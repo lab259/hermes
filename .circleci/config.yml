@@ -10,6 +10,6 @@ jobs:
 
     # specify any bash command here prefixed with `run: `
     - run: go get -u github.com/onsi/ginkgo/ginkgo
-    - run: make deps
-    - run: make coverage
+    - run: make deps-ci
+    - run: make coverage-ci
     - run: bash <(curl -s https://codecov.io/bash)

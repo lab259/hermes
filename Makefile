@@ -24,13 +24,22 @@ coverage:
 	@echo "mode: count" > "${COVERAGEFILE}"
 	@find . -type f -name *.coverprofile -exec grep -h -v "^mode:" {} >> "${COVERAGEFILE}" \; -exec rm -f {} \;
 
+coverage-ci:
+	@mkdir -p $(COVERDIR)
+	@${GOPATHCMD} ginkgo -r -covermode=count --cover --trace ./
+	@echo "mode: count" > "${COVERAGEFILE}"
+	@find . -type f -name *.coverprofile -exec grep -h -v "^mode:" {} >> "${COVERAGEFILE}" \; -exec rm -f {} \;
+
 coverage-html:
 	@$(GOPATHCMD) go tool cover -html="${COVERAGEFILE}" -o .cover/report.html
 
 deps:
 	@mkdir -p ${GOPATH}
-	@go list -f '{{join .Deps "\n"}}' $(1) | xargs go list -f '{{if not .Standard}}{{.ImportPath}}{{end}}' | GOPATH=${GOPATH} xargs go get
-	@go list -f '{{join .TestImports "\n"}}' $(1) | xargs go list -f '{{if not .Standard}}{{.ImportPath}}{{end}}' | GOPATH=${GOPATH} xargs go get
+	@go list -f '{{join .Deps "\n"}}' . | xargs go list -f '{{if not .Standard}}{{.ImportPath}}{{end}}' | GOPATH=${GOPATH} xargs go get
+	@go list -f '{{join .TestImports "\n"}}' . | xargs go list -f '{{if not .Standard}}{{.ImportPath}}{{end}}' | GOPATH=${GOPATH} xargs go get
+
+deps-ci:
+	-go get -v -t ./...
 
 list-external-deps:
 	$(call external_deps,'.')

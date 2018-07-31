@@ -8,6 +8,8 @@ DEP=dep
 COVERDIR=$(CURDIR)/.cover
 COVERAGEFILE=$(COVERDIR)/cover.out
 
+DEPS=$(call external_deps, '.')
+
 .PHONY: get test test-watch coverage coverage-html
 
 test:
@@ -27,14 +29,12 @@ coverage-html:
 
 deps:
 	@mkdir -p ${GOPATH}
-	@GOPATH=${GOPATH} go get -v -t ./...
-	@GOPATH=${GOPATH} go test -i ./...
+	@go list -f '{{join .Deps "\n"}}' $(1) | xargs go list -f '{{if not .Standard}}{{.ImportPath}}{{end}}' | GOPATH=${GOPATH} xargs go get
+	@go list -f '{{join .TestImports "\n"}}' $(1) | xargs go list -f '{{if not .Standard}}{{.ImportPath}}{{end}}' | GOPATH=${GOPATH} xargs go get
 
 list-external-deps:
 	$(call external_deps,'.')
 
-restore-import-paths:
-	find . -name '*.go' -type f -execdir sed -i '' s%\"github.com/$(REPO_OWNER)/migration%\"github.com/mattes/migrate%g '{}' \;
-
-rewrite-import-paths:
-	find . -name '*.go' -type f -execdir sed -i '' s%\"github.com/jamillosantos/migration%\"github.com/$(REPO_OWNER)/migrate%g '{}' \;
+define external_deps
+	@echo '-- $(1)'; go list -f '{{join .Deps .TestImports " "}}' $(1) | xargs go list -f '{{if not .Standard}}{{.ImportPath}}{{end}}'
+endef

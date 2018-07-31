@@ -9,5 +9,5 @@ type ConfigurationLoader interface {
 	// Load receives the `id` of the configuration and Unmarshals it
 	// int the `dst` pointer. If no error is reported the method will
 	// return nil otherwise the error will be returned.
-	Load(id string, dst interface{}) ([]byte, error)
+	Load(id string) ([]byte, error)
 }

@@ -19,16 +19,14 @@ var _ = g.Describe("ConfigurationLoaderFile", func() {
 		ioutil.WriteFile(fname, []byte("this is a file"), 0777)
 
 		loader := NewFileConfigurationLoader(dir)
-		var data interface{}
-		buff, err := loader.Load(id, &data)
+		buff, err := loader.Load(id)
 		Expect(err).To(BeNil())
 		Expect(string(buff)).To(Equal("this is a file"))
 	})
 
 	g.It("should fail unmarshaling a malformed JSON", func() {
 		loader := NewFileConfigurationLoader("a non existing folder")
-		var data interface{}
-		buff, err := loader.Load("a non existing file", &data)
+		buff, err := loader.Load("a non existing file")
 		Expect(err).NotTo(BeNil())
 		Expect(buff).To(BeNil())
 	})

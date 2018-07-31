@@ -1,4 +1,4 @@
-package http_test
+package http
 
 import (
 	"github.com/onsi/ginkgo"

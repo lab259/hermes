@@ -1,53 +1,52 @@
-package http_test
+package http
 
 import (
-	. "github.com/onsi/ginkgo"
+	g "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/jamillosantos/http"
 	"sync"
 	"time"
 )
 
-var _ = Describe("Services", func() {
-	Describe("Fasthttp Service", func() {
-		It("should not return any error loading the service", func() {
-			var service http.FasthttpService
+var _ = g.Describe("Services", func() {
+	g.Describe("Fasthttp Service", func() {
+		g.It("should not return any error loading the service", func() {
+			var service FasthttpService
 			result, err := service.LoadConfiguration()
 			Expect(err).NotTo(BeNil())
 			Expect(err.Error()).To(ContainSubstring("not implemented"))
 			Expect(result).To(BeNil())
 		})
 
-		It("should apply a given pointer configuration", func() {
-			var service http.FasthttpService
-			Expect(service.ApplyConfiguration(&http.FasthttpServiceConfiguration{
+		g.It("should apply a given pointer configuration", func() {
+			var service FasthttpService
+			Expect(service.ApplyConfiguration(&FasthttpServiceConfiguration{
 				Bind: "12345",
 			})).To(BeNil())
 			Expect(service.Configuration.Bind).To(Equal("12345"))
 		})
 
-		It("should apply a given configuration", func() {
-			var service http.FasthttpService
-			Expect(service.ApplyConfiguration(http.FasthttpServiceConfiguration{
+		g.It("should apply a given configuration", func() {
+			var service FasthttpService
+			Expect(service.ApplyConfiguration(FasthttpServiceConfiguration{
 				Bind: "12345",
 			})).To(BeNil())
 			Expect(service.Configuration.Bind).To(Equal("12345"))
 		})
 
-		It("should fail applying a wrong type configuration", func() {
-			var service http.FasthttpService
+		g.It("should fail applying a wrong type configuration", func() {
+			var service FasthttpService
 			Expect(service.ApplyConfiguration(map[string]interface{}{
 				"bind": "12345",
-			})).To(Equal(http.ErrWrongConfigurationInformed))
+			})).To(Equal(ErrWrongConfigurationInformed))
 		})
 
-		It("should start and stop the service", func(done Done) {
-			var service http.FasthttpService
+		g.It("should start and stop the service", func(done g.Done) {
+			var service FasthttpService
 			service.Configuration.Bind = ":32301" // High port
 			var wg sync.WaitGroup
 			wg.Add(1)
 			go func() {
-				defer GinkgoRecover()
+				defer g.GinkgoRecover()
 
 				wg.Done()
 				Expect(service.Start()).To(BeNil())
@@ -61,13 +60,13 @@ var _ = Describe("Services", func() {
 			done <- true
 		}, 0.5)
 
-		It("should restart the service that is not started", func(done Done) {
-			var service http.FasthttpService
+		g.It("should restart the service that is not started", func(done g.Done) {
+			var service FasthttpService
 			service.Configuration.Bind = ":32301" // High port
 			var wg sync.WaitGroup
 			wg.Add(1)
 			go func() {
-				defer GinkgoRecover()
+				defer g.GinkgoRecover()
 
 				wg.Done()
 				Expect(service.Restart()).To(BeNil())
@@ -81,13 +80,13 @@ var _ = Describe("Services", func() {
 			done <- true
 		}, 0.5)
 
-		It("should stop a stopped service", func() {
-			var service http.FasthttpService
+		g.It("should stop a stopped service", func() {
+			var service FasthttpService
 			Expect(service.Stop()).To(BeNil())
 		})
 
-		It("should restart the service", func(done Done) {
-			var service http.FasthttpService
+		g.It("should restart the service", func(done g.Done) {
+			var service FasthttpService
 			service.Configuration.Bind = ":32301" // High port
 
 			ch := make(chan string, 10)

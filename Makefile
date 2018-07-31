@@ -1,61 +1,40 @@
 
-GOPATH=$(CURDIR)
-GOPATHCMD=GOPATH=$(CURDIR)
+GOPATH=$(CURDIR)/.gopath
+GOPATHCMD=GOPATH=$(GOPATH)
 PROJECT=github.com/jamillosantos/http
 PROJECT_SRC=$(CURDIR)/src/$(PROJECT)
-DEP=cd $(PROJECT_SRC) && GOPATH=${GOPATH} dep
+DEP=dep
 
 COVERDIR=$(CURDIR)/.cover
 COVERAGEFILE=$(COVERDIR)/cover.out
 
-.PHONY: dep-ensure dep-add dep-status test test-watch coverage coverage-html
-
-dep-ensure:
-	@$(DEP) ensure -v
-
-dep-add:
-ifdef PACKAGE
-	@$(DEP) ensure -v -add $(PACKAGE)
-else
-	@echo "Usage: PACKAGE=<package url> make dep-add"
-	@echo "The environment variable \`PACKAGE\` is not defined."
-endif
-
-dep-status:
-	@$(DEP) status
+.PHONY: get test test-watch coverage coverage-html
 
 test:
-ifdef TARGET
-	@echo Running tests from src/${PROJECT}/${TARGET} tests
-	@${GOPATHCMD} ginkgo --failFast ./src/${PROJECT}/${TARGET}/...
-else
-	@${GOPATHCMD} ginkgo --failFast ./src/${PROJECT}/...
-endif
-
-race:
-ifdef TARGET
-	@echo Running tests from src/${PROJECT}/${TARGET} tests
-	@${GOPATHCMD} ginkgo --failFast ./src/${PROJECT}/${TARGET}/...
-else
-	@${GOPATHCMD} ginkgo --failFast ./src/${PROJECT}/...
-endif
+	@${GOPATHCMD} ginkgo --failFast ./...
 
 test-watch:
-ifdef TARGET
-	@echo Watching src/${PROJECT}/${TARGET} tests
-	@AURE_DIR=$(CURDIR) ${GOPATHCMD} ginkgo watch -cover -r ./src/${PROJECT}/${TARGET}
-else
-	@AURE_DIR=$(CURDIR) ${GOPATHCMD} ginkgo watch -cover -r ./src/${PROJECT}
-endif
+	@${GOPATHCMD} ginkgo watch -cover -r ./...
 
 coverage:
 	@mkdir -p $(COVERDIR)
-	@@AURE_DIR=$(CURDIR) ${GOPATHCMD} ginkgo -r -covermode=count --cover --trace ./src/${PROJECT}
+	@${GOPATHCMD} ginkgo -r -covermode=count --cover --trace ./
 	@echo "mode: count" > "${COVERAGEFILE}"
 	@find . -type f -name *.coverprofile -exec grep -h -v "^mode:" {} >> "${COVERAGEFILE}" \; -exec rm -f {} \;
 
-coverage-html: coverage
+coverage-html:
 	@$(GOPATHCMD) go tool cover -html="${COVERAGEFILE}" -o .cover/report.html
 
-vet:
-	@$(GOPATHCMD) go vet ./src/${PROJECT}
+deps:
+	@mkdir -p ${GOPATH}
+	@GOPATH=${GOPATH} go get -v -t ./...
+	@GOPATH=${GOPATH} go test -i ./...
+
+list-external-deps:
+	$(call external_deps,'.')
+
+restore-import-paths:
+	find . -name '*.go' -type f -execdir sed -i '' s%\"github.com/$(REPO_OWNER)/migration%\"github.com/mattes/migrate%g '{}' \;
+
+rewrite-import-paths:
+	find . -name '*.go' -type f -execdir sed -i '' s%\"github.com/jamillosantos/migration%\"github.com/$(REPO_OWNER)/migrate%g '{}' \;

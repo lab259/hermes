@@ -23,6 +23,12 @@ func NewContext(ctx *fasthttp.RequestCtx) *Context {
 	return &Context{Ctx: ctx, Response: &ctx.Response, Request: &ctx.Request}
 }
 
+// Write writes `buff` to the body response. It is an alias for the
+// `fasthttp.RequestCtx.Write`.
+func (ctx *Context) Write(buff []byte) (int, error) {
+	return ctx.Ctx.Write(buff)
+}
+
 // UserValue is an alias for the `fasthttp.RequestCtx.UserValue` method.
 func (ctx *Context) UserValue(name string) interface{} {
 	return ctx.Ctx.UserValue(name)

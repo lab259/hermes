@@ -1,3 +1,4 @@
+
 # Binaries for programs and plugins
 *.exe
 *.exe~
@@ -12,3 +13,4 @@
 *.out
 pkg/
 .cover/
+.idea/

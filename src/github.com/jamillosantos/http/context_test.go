@@ -8,6 +8,7 @@ import (
 	"github.com/valyala/fasthttp"
 	"github.com/jamillosantos/http"
 	"errors"
+	"fmt"
 )
 
 type ErrornousJson struct {
@@ -49,7 +50,7 @@ var _ = Describe("Http", func() {
 			Expect(data.Foo).To(Equal("bar"))
 		})
 
-		It("deve retornar os uservalues do contexto", func() {
+		It("should return some user values defined", func() {
 			ctx := http.NewContext(&fasthttp.RequestCtx{})
 			ctx.Ctx.SetUserValue("key1", "value1")
 			ctx.Ctx.SetUserValue("key2", 2)
@@ -71,6 +72,16 @@ var _ = Describe("Http", func() {
 		It("should fail serializing a JSON struct", func() {
 			ctx := http.NewContext(&fasthttp.RequestCtx{})
 			Expect(ctx.SendJson(&ErrornousJson{})).NotTo(BeNil())
+		})
+
+		It("should write a buff to the context body", func() {
+			ctx := http.NewContext(&fasthttp.RequestCtx{})
+			n, err := fmt.Fprint(ctx, "this is a test")
+			Expect(err).To(BeNil())
+			Expect(n).To(Equal(14))
+			tmp := bytes.NewBufferString("")
+			ctx.Response.BodyWriteTo(tmp)
+			Expect(tmp.String()).To(Equal(`this is a test`))
 		})
 	})
 })

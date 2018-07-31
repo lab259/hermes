@@ -8,7 +8,7 @@ DEP=cd $(PROJECT_SRC) && GOPATH=${GOPATH} dep
 COVERDIR=$(CURDIR)/.cover
 COVERAGEFILE=$(COVERDIR)/cover.out
 
-.PHONY: dep-ensure dep-add dep-status test test-watch
+.PHONY: dep-ensure dep-add dep-status test test-watch coverage coverage-html
 
 dep-ensure:
 	@$(DEP) ensure -v

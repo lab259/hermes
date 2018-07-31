@@ -2,7 +2,10 @@ package http
 
 import "errors"
 
-var ErrWrongConfigurationInformed = errors.New("wrong configuration informed")
+var (
+	ErrWrongConfigurationInformed = errors.New("wrong configuration informed")
+	ErrServiceNotRunning          = errors.New("service not running")
+)
 
 // Service is an abstraction for implementing parts that can be loaded,
 // reloaded, started and stopped inside of the system.

@@ -10,7 +10,7 @@ type UnmarshalingYamlTest struct {
 	Name2 int
 }
 
-var _ = g.Describe("ConfigurationUnmarshelerYaml", func() {
+var _ = g.Describe("ConfigurationUnmarshalerYaml", func() {
 	g.It("should unmarshal a yaml", func() {
 		var dst UnmarshalingYamlTest
 		Expect(DefaultConfigurationUnmarshalerYaml.Unmarshal([]byte(`name1: "value 1"

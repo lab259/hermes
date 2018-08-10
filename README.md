@@ -1,5 +1,7 @@
 
-[![CircleCI](https://circleci.com/gh/jamillosantos/http.svg?style=svg)](https://circleci.com/gh/jamillosantos/http) [![codecov](https://codecov.io/gh/jamillosantos/http/branch/master/graph/badge.svg)](https://codecov.io/gh/jamillosantos/http)
+[![CircleCI](https://circleci.com/gh/lab259/http.svg?style=shield)](https://circleci.com/gh/lab259/http)
+[![codecov](https://codecov.io/gh/jamillosantos/http/branch/master/graph/badge.svg)](https://codecov.io/gh/jamillosantos/http)
+[![Go Report Card](https://goreportcard.com/badge/github.com/lab259/http)](https://goreportcard.com/report/github.com/lab259/http)
 
 # HTTP
 

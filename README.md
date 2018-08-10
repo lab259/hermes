@@ -1,6 +1,7 @@
 
 [![CircleCI](https://circleci.com/gh/lab259/http.svg?style=shield)](https://circleci.com/gh/lab259/http)
 [![codecov](https://codecov.io/gh/lab259/http/branch/master/graph/badge.svg)](https://codecov.io/gh/lab259/http)
+[![GoDoc](https://godoc.org/github.com/lab259/http?status.svg)](http://godoc.org/github.com/lab259/http)
 [![Go Report Card](https://goreportcard.com/badge/github.com/lab259/http)](https://goreportcard.com/report/github.com/lab259/http)
 
 # HTTP

@@ -1,11 +1,10 @@
 package http
 
 import (
-	"github.com/valyala/fasthttp"
 	"errors"
-	"net"
-	"sync"
+	"github.com/valyala/fasthttp"
 	"io"
+	"net"
 )
 
 // FasthttpServiceConfiguration keeps all the configuration needed to start the
@@ -17,7 +16,6 @@ type FasthttpServiceConfiguration struct {
 // FasthttpService implements the server for starting
 type FasthttpService struct {
 	running       bool
-	waitToFinish  sync.WaitGroup
 	Router        *Router
 	Configuration FasthttpServiceConfiguration
 	Listener      net.Listener
@@ -66,7 +64,6 @@ func (service *FasthttpService) Start() error {
 	service.Listener = ln
 	service.running = true
 	err = service.Server.Serve(ln)
-	defer service.waitToFinish.Done()
 	if err == io.EOF && !service.running {
 		return nil
 	}
@@ -76,13 +73,11 @@ func (service *FasthttpService) Start() error {
 // Stop closes the listener and waits the `Start` to stop.
 func (service *FasthttpService) Stop() error {
 	if service.running {
-		service.waitToFinish.Add(1)
 		err := service.Listener.Close()
 		if err != nil {
 			return err
 		}
 		service.running = false
-		service.waitToFinish.Wait()
 	}
 	return nil
 }

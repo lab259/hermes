@@ -16,3 +16,4 @@ pkg/
 .idea/
 *.coverprofile
 .gopath/
+.vscode/

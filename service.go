@@ -14,6 +14,9 @@ var (
 // As simple and wide as it could be this directive will provide an defined
 // signature to implement all your resources.
 type Service interface {
+	// Name identifies the service.
+	Name() string
+
 	// Loads the configuration. If successful nil will be returned, otherwise
 	// the error.
 	LoadConfiguration() (interface{}, error)

@@ -80,12 +80,9 @@ func (service *MockService) Stop() error {
 var _ = Describe("ServiceStarter", func() {
 	It("should start all service", func() {
 		reporter := &countEngineReporter{}
-		engineStarter := http.ServiceStarter{
-			reporter: reporter,
-			services: []http.Service{
-				&MockService{},
-			},
-		}
+		engineStarter := http.NewServiceStarter([]http.Service{
+			&MockService{},
+		}, reporter)
 		err := engineStarter.Start()
 		Expect(err).To(BeNil())
 		Expect(reporter.countBeforeBegin).To(Equal(1))
@@ -99,14 +96,11 @@ var _ = Describe("ServiceStarter", func() {
 
 	It("should fail loading configuration", func() {
 		reporter := &countEngineReporter{}
-		engineStarter := http.ServiceStarter{
-			reporter: reporter,
-			services: []http.Service{
-				&MockService{
-					errLoadingConfiguration: errors.New("loading configuration error"),
-				},
+		engineStarter := http.NewServiceStarter([]http.Service{
+			&MockService{
+				errLoadingConfiguration: errors.New("loading configuration error"),
 			},
-		}
+		}, reporter)
 		err := engineStarter.Start()
 		Expect(err).To(HaveOccurred())
 		Expect(err.Error()).To(ContainSubstring("loading configuration error"))
@@ -121,14 +115,11 @@ var _ = Describe("ServiceStarter", func() {
 
 	It("should fail applying configuration", func() {
 		reporter := &countEngineReporter{}
-		engineStarter := http.ServiceStarter{
-			reporter: reporter,
-			services: []http.Service{
-				&MockService{
-					errLoadingConfiguration: errors.New("loading configuration error"),
-				},
+		engineStarter := http.NewServiceStarter([]http.Service{
+			&MockService{
+				errLoadingConfiguration: errors.New("loading configuration error"),
 			},
-		}
+		}, reporter)
 		err := engineStarter.Start()
 		Expect(err).To(HaveOccurred())
 		Expect(err.Error()).To(ContainSubstring("loading configuration error"))

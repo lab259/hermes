@@ -1,16 +1,22 @@
-
-GOPATH=$(CURDIR)/.gopath
+GOPATH=$(CURDIR)/../../../../
 GOPATHCMD=GOPATH=$(GOPATH)
-PROJECT=github.com/jamillosantos/http
-PROJECT_SRC=$(CURDIR)/src/$(PROJECT)
-DEP=dep
 
 COVERDIR=$(CURDIR)/.cover
 COVERAGEFILE=$(COVERDIR)/cover.out
 
-DEPS=$(call external_deps, '.')
+.PHONY: dep-ensure dep-update vet test test-watch coverage coverage-ci coverage-html
 
-.PHONY: get test test-watch coverage coverage-html
+dep-ensure:
+	@$(GOPATHCMD) dep ensure -v
+
+dep-update:
+	@$(GOPATHCMD) dep update -v $(PACKAGE)
+
+vet:
+	@$(GOPATHCMD) go vet ./...
+
+fmt:
+	@$(GOPATHCMD) go fmt ./...
 
 test:
 	@${GOPATHCMD} ginkgo --failFast ./...
@@ -18,11 +24,9 @@ test:
 test-watch:
 	@${GOPATHCMD} ginkgo watch -cover -r ./...
 
-coverage:
-	@mkdir -p $(COVERDIR)
-	@${GOPATHCMD} ginkgo -r -covermode=count --cover --trace ./
-	@echo "mode: count" > "${COVERAGEFILE}"
-	@find . -type f -name *.coverprofile -exec grep -h -v "^mode:" {} >> "${COVERAGEFILE}" \; -exec rm -f {} \;
+coverage: coverage-ci
+	@sed -i -e "s|_$(CURDIR)/|./|g" "${COVERAGEFILE}"
+	@cp "${COVERAGEFILE}" coverage.txt
 
 coverage-ci:
 	@mkdir -p $(COVERDIR)

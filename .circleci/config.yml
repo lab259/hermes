@@ -2,14 +2,12 @@ version: 2
 jobs:
   build:
     docker:
-    - image: circleci/golang:1.9
+      - image: circleci/golang:1.9
 
     working_directory: /go/src/github.com/jamillosantos/http
     steps:
-    - checkout
-
-    # specify any bash command here prefixed with `run: `
-    - run: go get -u github.com/onsi/ginkgo/ginkgo
-    - run: make deps-ci
-    - run: make coverage-ci
-    - run: bash <(curl -s https://codecov.io/bash)
+      - checkout
+      - run: go get -u github.com/onsi/ginkgo/ginkgo
+      - run: make dep-ensure
+      - run: make coverage-ci
+      - run: bash <(curl -s https://codecov.io/bash)

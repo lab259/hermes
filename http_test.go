@@ -1,11 +1,11 @@
 package http
 
 import (
+	"github.com/jamillosantos/macchiato"
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
-	"github.com/jamillosantos/macchiato"
-	"testing"
 	"log"
+	"testing"
 )
 
 func TestHttp(t *testing.T) {

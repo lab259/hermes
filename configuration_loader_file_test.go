@@ -4,9 +4,9 @@ import (
 	g "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"os"
-	"io/ioutil"
 	"fmt"
+	"io/ioutil"
+	"os"
 	"path"
 	"time"
 )

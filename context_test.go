@@ -12,9 +12,9 @@ import (
 )
 
 var (
-	describe = g.Describe
+	describe  = g.Describe
 	fdescribe = g.FDescribe
-	it       = g.It
+	it        = g.It
 	fit       = g.FIt
 )
 

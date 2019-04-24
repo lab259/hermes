@@ -4,8 +4,8 @@ import (
 	"github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/valyala/fasthttp"
 	"fmt"
+	"github.com/valyala/fasthttp"
 	"testing"
 )
 

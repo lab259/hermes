@@ -1,9 +1,9 @@
 package http
 
 import (
+	"io/ioutil"
 	"os"
 	"path"
-	"io/ioutil"
 )
 
 type FileConfigurationLoader struct {

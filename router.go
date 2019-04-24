@@ -1,10 +1,10 @@
 package http
 
 import (
-	"github.com/valyala/fasthttp"
-	"fmt"
-	"sync"
 	"bytes"
+	"fmt"
+	"github.com/valyala/fasthttp"
+	"sync"
 )
 
 type Router struct {
@@ -59,7 +59,7 @@ func (router *Router) PATCH(path string, handler Handler, middlewares ...Middlew
 	router.handle("PATCH", path, handler, middlewares...)
 }
 
-func (router *Router) Group(path string, middlewares ... Middleware) Routable {
+func (router *Router) Group(path string, middlewares ...Middleware) Routable {
 	return &routerGroup{
 		prefix:      path,
 		router:      router,
@@ -181,7 +181,7 @@ func (group *routerGroup) PATCH(path string, handler Handler, middlewares ...Mid
 	group.router.PATCH(fmt.Sprintf("%s%s", group.prefix, path), handler, append(group.middlewares, middlewares...)...)
 }
 
-func (group *routerGroup) Group(path string, middlewares ... Middleware) Routable {
+func (group *routerGroup) Group(path string, middlewares ...Middleware) Routable {
 	return &routerGroup{
 		prefix:      path,
 		router:      group,

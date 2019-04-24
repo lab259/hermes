@@ -1,13 +1,19 @@
 package http
 
 type Routable interface {
-	DELETE(path string, handler Handler, middlewares ...Middleware)
-	GET(path string, handler Handler, middlewares ...Middleware)
-	HEAD(path string, handler Handler, middlewares ...Middleware)
-	OPTIONS(path string, handler Handler, middlewares ...Middleware)
-	PATCH(path string, handler Handler, middlewares ...Middleware)
-	POST(path string, handler Handler, middlewares ...Middleware)
-	PUT(path string, handler Handler, middlewares ...Middleware)
+	handle(method, path string, handler Handler)
 
-	Group(path string, middlewares ...Middleware) Routable
+	DELETE(path string, handler Handler)
+	GET(path string, handler Handler)
+	HEAD(path string, handler Handler)
+	OPTIONS(path string, handler Handler)
+	PATCH(path string, handler Handler)
+	POST(path string, handler Handler)
+	PUT(path string, handler Handler)
+
+	Prefix(path string) Routable
+	Group(func(Routable))
+
+	Use(...Middleware)
+	With(...Middleware) Routable
 }

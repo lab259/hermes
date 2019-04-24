@@ -3,68 +3,43 @@ package http
 import (
 	"bytes"
 	"fmt"
-	"github.com/valyala/fasthttp"
 	"sync"
+
+	"github.com/valyala/fasthttp"
 )
 
 type Router struct {
+	route
 	children map[string]*node
 	NotFound Handler
 }
 
-func NewRouter() *Router {
-	return &Router{
-		children: make(map[string]*node),
-	}
+type route struct {
+	prefix      string
+	router      *Router
+	middlewares []Middleware
 }
 
-func (router *Router) handle(method, path string, handler Handler, middlewares ...Middleware) {
-	root, ok := router.children[method]
+func NewRouter() *Router {
+	r := &Router{
+		children: make(map[string]*node),
+	}
+	r.router = r
+	return r
+}
+
+func (r *route) handle(method, subpath string, handler Handler) {
+	root, ok := r.router.children[method]
 	if !ok {
 		root = newNode()
-		router.children[method] = root
+		r.router.children[method] = root
 	}
 
+	path := fmt.Sprintf("%s%s", r.prefix, subpath)
 	if len(path) > 0 && path[0] == '/' {
 		path = path[1:]
 	}
-	root.Add(path, handler, nil, middlewares)
-}
-
-func (router *Router) DELETE(path string, handler Handler, middlewares ...Middleware) {
-	router.handle("DELETE", path, handler, middlewares...)
-}
-
-func (router *Router) GET(path string, handler Handler, middlewares ...Middleware) {
-	router.handle("GET", path, handler, middlewares...)
-}
-
-func (router *Router) POST(path string, handler Handler, middlewares ...Middleware) {
-	router.handle("POST", path, handler, middlewares...)
-}
-
-func (router *Router) PUT(path string, handler Handler, middlewares ...Middleware) {
-	router.handle("PUT", path, handler, middlewares...)
-}
-
-func (router *Router) HEAD(path string, handler Handler, middlewares ...Middleware) {
-	router.handle("HEAD", path, handler, middlewares...)
-}
-
-func (router *Router) OPTIONS(path string, handler Handler, middlewares ...Middleware) {
-	router.handle("OPTIONS", path, handler, middlewares...)
-}
-
-func (router *Router) PATCH(path string, handler Handler, middlewares ...Middleware) {
-	router.handle("PATCH", path, handler, middlewares...)
-}
-
-func (router *Router) Group(path string, middlewares ...Middleware) Routable {
-	return &routerGroup{
-		prefix:      path,
-		router:      router,
-		middlewares: middlewares,
-	}
+	root.Add(path, handler, nil, r.middlewares)
 }
 
 func Split(source []byte, dest [][]byte) [][]byte {
@@ -147,44 +122,54 @@ func (router *Router) Handler(fCtx *fasthttp.RequestCtx) {
 	}
 }
 
-type routerGroup struct {
-	prefix      string
-	router      Routable
-	middlewares []Middleware
+func (group *route) DELETE(path string, handler Handler) {
+	group.handle("DELETE", path, handler)
 }
 
-func (group *routerGroup) DELETE(path string, handler Handler, middlewares ...Middleware) {
-	group.router.DELETE(fmt.Sprintf("%s%s", group.prefix, path), handler, append(group.middlewares, middlewares...)...)
+func (group *route) GET(path string, handler Handler) {
+	group.handle("GET", path, handler)
 }
 
-func (group *routerGroup) GET(path string, handler Handler, middlewares ...Middleware) {
-	group.router.GET(fmt.Sprintf("%s%s", group.prefix, path), handler, append(group.middlewares, middlewares...)...)
+func (group *route) POST(path string, handler Handler) {
+	group.handle("POST", path, handler)
 }
 
-func (group *routerGroup) POST(path string, handler Handler, middlewares ...Middleware) {
-	group.router.POST(fmt.Sprintf("%s%s", group.prefix, path), handler, append(group.middlewares, middlewares...)...)
+func (group *route) PUT(path string, handler Handler) {
+	group.handle("PUT", path, handler)
 }
 
-func (group *routerGroup) PUT(path string, handler Handler, middlewares ...Middleware) {
-	group.router.PUT(fmt.Sprintf("%s%s", group.prefix, path), handler, append(group.middlewares, middlewares...)...)
+func (group *route) HEAD(path string, handler Handler) {
+	group.handle("HEAD", path, handler)
 }
 
-func (group *routerGroup) HEAD(path string, handler Handler, middlewares ...Middleware) {
-	group.router.HEAD(fmt.Sprintf("%s%s", group.prefix, path), handler, append(group.middlewares, middlewares...)...)
+func (group *route) OPTIONS(path string, handler Handler) {
+	group.handle("OPTIONS", path, handler)
 }
 
-func (group *routerGroup) OPTIONS(path string, handler Handler, middlewares ...Middleware) {
-	group.router.OPTIONS(fmt.Sprintf("%s%s", group.prefix, path), handler, append(group.middlewares, middlewares...)...)
+func (group *route) PATCH(path string, handler Handler) {
+	group.handle("PATCH", path, handler)
 }
 
-func (group *routerGroup) PATCH(path string, handler Handler, middlewares ...Middleware) {
-	group.router.PATCH(fmt.Sprintf("%s%s", group.prefix, path), handler, append(group.middlewares, middlewares...)...)
+func (group *route) Prefix(path string) Routable {
+	return &route{
+		prefix:      fmt.Sprintf("%s%s", group.prefix, path),
+		router:      group.router,
+		middlewares: group.middlewares,
+	}
 }
 
-func (group *routerGroup) Group(path string, middlewares ...Middleware) Routable {
-	return &routerGroup{
-		prefix:      path,
-		router:      group,
-		middlewares: middlewares,
+func (r *route) Group(h func(Routable)) {
+	h(r)
+}
+
+func (r *route) Use(middlewares ...Middleware) {
+	r.middlewares = append(r.middlewares, middlewares...)
+}
+
+func (r *route) With(middlewares ...Middleware) Routable {
+	return &route{
+		prefix:      r.prefix,
+		router:      r.router,
+		middlewares: append(r.middlewares, middlewares...),
 	}
 }

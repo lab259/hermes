@@ -1,12 +1,13 @@
 package http
 
 import (
-	"github.com/onsi/ginkgo"
+	g "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	"fmt"
-	"github.com/valyala/fasthttp"
 	"testing"
+
+	"github.com/valyala/fasthttp"
 )
 
 func createRequestCtxFromPath(method, path string) *fasthttp.RequestCtx {
@@ -19,10 +20,10 @@ func createRequestCtxFromPath(method, path string) *fasthttp.RequestCtx {
 var emptyHandler = func(ctx *Context) {
 }
 
-var _ = ginkgo.Describe("Router", func() {
+var _ = g.Describe("Router", func() {
 
-	ginkgo.Describe("Split", func() {
-		ginkgo.It("should split the path", func() {
+	g.Describe("Split", func() {
+		g.It("should split the path", func() {
 			path := []byte("/path/with/four/parts")
 			tokens := make([][]byte, 0)
 			tokens = Split(path, tokens)
@@ -33,7 +34,7 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(tokens[3]).To(Equal([]byte("parts")))
 		})
 
-		ginkgo.It("should split the path not starting with /", func() {
+		g.It("should split the path not starting with /", func() {
 			path := []byte("path/with/four/parts")
 			tokens := make([][]byte, 0)
 			tokens = Split(path, tokens)
@@ -44,7 +45,7 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(tokens[3]).To(Equal([]byte("parts")))
 		})
 
-		ginkgo.It("should split the path ending with /", func() {
+		g.It("should split the path ending with /", func() {
 			path := []byte("/path/with/four/parts/")
 			tokens := make([][]byte, 0)
 			tokens = Split(path, tokens)
@@ -55,7 +56,7 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(tokens[3]).To(Equal([]byte("parts")))
 		})
 
-		ginkgo.It("should split an empty path", func() {
+		g.It("should split an empty path", func() {
 			path := []byte("/")
 			tokens := make([][]byte, 0)
 			tokens = Split(path, tokens)
@@ -63,9 +64,9 @@ var _ = ginkgo.Describe("Router", func() {
 		})
 	})
 
-	ginkgo.Describe("Parse", func() {
+	g.Describe("Parse", func() {
 
-		ginkgo.It("should parse a GET", func() {
+		g.It("should parse a GET", func() {
 			router := NewRouter()
 			router.GET("", emptyHandler)
 
@@ -75,7 +76,7 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(router.children["GET"].handler).NotTo(BeNil())
 		})
 
-		ginkgo.It("should parse a GET", func() {
+		g.It("should parse a GET", func() {
 			router := NewRouter()
 			router.GET("/route", emptyHandler)
 
@@ -84,7 +85,7 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(router.children["GET"].wildcard).To(BeNil())
 		})
 
-		ginkgo.It("should parse a POST", func() {
+		g.It("should parse a POST", func() {
 			router := NewRouter()
 			router.POST("/route", emptyHandler)
 
@@ -93,7 +94,7 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(router.children["POST"].wildcard).To(BeNil())
 		})
 
-		ginkgo.It("should parse a PUT", func() {
+		g.It("should parse a PUT", func() {
 			router := NewRouter()
 			router.PUT("/route", emptyHandler)
 
@@ -102,7 +103,7 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(router.children["PUT"].wildcard).To(BeNil())
 		})
 
-		ginkgo.It("should parse a DELETE", func() {
+		g.It("should parse a DELETE", func() {
 			router := NewRouter()
 			router.DELETE("/route", emptyHandler)
 
@@ -111,7 +112,7 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(router.children["DELETE"].wildcard).To(BeNil())
 		})
 
-		ginkgo.It("should parse a HEAD", func() {
+		g.It("should parse a HEAD", func() {
 			router := NewRouter()
 			router.HEAD("/route", emptyHandler)
 
@@ -120,7 +121,7 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(router.children["HEAD"].wildcard).To(BeNil())
 		})
 
-		ginkgo.It("should parse a OPTIONS", func() {
+		g.It("should parse a OPTIONS", func() {
 			router := NewRouter()
 			router.OPTIONS("/route", emptyHandler)
 
@@ -129,7 +130,7 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(router.children["OPTIONS"].wildcard).To(BeNil())
 		})
 
-		ginkgo.It("should parse a PATCH", func() {
+		g.It("should parse a PATCH", func() {
 			router := NewRouter()
 			router.PATCH("/route", emptyHandler)
 
@@ -138,7 +139,7 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(router.children["PATCH"].wildcard).To(BeNil())
 		})
 
-		ginkgo.It("should parse a POST", func() {
+		g.It("should parse a POST", func() {
 			router := NewRouter()
 			router.POST("/route", emptyHandler)
 
@@ -147,7 +148,7 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(router.children["POST"].wildcard).To(BeNil())
 		})
 
-		ginkgo.It("should parse a complete static route", func() {
+		g.It("should parse a complete static route", func() {
 			router := NewRouter()
 			router.GET("/this/should/be/static", emptyHandler)
 
@@ -166,7 +167,7 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(fmt.Sprintf("%p", router.children["GET"].children["this"].children["should"].children["be"].children["static"].handler)).To(Equal(fmt.Sprintf("%p", emptyHandler)))
 		})
 
-		ginkgo.It("should parse multiple static routes related", func() {
+		g.It("should parse multiple static routes related", func() {
 			router := NewRouter()
 			router.GET("/this/should/be/static", emptyHandler)
 			router.GET("/this/should2/be/static", emptyHandler)
@@ -196,7 +197,7 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(fmt.Sprintf("%p", router.children["GET"].children["this"].children["should2"].children["be"].children["static"].handler)).To(Equal(fmt.Sprintf("%p", emptyHandler)))
 		})
 
-		ginkgo.It("should parse a complete a route starting static and ending with a wildcard", func() {
+		g.It("should parse a complete a route starting static and ending with a wildcard", func() {
 			router := NewRouter()
 			router.GET("/static/:wildcard", emptyHandler)
 
@@ -212,7 +213,7 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(router.children["GET"].children["static"].wildcard.names).To(Equal([]string{"wildcard"}))
 		})
 
-		ginkgo.It("should parse multiple static routes related and not", func() {
+		g.It("should parse multiple static routes related and not", func() {
 			router := NewRouter()
 			router.GET("/this/should/be/static", emptyHandler)
 			router.GET("/this/should2/be/static", emptyHandler)
@@ -255,7 +256,7 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(fmt.Sprintf("%p", router.children["GET"].children["this2"].children["should"].children["be"].children["static"].handler)).To(Equal(fmt.Sprintf("%p", emptyHandler)))
 		})
 
-		ginkgo.It("should parse a complete route with wildcard", func() {
+		g.It("should parse a complete route with wildcard", func() {
 			router := NewRouter()
 			router.GET("/:account/detail/another", emptyHandler)
 
@@ -273,7 +274,7 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(router.children["GET"].wildcard.children["detail"].children["another"].names).To(Equal([]string{"account"}))
 		})
 
-		ginkgo.It("should parse a complete route with a sequence of wildcards", func() {
+		g.It("should parse a complete route with a sequence of wildcards", func() {
 			router := NewRouter()
 			router.GET("/:account/:transaction/:invoice", emptyHandler)
 
@@ -291,7 +292,7 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(router.children["GET"].wildcard.wildcard.wildcard.names).To(Equal([]string{"account", "transaction", "invoice"}))
 		})
 
-		ginkgo.It("should parse multiple routes starting with wildcards", func() {
+		g.It("should parse multiple routes starting with wildcards", func() {
 			router := NewRouter()
 			router.GET("/:account/detail", emptyHandler)
 			router.GET("/:account/history", emptyHandler)
@@ -311,7 +312,7 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(router.children["GET"].wildcard.children["invoice"].names).To(Equal([]string{"transaction"}))
 		})
 
-		ginkgo.It("should parse multiple mixed routes", func() {
+		g.It("should parse multiple mixed routes", func() {
 			router := NewRouter()
 			router.GET("/accounts/:account/detail", emptyHandler)
 			router.GET("/accounts/:account/history", emptyHandler)
@@ -343,7 +344,7 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(router.children["GET"].wildcard.children["invoice"].names).To(Equal([]string{"transaction"}))
 		})
 
-		ginkgo.It("should panic due to conflicting empty tokens", func() {
+		g.It("should panic due to conflicting empty tokens", func() {
 			router := NewRouter()
 
 			Expect(func() {
@@ -359,7 +360,7 @@ var _ = ginkgo.Describe("Router", func() {
 			}).To(Panic())
 		})
 
-		ginkgo.It("should not panic with empty token at the end", func() {
+		g.It("should not panic with empty token at the end", func() {
 			router := NewRouter()
 
 			Expect(func() {
@@ -375,7 +376,7 @@ var _ = ginkgo.Describe("Router", func() {
 			}).NotTo(Panic())
 		})
 
-		ginkgo.It("should panic due to conflicting static routes", func() {
+		g.It("should panic due to conflicting static routes", func() {
 			router := NewRouter()
 			router.GET("/account/detail", emptyHandler)
 			Expect(func() {
@@ -383,7 +384,7 @@ var _ = ginkgo.Describe("Router", func() {
 			}).To(Panic())
 		})
 
-		ginkgo.It("should panic due to conflicting 'wildcarded' routes", func() {
+		g.It("should panic due to conflicting 'wildcarded' routes", func() {
 			router := NewRouter()
 			router.GET("/:account", emptyHandler)
 			Expect(func() {
@@ -391,7 +392,7 @@ var _ = ginkgo.Describe("Router", func() {
 			}).To(Panic())
 		})
 
-		ginkgo.It("should panic due to conflicting mixing routes", func() {
+		g.It("should panic due to conflicting mixing routes", func() {
 			router := NewRouter()
 			router.GET("/:account/detail", emptyHandler)
 			router.GET("/:account/id", emptyHandler)
@@ -400,7 +401,7 @@ var _ = ginkgo.Describe("Router", func() {
 			}).To(Panic())
 		})
 
-		ginkgo.It("should not match any ropute", func() {
+		g.It("should not match any ropute", func() {
 			router := NewRouter()
 			router.GET("/:account/detail", emptyHandler)
 			router.GET("/:account/id", emptyHandler)
@@ -409,10 +410,10 @@ var _ = ginkgo.Describe("Router", func() {
 		})
 	})
 
-	ginkgo.Describe("Group", func() {
-		ginkgo.It("should parse a GET", func() {
+	g.Describe("Group", func() {
+		g.It("should parse a GET", func() {
 			router := NewRouter()
-			group := router.Group("/group")
+			group := router.Prefix("/group")
 			group.GET("/route", emptyHandler)
 
 			Expect(router.children).To(HaveKey("GET"))
@@ -428,9 +429,9 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(router.children["GET"].children["group"].children["route"].children).To(BeEmpty())
 		})
 
-		ginkgo.It("should parse a POST", func() {
+		g.It("should parse a POST", func() {
 			router := NewRouter()
-			group := router.Group("/group")
+			group := router.Prefix("/group")
 			group.POST("/route", emptyHandler)
 
 			Expect(router.children).To(HaveKey("POST"))
@@ -446,9 +447,9 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(router.children["POST"].children["group"].children["route"].children).To(BeEmpty())
 		})
 
-		ginkgo.It("should parse a PUT", func() {
+		g.It("should parse a PUT", func() {
 			router := NewRouter()
-			group := router.Group("/group")
+			group := router.Prefix("/group")
 			group.PUT("/route", emptyHandler)
 
 			Expect(router.children).To(HaveKey("PUT"))
@@ -464,9 +465,9 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(router.children["PUT"].children["group"].children["route"].children).To(BeEmpty())
 		})
 
-		ginkgo.It("should parse a DELETE", func() {
+		g.It("should parse a DELETE", func() {
 			router := NewRouter()
-			group := router.Group("/group")
+			group := router.Prefix("/group")
 			group.DELETE("/route", emptyHandler)
 
 			Expect(router.children).To(HaveKey("DELETE"))
@@ -482,9 +483,9 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(router.children["DELETE"].children["group"].children["route"].children).To(BeEmpty())
 		})
 
-		ginkgo.It("should parse a HEAD", func() {
+		g.It("should parse a HEAD", func() {
 			router := NewRouter()
-			group := router.Group("/group")
+			group := router.Prefix("/group")
 			group.HEAD("/route", emptyHandler)
 
 			Expect(router.children).To(HaveKey("HEAD"))
@@ -500,9 +501,9 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(router.children["HEAD"].children["group"].children["route"].children).To(BeEmpty())
 		})
 
-		ginkgo.It("should parse a OPTIONS", func() {
+		g.It("should parse a OPTIONS", func() {
 			router := NewRouter()
-			group := router.Group("/group")
+			group := router.Prefix("/group")
 			group.OPTIONS("/route", emptyHandler)
 
 			Expect(router.children).To(HaveKey("OPTIONS"))
@@ -518,9 +519,9 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(router.children["OPTIONS"].children["group"].children["route"].children).To(BeEmpty())
 		})
 
-		ginkgo.It("should parse a PATCH", func() {
+		g.It("should parse a PATCH", func() {
 			router := NewRouter()
-			group := router.Group("/group")
+			group := router.Prefix("/group")
 			group.PATCH("/route", emptyHandler)
 
 			Expect(router.children).To(HaveKey("PATCH"))
@@ -536,25 +537,25 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(router.children["PATCH"].children["group"].children["route"].children).To(BeEmpty())
 		})
 
-		ginkgo.It("should check the subgroup", func() {
+		g.It("should check the subgroup", func() {
 			router := NewRouter()
-			group := router.Group("/group")
-			group2 := group.Group("/subgroup").(*routerGroup)
+			group := router.Prefix("/group").(*route)
+			group2 := group.Prefix("/subgroup").(*route)
 
+			Expect(group.prefix).To(Equal("/group"))
 			Expect(group2).NotTo(BeNil())
-			Expect(group2.router).To(Equal(group))
-			Expect(group2.prefix).To(Equal("/subgroup"))
+			Expect(group2.prefix).To(Equal("/group/subgroup"))
 		})
 	})
 
-	ginkgo.Describe("Handle", func() {
+	g.Describe("Handle", func() {
 		var router *Router
 
-		ginkgo.BeforeEach(func() {
+		g.BeforeEach(func() {
 			router = NewRouter()
 		})
 
-		ginkgo.It("should resolve an empty route", func() {
+		g.It("should resolve an empty route", func() {
 			value := 1
 			router.GET("", func(ctx *Context) {
 				value = 2
@@ -565,7 +566,7 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(value).To(Equal(2))
 		})
 
-		ginkgo.It("should resolve an empty trailing route", func() {
+		g.It("should resolve an empty trailing route", func() {
 			value := 1
 			router.GET("/", func(ctx *Context) {
 				value = 2
@@ -576,7 +577,7 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(value).To(Equal(2))
 		})
 
-		ginkgo.It("should resolve a static route", func() {
+		g.It("should resolve a static route", func() {
 			value := 1
 			router.GET("/static", func(ctx *Context) {
 				value = 2
@@ -587,7 +588,7 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(value).To(Equal(2))
 		})
 
-		ginkgo.It("should resolve a static route not starting with /", func() {
+		g.It("should resolve a static route not starting with /", func() {
 			value := 1
 			router.GET("static", func(ctx *Context) {
 				value = 2
@@ -598,7 +599,7 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(value).To(Equal(2))
 		})
 
-		ginkgo.It("should resolve multiple static routes", func() {
+		g.It("should resolve multiple static routes", func() {
 			value1 := 1
 			value2 := 1
 			value3 := 1
@@ -624,7 +625,7 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(value3).To(Equal(2))
 		})
 
-		ginkgo.It("should resolve a wildcard route", func() {
+		g.It("should resolve a wildcard route", func() {
 			value := 1
 			router.GET("/:wildcard", func(ctx *Context) {
 				Expect(ctx.UserValue("wildcard")).To(Equal("value"))
@@ -636,7 +637,7 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(value).To(Equal(2))
 		})
 
-		ginkgo.It("should resolve a multiple wildcard routes", func() {
+		g.It("should resolve a multiple wildcard routes", func() {
 			value1 := 1
 			value2 := 1
 			value3 := 1
@@ -662,7 +663,7 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(value3).To(Equal(2))
 		})
 
-		ginkgo.It("should resolve a multiple wildcard routes in sequence", func() {
+		g.It("should resolve a multiple wildcard routes in sequence", func() {
 			value1 := 1
 			value2 := 1
 			value3 := 1
@@ -691,11 +692,11 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(value3).To(Equal(2))
 		})
 
-		ginkgo.It("should call the not found callback for the index route", func() {
+		g.It("should call the not found callback for the index route", func() {
 			value1 := 1
 
 			router.GET("/account/transactions", func(ctx *Context) {
-				ginkgo.Fail("should not be called")
+				g.Fail("should not be called")
 			})
 
 			router.NotFound = func(ctx *Context) {
@@ -706,11 +707,11 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(value1).To(Equal(2))
 		})
 
-		ginkgo.It("should call the not found callback for static routes", func() {
+		g.It("should call the not found callback for static routes", func() {
 			value1 := 1
 
 			router.GET("/account/transactions", func(ctx *Context) {
-				ginkgo.Fail("should not be called")
+				g.Fail("should not be called")
 			})
 
 			router.NotFound = func(ctx *Context) {
@@ -721,11 +722,11 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(value1).To(Equal(2))
 		})
 
-		ginkgo.It("should call the not found callback for static routes half path", func() {
+		g.It("should call the not found callback for static routes half path", func() {
 			value1 := 1
 
 			router.GET("/account/transactions", func(ctx *Context) {
-				ginkgo.Fail("should not be called")
+				g.Fail("should not be called")
 			})
 
 			router.NotFound = func(ctx *Context) {
@@ -736,19 +737,19 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(value1).To(Equal(2))
 		})
 
-		ginkgo.It("should call the not found callback for wildcard routes", func() {
+		g.It("should call the not found callback for wildcard routes", func() {
 			value1 := 1
 			value2 := 1
 			value3 := 1
 
 			router.GET("/:account/transactions", func(ctx *Context) {
-				ginkgo.Fail("should not be called")
+				g.Fail("should not be called")
 			})
 			router.GET("/:account/profile", func(ctx *Context) {
-				ginkgo.Fail("should not be called")
+				g.Fail("should not be called")
 			})
 			router.GET("/:user/roles", func(ctx *Context) {
-				ginkgo.Fail("should not be called")
+				g.Fail("should not be called")
 			})
 
 			router.NotFound = func(ctx *Context) {
@@ -771,11 +772,11 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(value3).To(Equal(2))
 		})
 
-		ginkgo.It("should call the not found callback for wildcard half path", func() {
+		g.It("should call the not found callback for wildcard half path", func() {
 			value1 := 1
 
 			router.GET("/:account/transactions", func(ctx *Context) {
-				ginkgo.Fail("should not be called")
+				g.Fail("should not be called")
 			})
 
 			router.NotFound = func(ctx *Context) {
@@ -786,11 +787,11 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(value1).To(Equal(2))
 		})
 
-		ginkgo.It("should call the not found callback for wrong method", func() {
+		g.It("should call the not found callback for wrong method", func() {
 			value1 := 1
 
 			router.GET("/:account/transactions", func(ctx *Context) {
-				ginkgo.Fail("should not be called")
+				g.Fail("should not be called")
 			})
 
 			router.NotFound = func(ctx *Context) {
@@ -801,17 +802,17 @@ var _ = ginkgo.Describe("Router", func() {
 			Expect(value1).To(Equal(2))
 		})
 
-		ginkgo.Describe("Middlewares", func() {
-			ginkgo.It("should call all the middlewares in sequence", func() {
+		g.Describe("Middlewares", func() {
+			g.It("should call all the middlewares in sequence", func() {
 				calls := make([]string, 0)
-				router.GET("/:account/transactions", func(ctx *Context) {
-					calls = append(calls, "endpoint")
-				}, func(ctx *Context, next Handler) {
+				router.With(func(ctx *Context, next Handler) {
 					calls = append(calls, "middleware1")
 					next(ctx)
 				}, func(ctx *Context, next Handler) {
 					calls = append(calls, "middleware2")
 					next(ctx)
+				}).GET("/:account/transactions", func(ctx *Context) {
+					calls = append(calls, "endpoint")
 				})
 				router.Handler(createRequestCtxFromPath("GET", "/account/transactions"))
 				Expect(calls).To(HaveLen(3))
@@ -820,41 +821,46 @@ var _ = ginkgo.Describe("Router", func() {
 				Expect(calls[2]).To(Equal("endpoint"))
 			})
 
-			ginkgo.It("should the middleware prevent a handler and  for being called", func() {
+			g.It("should the middleware prevent a handler and  for being called", func() {
 				calls := make([]string, 0)
-				router.GET("/:account/transactions", func(ctx *Context) {
-					ginkgo.Fail("this endpoint should not be called")
-				}, func(ctx *Context, next Handler) {
+				router.With(func(ctx *Context, next Handler) {
 					calls = append(calls, "middleware1")
 				}, func(ctx *Context, next Handler) {
-					ginkgo.Fail("this middleware should not be called")
+					g.Fail("this middleware should not be called")
+				}).GET("/:account/transactions", func(ctx *Context) {
+					g.Fail("this endpoint should not be called")
 				})
 				router.Handler(createRequestCtxFromPath("GET", "/account/transactions"))
 				Expect(calls).To(HaveLen(1))
 				Expect(calls[0]).To(Equal("middleware1"))
 			})
 
-			ginkgo.It("should call the group middleware for a route", func() {
+			g.It("should call the group middleware for a route", func() {
 				calls := make([]string, 0)
-				group := router.Group("/v1", func(ctx *Context, next Handler) {
+				group := router.Prefix("/v1")
+				group.Use(func(ctx *Context, next Handler) {
 					calls = append(calls, "groupMiddleware1")
 					next(ctx)
 				}, func(ctx *Context, next Handler) {
 					calls = append(calls, "groupMiddleware2")
 					next(ctx)
 				})
-				subgroup := group.Group("/subgroup", func(ctx *Context, next Handler) {
-					calls = append(calls, "subgroupMiddleware1")
-					next(ctx)
-				}, func(ctx *Context, next Handler) {
-					calls = append(calls, "subgroupMiddleware2")
-					next(ctx)
-				})
-				subgroup.GET("/route1", func(ctx *Context) {
-					calls = append(calls, "endpoint")
-				}, func(ctx *Context, next Handler) {
-					calls = append(calls, "middleware1")
-					next(ctx)
+
+				group.Prefix("/subgroup").Group(func(r Routable) {
+					r.Use(func(ctx *Context, next Handler) {
+						calls = append(calls, "subgroupMiddleware1")
+						next(ctx)
+					}, func(ctx *Context, next Handler) {
+						calls = append(calls, "subgroupMiddleware2")
+						next(ctx)
+					})
+
+					r.With(func(ctx *Context, next Handler) {
+						calls = append(calls, "middleware1")
+						next(ctx)
+					}).GET("/route1", func(ctx *Context) {
+						calls = append(calls, "endpoint")
+					})
 				})
 				router.Handler(createRequestCtxFromPath("GET", "/v1/subgroup/route1"))
 				Expect(calls).To(HaveLen(6))
@@ -866,23 +872,28 @@ var _ = ginkgo.Describe("Router", func() {
 				Expect(calls[5]).To(Equal("endpoint"))
 			})
 
-			ginkgo.It("should call the group middleware avoid calling the next middleware and the route", func() {
+			g.It("should call the group middleware avoid calling the next middleware and the route", func() {
 				calls := make([]string, 0)
-				group := router.Group("/v1", func(ctx *Context, next Handler) {
-					calls = append(calls, "groupMiddleware1")
-					next(ctx)
-				})
-				subgroup := group.Group("/subgroup", func(ctx *Context, next Handler) {
-					calls = append(calls, "subgroupMiddleware1")
-					next(ctx)
-				}, func(ctx *Context, next Handler) {
-					calls = append(calls, "subgroupMiddleware2")
-				})
-				subgroup.GET("/route1", func(ctx *Context) {
-					calls = append(calls, "endpoint")
-				}, func(ctx *Context, next Handler) {
-					calls = append(calls, "middleware1")
-					next(ctx)
+
+				router.Prefix("/v1").Group(func(r Routable) {
+					r.Use(func(ctx *Context, next Handler) {
+						calls = append(calls, "groupMiddleware1")
+						next(ctx)
+					})
+
+					subgroup := r.Prefix("/subgroup").With(func(ctx *Context, next Handler) {
+						calls = append(calls, "subgroupMiddleware1")
+						next(ctx)
+					}, func(ctx *Context, next Handler) {
+						calls = append(calls, "subgroupMiddleware2")
+					})
+
+					subgroup.With(func(ctx *Context, next Handler) {
+						calls = append(calls, "middleware1")
+						next(ctx)
+					}).GET("/route1", func(ctx *Context) {
+						calls = append(calls, "endpoint")
+					})
 				})
 				router.Handler(createRequestCtxFromPath("GET", "/v1/subgroup/route1"))
 				Expect(calls).To(HaveLen(3))
@@ -917,9 +928,9 @@ func BenchmarkRouter_Handler(b *testing.B) {
 
 func BenchmarkRouter_HandlerWithMiddleware(b *testing.B) {
 	router := NewRouter()
-	router.GET("/", emptyHandler, func(ctx *Context, next Handler) {
+	router.With(func(ctx *Context, next Handler) {
 		next(ctx)
-	})
+	}).GET("/", emptyHandler)
 	ctx := fasthttp.RequestCtx{}
 	ctx.Request.SetRequestURI("/")
 

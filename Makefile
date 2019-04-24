@@ -4,7 +4,10 @@ GOPATHCMD=GOPATH=$(GOPATH)
 COVERDIR=$(CURDIR)/.cover
 COVERAGEFILE=$(COVERDIR)/cover.out
 
-.PHONY: dep-ensure dep-update vet test test-watch coverage coverage-ci coverage-html
+.PHONY: run dep-ensure dep-update vet test test-watch coverage coverage-ci coverage-html
+
+run:
+	@$(GOPATHCMD) go run examples/$(EXAMPLE)/main.go
 
 dep-ensure:
 	@$(GOPATHCMD) dep ensure -v

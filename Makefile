@@ -16,7 +16,7 @@ vet:
 	@$(GOPATHCMD) go vet ./...
 
 fmt:
-	@$(GOPATHCMD) go fmt ./...
+	@$(GOPATHCMD) gofmt -e -s -d *.go
 
 test:
 	@${GOPATHCMD} ginkgo --failFast ./...
@@ -36,18 +36,3 @@ coverage-ci:
 
 coverage-html:
 	@$(GOPATHCMD) go tool cover -html="${COVERAGEFILE}" -o .cover/report.html
-
-deps:
-	@mkdir -p ${GOPATH}
-	@go list -f '{{join .Deps "\n"}}' . | xargs go list -f '{{if not .Standard}}{{.ImportPath}}{{end}}' | GOPATH=${GOPATH} xargs go get
-	@go list -f '{{join .TestImports "\n"}}' . | xargs go list -f '{{if not .Standard}}{{.ImportPath}}{{end}}' | GOPATH=${GOPATH} xargs go get
-
-deps-ci:
-	-go get -v -t ./...
-
-list-external-deps:
-	$(call external_deps,'.')
-
-define external_deps
-	@echo '-- $(1)'; go list -f '{{join .Deps .TestImports " "}}' $(1) | xargs go list -f '{{if not .Standard}}{{.ImportPath}}{{end}}'
-endef

@@ -11,10 +11,10 @@ var config = http.Config{
 	},
 }
 
-func router() *http.Router {
-	router := http.NewRouter()
-	router.GET("/hello", func(ctx *http.Context) {
-		ctx.SendJson(map[string]interface{}{
+func router() http.Router {
+	router := http.NewRouter(nil)
+	router.GET("/hello", func(req http.Request, res http.Response) http.Result {
+		return res.Data(map[string]interface{}{
 			"hello": "world",
 		})
 	})

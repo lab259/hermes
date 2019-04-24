@@ -2,47 +2,28 @@ package http
 
 import (
 	"bytes"
-	"fmt"
+	"context"
 	"sync"
 
 	"github.com/valyala/fasthttp"
 )
 
-type Router struct {
+type router struct {
 	route
 	children map[string]*node
-	NotFound Handler
+	notFound Handler
 }
 
-type route struct {
-	prefix      string
-	router      *Router
-	middlewares []Middleware
-}
-
-func NewRouter() *Router {
-	r := &Router{
+func NewRouter(notFound Handler) Router {
+	r := &router{
 		children: make(map[string]*node),
+		notFound: notFound,
 	}
 	r.router = r
 	return r
 }
 
-func (r *route) handle(method, subpath string, handler Handler) {
-	root, ok := r.router.children[method]
-	if !ok {
-		root = newNode()
-		r.router.children[method] = root
-	}
-
-	path := fmt.Sprintf("%s%s", r.prefix, subpath)
-	if len(path) > 0 && path[0] == '/' {
-		path = path[1:]
-	}
-	root.Add(path, handler, nil, r.middlewares)
-}
-
-func Split(source []byte, dest [][]byte) [][]byte {
+func split(source []byte, dest [][]byte) [][]byte {
 	lSource := len(source)
 	s := 0
 	for i := 0; i < lSource; i++ {
@@ -68,108 +49,60 @@ var pathPool = sync.Pool{
 	},
 }
 
-func (router *Router) Handler(fCtx *fasthttp.RequestCtx) {
-	method := string(fCtx.Method())
-	node, ok := router.children[method]
-	ctx := &Context{
-		Ctx:      fCtx,
-		Request:  &fCtx.Request,
-		Response: &fCtx.Response,
-	}
-	if ok {
-		path := pathPool.Get().([][]byte)
-		path = Split(ctx.Request.URI().Path(), path)
-		defer func() {
-			path = path[0:0]
-			pathPool.Put(path)
-		}()
-		path = bytes.Split(ctx.Request.URI().Path()[1:], routerHandlerSep)
-		if len(path) == 1 && len(path[0]) == 0 {
-			if node.handler != nil {
-				node.handler(ctx)
+func (router *router) Handler() fasthttp.RequestHandler {
+	return func(fCtx *fasthttp.RequestCtx) {
+		req := acquireRequest(context.Background(), fCtx)
+		defer releaseRequest(req)
+
+		res := acquireResponse(fCtx)
+		defer releaseResponse(res)
+
+		method := string(fCtx.Method())
+		node, ok := router.children[method]
+
+		if ok {
+			path := pathPool.Get().([][]byte)
+			path = split(req.Path(), path)
+			defer func() {
+				path = path[0:0]
+				pathPool.Put(path)
+			}()
+			path = bytes.Split(req.Path()[1:], routerHandlerSep)
+			if len(path) == 1 && len(path[0]) == 0 {
+				if node.handler != nil {
+					node.handler(req, res)
+					return
+				}
+				if router.notFound != nil {
+					router.notFound(req, res)
+				}
 				return
 			}
-			if router.NotFound != nil {
-				router.NotFound(ctx)
-			}
-			return
-		}
-		found, node, values := node.Matches(path, nil)
-		if found {
-			for i, v := range values {
-				ctx.Ctx.SetUserValue(node.names[i], string(v))
-			}
-			if len(node.middlewares) > 0 {
-				middlewareIdx := 0
-				var next Handler
-				next = func(ctx *Context) {
-					middlewareIdx++
-					if middlewareIdx < len(node.middlewares) {
-						node.middlewares[middlewareIdx](ctx, next)
-					} else {
-						node.handler(ctx)
-					}
+			found, node, values := node.Matches(path, nil)
+			if found {
+				for i, v := range values {
+					fCtx.SetUserValue(node.names[i], string(v))
 				}
-				node.middlewares[0](ctx, next)
-			} else {
-				node.handler(ctx)
+				if len(node.middlewares) > 0 {
+					middlewareIdx := 0
+					var next Handler
+					next = func(req2 Request, res2 Response) Result {
+						middlewareIdx++
+						if middlewareIdx < len(node.middlewares) {
+							return node.middlewares[middlewareIdx](req2, res2, next)
+						}
+
+						return node.handler(req2, res2)
+					}
+					node.middlewares[0](req, res, next)
+				} else {
+					node.handler(req, res)
+				}
+				return
 			}
-			return
 		}
-	}
-	if router.NotFound != nil {
-		router.NotFound(ctx)
-	}
-}
-
-func (group *route) DELETE(path string, handler Handler) {
-	group.handle("DELETE", path, handler)
-}
-
-func (group *route) GET(path string, handler Handler) {
-	group.handle("GET", path, handler)
-}
-
-func (group *route) POST(path string, handler Handler) {
-	group.handle("POST", path, handler)
-}
-
-func (group *route) PUT(path string, handler Handler) {
-	group.handle("PUT", path, handler)
-}
-
-func (group *route) HEAD(path string, handler Handler) {
-	group.handle("HEAD", path, handler)
-}
-
-func (group *route) OPTIONS(path string, handler Handler) {
-	group.handle("OPTIONS", path, handler)
-}
-
-func (group *route) PATCH(path string, handler Handler) {
-	group.handle("PATCH", path, handler)
-}
-
-func (group *route) Prefix(path string) Routable {
-	return &route{
-		prefix:      fmt.Sprintf("%s%s", group.prefix, path),
-		router:      group.router,
-		middlewares: group.middlewares,
-	}
-}
-
-func (r *route) Group(h func(Routable)) {
-	h(r)
-}
-
-func (r *route) Use(middlewares ...Middleware) {
-	r.middlewares = append(r.middlewares, middlewares...)
-}
-
-func (r *route) With(middlewares ...Middleware) Routable {
-	return &route{
-		prefix:      r.prefix,
-		router:      r.router,
-		middlewares: append(r.middlewares, middlewares...),
+		if router.notFound != nil {
+			router.notFound(req, res)
+		}
 	}
 }

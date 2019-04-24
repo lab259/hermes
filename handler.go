@@ -1,3 +1,3 @@
 package http
 
-type Handler func(ctx *Context)
+// type Handler func(ctx *Context)

@@ -8,4 +8,4 @@ package http
 //
 // If you need to avoid the endpoint execution to continue, you should not to
 // call the `next` handler.
-type Middleware func(ctx *Context, next Handler)
+// type Middleware func(ctx *Context, next Handler)

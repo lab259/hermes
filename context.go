@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	StrApplicationJson = []byte("application/json")
-	StrXForwardedFor   = []byte("X-Forwarded-For")
+	applicationJSON = []byte("application/json")
+	textPlain       = []byte("text/plain")
 )
 
 // Context is the wrapper structure on top of the fasthttp.
@@ -45,9 +45,9 @@ func (ctx *Context) BodyJson(dst interface{}) error {
 // IsJson checks if the Content-type of the request is `application/json`.
 func (ctx *Context) IsJson() bool {
 	ct := ctx.Request.Header.ContentType()
-	laj := len(StrApplicationJson)
-	return bytes.Equal(ct, StrApplicationJson) ||
-		((laj < len(ct)) && bytes.Equal(ct[:laj], StrApplicationJson) && (ct[laj] == ';'))
+	laj := len(applicationJSON)
+	return bytes.Equal(ct, applicationJSON) ||
+		((laj < len(ct)) && bytes.Equal(ct[:laj], applicationJSON) && (ct[laj] == ';'))
 }
 
 // SendJson marshals the given `obj` and then uses the `SendJsonBytes` to
@@ -63,7 +63,7 @@ func (ctx *Context) SendJson(obj interface{}) error {
 // SendJsonBytes prepares the repsonse header to send the JSON Data. Afterwards,
 // it appends the received `data` to the body.
 func (ctx *Context) SendJsonBytes(data []byte) error {
-	ctx.Response.Header.SetBytesV("Content-type", StrApplicationJson)
+	ctx.Response.Header.SetBytesV("Content-type", applicationJSON)
 	ctx.Response.AppendBody(data)
 	return nil
 }

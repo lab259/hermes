@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -14,20 +15,20 @@ var config = http.Config{
 	},
 }
 
-func router() *http.Router {
-	router := http.NewRouter()
+func router() http.Router {
+	router := http.NewRouter(nil)
 	router.Use(
 		recoverMiddleware,
 		logMiddleware,
 	)
 
-	router.GET("/hello", func(ctx *http.Context) {
-		ctx.SendJson(map[string]interface{}{
+	router.GET("/hello", func(req http.Request, res http.Response) http.Result {
+		return res.Data(map[string]interface{}{
 			"hello": "world",
 		})
 	})
 
-	router.GET("/crash", func(ctx *http.Context) {
+	router.GET("/crash", func(req http.Request, res http.Response) http.Result {
 		panic("oops")
 	})
 
@@ -39,21 +40,23 @@ func main() {
 	app.Start()
 }
 
-func recoverMiddleware(ctx *http.Context, next http.Handler) {
+func recoverMiddleware(req http.Request, res http.Response, next http.Handler) http.Result {
 	defer func() {
 		e := recover()
 		if e != nil {
-			fmt.Printf("%s %s [recovered: %s]\n", time.Now().UTC().Format(time.RFC3339), ctx.Request.RequestURI(), e)
-			ctx.SendJson(map[string]interface{}{
-				"error": 500,
-			})
+			fmt.Printf("%s %s [recovered: %s]\n", time.Now().UTC().Format(time.RFC3339), req.Path(), e)
+			if err, ok := e.(error); ok {
+				res.Error(err)
+			} else {
+				res.Error(errors.New("internal server error"))
+			}
 		}
 	}()
-	next(ctx)
+	return next(req, res)
 }
 
-func logMiddleware(ctx *http.Context, next http.Handler) {
+func logMiddleware(req http.Request, res http.Response, next http.Handler) http.Result {
 	now := time.Now()
-	next(ctx)
-	fmt.Printf("%s %s [%s]\n", now.UTC().Format(time.RFC3339), ctx.Request.RequestURI(), time.Since(now))
+	defer fmt.Printf("%s %s [%s]\n", now.UTC().Format(time.RFC3339), req.Path(), time.Since(now))
+	return next(req, res)
 }

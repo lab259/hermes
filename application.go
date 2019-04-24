@@ -14,12 +14,12 @@ func (service *Application) Name() string {
 	return service.Configuration.Name
 }
 
-func NewApplication(config Config, router *Router) *Application {
+func NewApplication(config Config, router Router) *Application {
 	app := &Application{
 		Configuration: config,
 	}
 
-	app.fasthttpService.Server.Handler = router.Handler
+	app.fasthttpService.Server.Handler = router.Handler()
 	return app
 }
 

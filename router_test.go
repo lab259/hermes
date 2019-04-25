@@ -560,6 +560,7 @@ var _ = g.Describe("Router", func() {
 			value := 1
 			router.GET("", func(req Request, res Response) Result {
 				value = 2
+				return res.End()
 			})
 
 			router.Handler()(createRequestCtxFromPath("GET", "/"))
@@ -569,8 +570,9 @@ var _ = g.Describe("Router", func() {
 
 		g.It("should resolve an empty trailing route", func() {
 			value := 1
-			router.GET("/", func(ctx *Context) {
+			router.GET("/", func(req Request, res Response) Result {
 				value = 2
+				return res.End()
 			})
 
 			router.Handler()(createRequestCtxFromPath("GET", "/"))
@@ -580,8 +582,9 @@ var _ = g.Describe("Router", func() {
 
 		g.It("should resolve a static route", func() {
 			value := 1
-			router.GET("/static", func(ctx *Context) {
+			router.GET("/static", func(req Request, res Response) Result {
 				value = 2
+				return res.End()
 			})
 
 			router.Handler()(createRequestCtxFromPath("GET", "/static"))
@@ -591,8 +594,9 @@ var _ = g.Describe("Router", func() {
 
 		g.It("should resolve a static route not starting with /", func() {
 			value := 1
-			router.GET("static", func(ctx *Context) {
+			router.GET("static", func(req Request, res Response) Result {
 				value = 2
+				return res.End()
 			})
 
 			router.Handler()(createRequestCtxFromPath("GET", "/static"))
@@ -605,16 +609,19 @@ var _ = g.Describe("Router", func() {
 			value2 := 1
 			value3 := 1
 
-			router.GET("/static", func(ctx *Context) {
+			router.GET("/static", func(req Request, res Response) Result {
 				value1 = 2
+				return res.End()
 			})
 
-			router.GET("/static/second", func(ctx *Context) {
+			router.GET("/static/second", func(req Request, res Response) Result {
 				value2 = 2
+				return res.End()
 			})
 
-			router.GET("/another", func(ctx *Context) {
+			router.GET("/another", func(req Request, res Response) Result {
 				value3 = 2
+				return res.End()
 			})
 
 			router.Handler()(createRequestCtxFromPath("GET", "/static"))
@@ -628,9 +635,10 @@ var _ = g.Describe("Router", func() {
 
 		g.It("should resolve a wildcard route", func() {
 			value := 1
-			router.GET("/:wildcard", func(ctx *Context) {
-				Expect(ctx.UserValue("wildcard")).To(Equal("value"))
+			router.GET("/:wildcard", func(req Request, res Response) Result {
+				Expect(req.Param("wildcard")).To(Equal("value"))
 				value = 2
+				return res.End()
 			})
 
 			router.Handler()(createRequestCtxFromPath("GET", "/value"))
@@ -642,17 +650,20 @@ var _ = g.Describe("Router", func() {
 			value1 := 1
 			value2 := 1
 			value3 := 1
-			router.GET("/:account/transactions", func(ctx *Context) {
-				Expect(ctx.UserValue("account")).To(Equal("value1"))
+			router.GET("/:account/transactions", func(req Request, res Response) Result {
+				Expect(req.Param("account")).To(Equal("value1"))
 				value1 = 2
+				return res.End()
 			})
-			router.GET("/:account/profile", func(ctx *Context) {
-				Expect(ctx.UserValue("account")).To(Equal("value2"))
+			router.GET("/:account/profile", func(req Request, res Response) Result {
+				Expect(req.Param("account")).To(Equal("value2"))
 				value2 = 2
+				return res.End()
 			})
-			router.GET("/:user/roles", func(ctx *Context) {
-				Expect(ctx.UserValue("user")).To(Equal("value3"))
+			router.GET("/:user/roles", func(req Request, res Response) Result {
+				Expect(req.Param("user")).To(Equal("value3"))
 				value3 = 2
+				return res.End()
 			})
 
 			router.Handler()(createRequestCtxFromPath("GET", "/value1/transactions"))
@@ -668,20 +679,23 @@ var _ = g.Describe("Router", func() {
 			value1 := 1
 			value2 := 1
 			value3 := 1
-			router.GET("/:account/:subscription/cancel", func(ctx *Context) {
-				Expect(ctx.UserValue("account")).To(Equal("account1"))
-				Expect(ctx.UserValue("subscription")).To(Equal("subscription1"))
+			router.GET("/:account/:subscription/cancel", func(req Request, res Response) Result {
+				Expect(req.Param("account")).To(Equal("account1"))
+				Expect(req.Param("subscription")).To(Equal("subscription1"))
 				value1 = 2
+				return res.End()
 			})
-			router.GET("/:account/:subscription/history", func(ctx *Context) {
-				Expect(ctx.UserValue("account")).To(Equal("account2"))
-				Expect(ctx.UserValue("subscription")).To(Equal("subscription2"))
+			router.GET("/:account/:subscription/history", func(req Request, res Response) Result {
+				Expect(req.Param("account")).To(Equal("account2"))
+				Expect(req.Param("subscription")).To(Equal("subscription2"))
 				value2 = 2
+				return res.End()
 			})
-			router.GET("/:account/:subscription", func(ctx *Context) {
-				Expect(ctx.UserValue("account")).To(Equal("account3"))
-				Expect(ctx.UserValue("subscription")).To(Equal("subscription3"))
+			router.GET("/:account/:subscription", func(req Request, res Response) Result {
+				Expect(req.Param("account")).To(Equal("account3"))
+				Expect(req.Param("subscription")).To(Equal("subscription3"))
 				value3 = 2
+				return res.End()
 			})
 
 			router.Handler()(createRequestCtxFromPath("GET", "/account1/subscription1/cancel"))
@@ -696,13 +710,16 @@ var _ = g.Describe("Router", func() {
 		g.It("should call the not found callback for the index route", func() {
 			value1 := 1
 
-			router.GET("/account/transactions", func(ctx *Context) {
-				g.Fail("should not be called")
+			router := NewRouter(func(req Request, res Response) Result {
+				value1 = 2
+				return res.End()
 			})
 
-			router.NotFound = func(ctx *Context) {
-				value1 = 2
-			}
+			router.GET("/account/transactions", func(req Request, res Response) Result {
+				g.Fail("should not be called")
+				return res.End()
+			})
+
 			router.Handler()(createRequestCtxFromPath("GET", "/"))
 
 			Expect(value1).To(Equal(2))
@@ -711,13 +728,14 @@ var _ = g.Describe("Router", func() {
 		g.It("should call the not found callback for static routes", func() {
 			value1 := 1
 
-			router.GET("/account/transactions", func(ctx *Context) {
-				g.Fail("should not be called")
-			})
-
-			router.NotFound = func(ctx *Context) {
+			router = NewRouter(func(req Request, res Response) Result {
 				value1 = 2
-			}
+				return res.End()
+			})
+			router.GET("/account/transactions", func(req Request, res Response) Result {
+				g.Fail("should not be called")
+				return res.End()
+			})
 			router.Handler()(createRequestCtxFromPath("GET", "/account/transactions_notfound"))
 
 			Expect(value1).To(Equal(2))
@@ -726,63 +744,59 @@ var _ = g.Describe("Router", func() {
 		g.It("should call the not found callback for static routes half path", func() {
 			value1 := 1
 
-			router.GET("/account/transactions", func(ctx *Context) {
+			router := NewRouter(func(req Request, res Response) Result {
+				value1 = 2
+				return res.End()
+			})
+			router.GET("/account/transactions", func(req Request, res Response) Result {
 				g.Fail("should not be called")
+				return res.End()
 			})
 
-			router.NotFound = func(ctx *Context) {
-				value1 = 2
-			}
 			router.Handler()(createRequestCtxFromPath("GET", "/account"))
 
 			Expect(value1).To(Equal(2))
 		})
 
 		g.It("should call the not found callback for wildcard routes", func() {
-			value1 := 1
-			value2 := 1
-			value3 := 1
-
-			router.GET("/:account/transactions", func(ctx *Context) {
-				g.Fail("should not be called")
+			value := 0
+			router := NewRouter(func(req Request, res Response) Result {
+				value++
+				return res.End()
 			})
-			router.GET("/:account/profile", func(ctx *Context) {
+			router.GET("/:account/transactions", func(req Request, res Response) Result {
 				g.Fail("should not be called")
+				return res.End()
 			})
-			router.GET("/:user/roles", func(ctx *Context) {
+			router.GET("/:account/profile", func(req Request, res Response) Result {
 				g.Fail("should not be called")
+				return res.End()
+			})
+			router.GET("/:user/roles", func(req Request, res Response) Result {
+				g.Fail("should not be called")
+				return res.End()
 			})
 
-			router.NotFound = func(ctx *Context) {
-				value1 = 2
-			}
-			router.Handler()(createRequestCtxFromPath("GET", "/value1/transactions_notfound"))
+			handler := router.Handler()
 
-			router.NotFound = func(ctx *Context) {
-				value2 = 2
-			}
-			router.Handler()(createRequestCtxFromPath("GET", "/value2/profile_notfound"))
+			handler(createRequestCtxFromPath("GET", "/value2/profile_notfound"))
+			handler(createRequestCtxFromPath("GET", "/value2/profile_notfound"))
+			handler(createRequestCtxFromPath("GET", "/value3/roles_notfound"))
 
-			router.NotFound = func(ctx *Context) {
-				value3 = 2
-			}
-			router.Handler()(createRequestCtxFromPath("GET", "/value3/roles_notfound"))
-
-			Expect(value1).To(Equal(2))
-			Expect(value2).To(Equal(2))
-			Expect(value3).To(Equal(2))
+			Expect(value).To(Equal(3))
 		})
 
 		g.It("should call the not found callback for wildcard half path", func() {
 			value1 := 1
-
-			router.GET("/:account/transactions", func(ctx *Context) {
+			router := NewRouter(func(req Request, res Response) Result {
+				value1 = 2
+				return res.End()
+			})
+			router.GET("/:account/transactions", func(req Request, res Response) Result {
 				g.Fail("should not be called")
+				return res.End()
 			})
 
-			router.NotFound = func(ctx *Context) {
-				value1 = 2
-			}
 			router.Handler()(createRequestCtxFromPath("GET", "/value1"))
 
 			Expect(value1).To(Equal(2))
@@ -791,13 +805,15 @@ var _ = g.Describe("Router", func() {
 		g.It("should call the not found callback for wrong method", func() {
 			value1 := 1
 
-			router.GET("/:account/transactions", func(ctx *Context) {
+			router := NewRouter(func(req Request, res Response) Result {
+				value1 = 2
+				return res.End()
+			})
+			router.GET("/:account/transactions", func(req Request, res Response) Result {
 				g.Fail("should not be called")
+				return res.End()
 			})
 
-			router.NotFound = func(ctx *Context) {
-				value1 = 2
-			}
 			router.Handler()(createRequestCtxFromPath("POST", "/value1"))
 
 			Expect(value1).To(Equal(2))
@@ -806,14 +822,15 @@ var _ = g.Describe("Router", func() {
 		g.Describe("Middlewares", func() {
 			g.It("should call all the middlewares in sequence", func() {
 				calls := make([]string, 0)
-				router.With(func(ctx *Context, next Handler) {
+				router.With(func(req Request, res Response, next Handler) Result {
 					calls = append(calls, "middleware1")
-					next(ctx)
-				}, func(ctx *Context, next Handler) {
+					return next(req, res)
+				}, func(req Request, res Response, next Handler) Result {
 					calls = append(calls, "middleware2")
-					next(ctx)
-				}).GET("/:account/transactions", func(ctx *Context) {
+					return next(req, res)
+				}).GET("/:account/transactions", func(req Request, res Response) Result {
 					calls = append(calls, "endpoint")
+					return res.End()
 				})
 				router.Handler()(createRequestCtxFromPath("GET", "/account/transactions"))
 				Expect(calls).To(HaveLen(3))
@@ -824,12 +841,15 @@ var _ = g.Describe("Router", func() {
 
 			g.It("should the middleware prevent a handler and  for being called", func() {
 				calls := make([]string, 0)
-				router.With(func(ctx *Context, next Handler) {
+				router.With(func(req Request, res Response, next Handler) Result {
 					calls = append(calls, "middleware1")
-				}, func(ctx *Context, next Handler) {
+					return res.End()
+				}, func(req Request, res Response, next Handler) Result {
 					g.Fail("this middleware should not be called")
-				}).GET("/:account/transactions", func(ctx *Context) {
+					return next(req, res)
+				}).GET("/:account/transactions", func(req Request, res Response) Result {
 					g.Fail("this endpoint should not be called")
+					return res.End()
 				})
 				router.Handler()(createRequestCtxFromPath("GET", "/account/transactions"))
 				Expect(calls).To(HaveLen(1))
@@ -839,28 +859,29 @@ var _ = g.Describe("Router", func() {
 			g.It("should call the group middleware for a route", func() {
 				calls := make([]string, 0)
 				group := router.Prefix("/v1")
-				group.Use(func(ctx *Context, next Handler) {
+				group.Use(func(req Request, res Response, next Handler) Result {
 					calls = append(calls, "groupMiddleware1")
-					next(ctx)
-				}, func(ctx *Context, next Handler) {
+					return next(req, res)
+				}, func(req Request, res Response, next Handler) Result {
 					calls = append(calls, "groupMiddleware2")
-					next(ctx)
+					return next(req, res)
 				})
 
 				group.Prefix("/subgroup").Group(func(r Routable) {
-					r.Use(func(ctx *Context, next Handler) {
+					r.Use(func(req Request, res Response, next Handler) Result {
 						calls = append(calls, "subgroupMiddleware1")
-						next(ctx)
-					}, func(ctx *Context, next Handler) {
+						return next(req, res)
+					}, func(req Request, res Response, next Handler) Result {
 						calls = append(calls, "subgroupMiddleware2")
-						next(ctx)
+						return next(req, res)
 					})
 
-					r.With(func(ctx *Context, next Handler) {
+					r.With(func(req Request, res Response, next Handler) Result {
 						calls = append(calls, "middleware1")
-						next(ctx)
-					}).GET("/route1", func(ctx *Context) {
+						return next(req, res)
+					}).GET("/route1", func(req Request, res Response) Result {
 						calls = append(calls, "endpoint")
+						return res.End()
 					})
 				})
 				router.Handler()(createRequestCtxFromPath("GET", "/v1/subgroup/route1"))
@@ -877,23 +898,25 @@ var _ = g.Describe("Router", func() {
 				calls := make([]string, 0)
 
 				router.Prefix("/v1").Group(func(r Routable) {
-					r.Use(func(ctx *Context, next Handler) {
+					r.Use(func(req Request, res Response, next Handler) Result {
 						calls = append(calls, "groupMiddleware1")
-						next(ctx)
+						return next(req, res)
 					})
 
-					subgroup := r.Prefix("/subgroup").With(func(ctx *Context, next Handler) {
+					subgroup := r.Prefix("/subgroup").With(func(req Request, res Response, next Handler) Result {
 						calls = append(calls, "subgroupMiddleware1")
-						next(ctx)
-					}, func(ctx *Context, next Handler) {
+						return next(req, res)
+					}, func(req Request, res Response, next Handler) Result {
 						calls = append(calls, "subgroupMiddleware2")
+						return res.End()
 					})
 
-					subgroup.With(func(ctx *Context, next Handler) {
+					subgroup.With(func(req Request, res Response, next Handler) Result {
 						calls = append(calls, "middleware1")
-						next(ctx)
-					}).GET("/route1", func(ctx *Context) {
+						return next(req, res)
+					}).GET("/route1", func(req Request, res Response) Result {
 						calls = append(calls, "endpoint")
+						return res.End()
 					})
 				})
 				router.Handler()(createRequestCtxFromPath("GET", "/v1/subgroup/route1"))

@@ -57,9 +57,7 @@ func (router *router) Handler() fasthttp.RequestHandler {
 		res := acquireResponse(fCtx)
 		defer releaseResponse(res)
 
-		method := string(fCtx.Method())
-		node, ok := router.children[method]
-
+		node, ok := router.children[string(req.Method())]
 		if ok {
 			path := pathPool.Get().([][]byte)
 			path = split(req.Path(), path)
@@ -70,7 +68,7 @@ func (router *router) Handler() fasthttp.RequestHandler {
 			path = bytes.Split(req.Path()[1:], routerHandlerSep)
 			if len(path) == 1 && len(path[0]) == 0 {
 				if node.handler != nil {
-					router.callHandler(req, res, router.middlewares, node.handler)
+					node.handler(req, res)
 					return
 				}
 				router.callNotFound(req, res)
@@ -81,7 +79,7 @@ func (router *router) Handler() fasthttp.RequestHandler {
 				for i, v := range values {
 					fCtx.SetUserValue(node.names[i], string(v))
 				}
-				router.callHandler(req, res, node.middlewares, node.handler)
+				node.handler(req, res)
 				return
 			}
 		}

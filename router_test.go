@@ -4,7 +4,6 @@ import (
 	g "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"fmt"
 	"testing"
 
 	"github.com/valyala/fasthttp"
@@ -17,8 +16,10 @@ func createRequestCtxFromPath(method, path string) *fasthttp.RequestCtx {
 	return ctx
 }
 
+var emptyResult = &result{}
+
 var emptyHandler = func(req Request, res Response) Result {
-	return res.End()
+	return emptyResult
 }
 
 var _ = g.Describe("Router", func() {
@@ -165,7 +166,6 @@ var _ = g.Describe("Router", func() {
 			Expect(router.children["GET"].children["this"].children["should"].children["be"].wildcard).To(BeNil())
 			Expect(router.children["GET"].children["this"].children["should"].children["be"].handler).To(BeNil())
 			Expect(router.children["GET"].children["this"].children["should"].children["be"].children).To(HaveKey("static"))
-			Expect(fmt.Sprintf("%p", router.children["GET"].children["this"].children["should"].children["be"].children["static"].handler)).To(Equal(fmt.Sprintf("%p", emptyHandler)))
 		})
 
 		g.It("should parse multiple static routes related", func() {
@@ -186,7 +186,6 @@ var _ = g.Describe("Router", func() {
 			Expect(router.children["GET"].children["this"].children["should"].children["be"].wildcard).To(BeNil())
 			Expect(router.children["GET"].children["this"].children["should"].children["be"].handler).To(BeNil())
 			Expect(router.children["GET"].children["this"].children["should"].children["be"].children).To(HaveKey("static"))
-			Expect(fmt.Sprintf("%p", router.children["GET"].children["this"].children["should"].children["be"].children["static"].handler)).To(Equal(fmt.Sprintf("%p", emptyHandler)))
 
 			Expect(router.children["GET"].children["this"].children).To(HaveKey("should2"))
 			Expect(router.children["GET"].children["this"].children["should2"].wildcard).To(BeNil())
@@ -195,7 +194,6 @@ var _ = g.Describe("Router", func() {
 			Expect(router.children["GET"].children["this"].children["should2"].children["be"].wildcard).To(BeNil())
 			Expect(router.children["GET"].children["this"].children["should2"].children["be"].handler).To(BeNil())
 			Expect(router.children["GET"].children["this"].children["should2"].children["be"].children).To(HaveKey("static"))
-			Expect(fmt.Sprintf("%p", router.children["GET"].children["this"].children["should2"].children["be"].children["static"].handler)).To(Equal(fmt.Sprintf("%p", emptyHandler)))
 		})
 
 		g.It("should parse a complete a route starting static and ending with a wildcard", func() {
@@ -232,7 +230,6 @@ var _ = g.Describe("Router", func() {
 			Expect(router.children["GET"].children["this"].children["should"].children["be"].wildcard).To(BeNil())
 			Expect(router.children["GET"].children["this"].children["should"].children["be"].handler).To(BeNil())
 			Expect(router.children["GET"].children["this"].children["should"].children["be"].children).To(HaveKey("static"))
-			Expect(fmt.Sprintf("%p", router.children["GET"].children["this"].children["should"].children["be"].children["static"].handler)).To(Equal(fmt.Sprintf("%p", emptyHandler)))
 
 			Expect(router.children["GET"].children["this"].children).To(HaveKey("should2"))
 			Expect(router.children["GET"].children["this"].children["should2"].wildcard).To(BeNil())
@@ -241,7 +238,6 @@ var _ = g.Describe("Router", func() {
 			Expect(router.children["GET"].children["this"].children["should2"].children["be"].wildcard).To(BeNil())
 			Expect(router.children["GET"].children["this"].children["should2"].children["be"].handler).To(BeNil())
 			Expect(router.children["GET"].children["this"].children["should2"].children["be"].children).To(HaveKey("static"))
-			Expect(fmt.Sprintf("%p", router.children["GET"].children["this"].children["should2"].children["be"].children["static"].handler)).To(Equal(fmt.Sprintf("%p", emptyHandler)))
 
 			Expect(router.children["GET"].children).To(HaveKey("this2"))
 			Expect(router.children["GET"].wildcard).To(BeNil())
@@ -254,7 +250,6 @@ var _ = g.Describe("Router", func() {
 			Expect(router.children["GET"].children["this2"].children["should"].children["be"].wildcard).To(BeNil())
 			Expect(router.children["GET"].children["this2"].children["should"].children["be"].handler).To(BeNil())
 			Expect(router.children["GET"].children["this2"].children["should"].children["be"].children).To(HaveKey("static"))
-			Expect(fmt.Sprintf("%p", router.children["GET"].children["this2"].children["should"].children["be"].children["static"].handler)).To(Equal(fmt.Sprintf("%p", emptyHandler)))
 		})
 
 		g.It("should parse a complete route with wildcard", func() {
@@ -969,6 +964,19 @@ func BenchmarkRouter_Handler(b *testing.B) {
 	router.Get("/", emptyHandler)
 	ctx := fasthttp.RequestCtx{}
 	ctx.Request.SetRequestURI("/")
+
+	h := router.Handler()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		h(&ctx)
+	}
+}
+
+func BenchmarkRouter_HandlerWithParams(b *testing.B) {
+	router := NewRouter(emptyHandler)
+	router.Get("/:id", emptyHandler)
+	ctx := fasthttp.RequestCtx{}
+	ctx.Request.SetRequestURI("/id")
 
 	h := router.Handler()
 	b.ResetTimer()

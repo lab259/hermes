@@ -6,11 +6,10 @@ import (
 )
 
 type node struct {
-	wildcard    *node
-	children    map[string]*node
-	handler     Handler
-	names       []string
-	middlewares []Middleware
+	wildcard *node
+	children map[string]*node
+	handler  Handler
+	names    []string
 }
 
 func newNode() *node {
@@ -50,9 +49,8 @@ func (n *node) Add(path string, handler Handler, names []string, middlewares []M
 						panic(fmt.Sprintf("conflict adding '%s'", path))
 					}
 					// Initialize stuff
-					node.handler = handler
 					node.names = names
-					node.middlewares = middlewares
+					node.handler = newHandler(handler, middlewares)
 				}
 				continue
 			} else {
@@ -72,9 +70,8 @@ func (n *node) Add(path string, handler Handler, names []string, middlewares []M
 					if ok && node.handler != nil {
 						panic(fmt.Sprintf("conflict adding '%s'", path))
 					}
-					node.handler = handler
 					node.names = names
-					node.middlewares = middlewares
+					node.handler = newHandler(handler, middlewares)
 					return
 				}
 			}
@@ -83,11 +80,27 @@ func (n *node) Add(path string, handler Handler, names []string, middlewares []M
 			panic("empty token")
 		} else {
 			// Just set the node info
-			n.handler = handler
 			n.names = names
-			n.middlewares = middlewares
+			n.handler = newHandler(handler, middlewares)
 		}
 	}
+}
+
+func newHandler(h Handler, m []Middleware) Handler {
+	sagas := make([]Handler, len(m)+1)
+
+	sagas[len(m)] = h
+
+	idx := len(m) - 1
+	for idx > -1 {
+		i := idx
+		sagas[i] = func(nextReq Request, nextRes Response) Result {
+			return m[i](nextReq, nextRes, sagas[i+1])
+		}
+		idx--
+	}
+
+	return sagas[0]
 }
 
 func (n *node) Matches(path [][]byte, values [][]byte) (bool, *node, [][]byte) {

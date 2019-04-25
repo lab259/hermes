@@ -1,9 +1,10 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"time"
+
+	"github.com/lab259/http/middlewares"
 
 	"github.com/lab259/http"
 )
@@ -18,7 +19,7 @@ var config = http.Config{
 func router() http.Router {
 	router := http.NewRouter(nil)
 	router.Use(
-		recoverMiddleware,
+		middlewares.RecoverableMiddleware,
 		logMiddleware,
 	)
 
@@ -37,22 +38,9 @@ func router() http.Router {
 
 func main() {
 	app := http.NewApplication(config, router())
+	fmt.Println("Go to http://localhost:8080/hello")
+	fmt.Println("Go to http://localhost:8080/crash")
 	app.Start()
-}
-
-func recoverMiddleware(req http.Request, res http.Response, next http.Handler) http.Result {
-	defer func() {
-		recoveredData := recover()
-		if recoveredData != nil {
-			fmt.Printf("%s [%d] recovered: %s\n", time.Now().UTC().Format(time.RFC3339), req.Raw().ID(), recoveredData)
-			if err, ok := recoveredData.(error); ok {
-				res.Error(err)
-			} else {
-				res.Error(errors.New("internal server error"))
-			}
-		}
-	}()
-	return next(req, res)
 }
 
 func logMiddleware(req http.Request, res http.Response, next http.Handler) http.Result {

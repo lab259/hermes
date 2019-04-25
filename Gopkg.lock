@@ -79,6 +79,14 @@
   revision = "f60793acdd1f7efea7a6b2bb1b36653e3e00ad99"
 
 [[projects]]
+  digest = "1:b625eb1694124e10a585355e4605f35b2cef495841c1015ecbee7019fa2b0e35"
+  name = "github.com/lab259/rlog"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "1ce2ad90a21c4c1c3aa9dbf98c5cba99cb3eb76e"
+  version = "v2.0.1"
+
+[[projects]]
   digest = "1:6782ffc812e8e700e6952ede1e60487ff1fd9da489eff762985be662a7cfc431"
   name = "github.com/leodido/go-urn"
   packages = ["."]
@@ -172,6 +180,14 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:bbe51412d9915d64ffaa96b51d409e070665efc5194fcf145c4a27d4133107a4"
+  name = "golang.org/x/crypto"
+  packages = ["ssh/terminal"]
+  pruneopts = "UT"
+  revision = "c05e17bb3b2dca130fc919668a96b4bec9eb9442"
+
+[[projects]]
+  branch = "master"
   digest = "1:edcff25c46eb79b1a74accf2ce971f62e07ab824790334f42095771a53d4c569"
   name = "golang.org/x/net"
   packages = [
@@ -184,9 +200,12 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:55565b142e38b7d00c39ce9a86fc70bbfa37c4f2f00d8ff2343f433c351db8e3"
+  digest = "1:0b1c39a5f01b898239cc5c6ee20c6535cb2621685206a371d4a489477d75511b"
   name = "golang.org/x/sys"
-  packages = ["unix"]
+  packages = [
+    "unix",
+    "windows",
+  ]
   pruneopts = "UT"
   revision = "953cdadca894cdc07be76fc99f95b40c28f06623"
 
@@ -256,9 +275,11 @@
     "github.com/fatih/color",
     "github.com/jamillosantos/macchiato",
     "github.com/lab259/errors",
+    "github.com/lab259/rlog",
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
     "github.com/valyala/fasthttp",
+    "gopkg.in/go-playground/validator.v9",
     "gopkg.in/yaml.v2",
   ]
   solver-name = "gps-cdcl"

@@ -16,6 +16,10 @@ func createRequestCtxFromPath(method, path string) *fasthttp.RequestCtx {
 	return ctx
 }
 
+var emptyRouterConfig = RouterConfig{
+	NotFoundHandler: emptyHandler,
+}
+
 var emptyResult = &result{}
 
 var emptyHandler = func(req Request, res Response) Result {
@@ -69,7 +73,7 @@ var _ = g.Describe("Router", func() {
 	g.Describe("Parse", func() {
 
 		g.It("should parse a GET", func() {
-			router := NewRouter(emptyHandler).(*router)
+			router := NewRouter(emptyRouterConfig).(*router)
 			router.Get("", emptyHandler)
 
 			Expect(router.children).To(HaveKey("GET"))
@@ -79,7 +83,7 @@ var _ = g.Describe("Router", func() {
 		})
 
 		g.It("should parse a GET", func() {
-			router := NewRouter(emptyHandler).(*router)
+			router := NewRouter(emptyRouterConfig).(*router)
 			router.Get("/route", emptyHandler)
 
 			Expect(router.children).To(HaveKey("GET"))
@@ -88,7 +92,7 @@ var _ = g.Describe("Router", func() {
 		})
 
 		g.It("should parse a POST", func() {
-			router := NewRouter(emptyHandler).(*router)
+			router := NewRouter(emptyRouterConfig).(*router)
 			router.Post("/route", emptyHandler)
 
 			Expect(router.children).To(HaveKey("POST"))
@@ -97,7 +101,7 @@ var _ = g.Describe("Router", func() {
 		})
 
 		g.It("should parse a PUT", func() {
-			router := NewRouter(emptyHandler).(*router)
+			router := NewRouter(emptyRouterConfig).(*router)
 			router.Put("/route", emptyHandler)
 
 			Expect(router.children).To(HaveKey("PUT"))
@@ -106,7 +110,7 @@ var _ = g.Describe("Router", func() {
 		})
 
 		g.It("should parse a DELETE", func() {
-			router := NewRouter(emptyHandler).(*router)
+			router := NewRouter(emptyRouterConfig).(*router)
 			router.Delete("/route", emptyHandler)
 
 			Expect(router.children).To(HaveKey("DELETE"))
@@ -115,7 +119,7 @@ var _ = g.Describe("Router", func() {
 		})
 
 		g.It("should parse a HEAD", func() {
-			router := NewRouter(emptyHandler).(*router)
+			router := NewRouter(emptyRouterConfig).(*router)
 			router.Head("/route", emptyHandler)
 
 			Expect(router.children).To(HaveKey("HEAD"))
@@ -124,7 +128,7 @@ var _ = g.Describe("Router", func() {
 		})
 
 		g.It("should parse a OPTIONS", func() {
-			router := NewRouter(emptyHandler).(*router)
+			router := NewRouter(emptyRouterConfig).(*router)
 			router.Options("/route", emptyHandler)
 
 			Expect(router.children).To(HaveKey("OPTIONS"))
@@ -133,7 +137,7 @@ var _ = g.Describe("Router", func() {
 		})
 
 		g.It("should parse a PATCH", func() {
-			router := NewRouter(emptyHandler).(*router)
+			router := NewRouter(emptyRouterConfig).(*router)
 			router.Patch("/route", emptyHandler)
 
 			Expect(router.children).To(HaveKey("PATCH"))
@@ -142,7 +146,7 @@ var _ = g.Describe("Router", func() {
 		})
 
 		g.It("should parse a POST", func() {
-			router := NewRouter(emptyHandler).(*router)
+			router := NewRouter(emptyRouterConfig).(*router)
 			router.Post("/route", emptyHandler)
 
 			Expect(router.children).To(HaveKey("POST"))
@@ -151,7 +155,7 @@ var _ = g.Describe("Router", func() {
 		})
 
 		g.It("should parse a complete static route", func() {
-			router := NewRouter(emptyHandler).(*router)
+			router := NewRouter(emptyRouterConfig).(*router)
 			router.Get("/this/should/be/static", emptyHandler)
 
 			Expect(router.children).To(HaveKey("GET"))
@@ -169,7 +173,7 @@ var _ = g.Describe("Router", func() {
 		})
 
 		g.It("should parse multiple static routes related", func() {
-			router := NewRouter(emptyHandler).(*router)
+			router := NewRouter(emptyRouterConfig).(*router)
 			router.Get("/this/should/be/static", emptyHandler)
 			router.Get("/this/should2/be/static", emptyHandler)
 
@@ -197,7 +201,7 @@ var _ = g.Describe("Router", func() {
 		})
 
 		g.It("should parse a complete a route starting static and ending with a wildcard", func() {
-			router := NewRouter(emptyHandler).(*router)
+			router := NewRouter(emptyRouterConfig).(*router)
 			router.Get("/static/:wildcard", emptyHandler)
 
 			Expect(router.children).To(HaveKey("GET"))
@@ -213,7 +217,7 @@ var _ = g.Describe("Router", func() {
 		})
 
 		g.It("should parse multiple static routes related and not", func() {
-			router := NewRouter(emptyHandler).(*router)
+			router := NewRouter(emptyRouterConfig).(*router)
 			router.Get("/this/should/be/static", emptyHandler)
 			router.Get("/this/should2/be/static", emptyHandler)
 			router.Get("/this2/should/be/static", emptyHandler)
@@ -253,7 +257,7 @@ var _ = g.Describe("Router", func() {
 		})
 
 		g.It("should parse a complete route with wildcard", func() {
-			router := NewRouter(emptyHandler).(*router)
+			router := NewRouter(emptyRouterConfig).(*router)
 			router.Get("/:account/detail/another", emptyHandler)
 
 			Expect(router.children).To(HaveKey("GET"))
@@ -271,7 +275,7 @@ var _ = g.Describe("Router", func() {
 		})
 
 		g.It("should parse a complete route with a sequence of wildcards", func() {
-			router := NewRouter(emptyHandler).(*router)
+			router := NewRouter(emptyRouterConfig).(*router)
 			router.Get("/:account/:transaction/:invoice", emptyHandler)
 
 			Expect(router.children).To(HaveKey("GET"))
@@ -289,7 +293,7 @@ var _ = g.Describe("Router", func() {
 		})
 
 		g.It("should parse multiple routes starting with wildcards", func() {
-			router := NewRouter(emptyHandler).(*router)
+			router := NewRouter(emptyRouterConfig).(*router)
 			router.Get("/:account/detail", emptyHandler)
 			router.Get("/:account/history", emptyHandler)
 			router.Get("/:transaction/invoice", emptyHandler)
@@ -309,7 +313,7 @@ var _ = g.Describe("Router", func() {
 		})
 
 		g.It("should parse multiple mixed routes", func() {
-			router := NewRouter(emptyHandler).(*router)
+			router := NewRouter(emptyRouterConfig).(*router)
 			router.Get("/accounts/:account/detail", emptyHandler)
 			router.Get("/accounts/:account/history", emptyHandler)
 			router.Get("/:transaction/invoice", emptyHandler)
@@ -341,7 +345,7 @@ var _ = g.Describe("Router", func() {
 		})
 
 		g.It("should panic due to conflicting empty tokens", func() {
-			router := NewRouter(emptyHandler).(*router)
+			router := NewRouter(emptyRouterConfig).(*router)
 
 			Expect(func() {
 				router.Get("//detail", emptyHandler)
@@ -357,7 +361,7 @@ var _ = g.Describe("Router", func() {
 		})
 
 		g.It("should not panic with empty token at the end", func() {
-			router := NewRouter(emptyHandler).(*router)
+			router := NewRouter(emptyRouterConfig).(*router)
 
 			Expect(func() {
 				router.Get("/account/", emptyHandler)
@@ -373,7 +377,7 @@ var _ = g.Describe("Router", func() {
 		})
 
 		g.It("should panic due to conflicting static routes", func() {
-			router := NewRouter(emptyHandler).(*router)
+			router := NewRouter(emptyRouterConfig).(*router)
 			router.Get("/account/detail", emptyHandler)
 			Expect(func() {
 				router.Get("/account/detail", emptyHandler)
@@ -381,7 +385,7 @@ var _ = g.Describe("Router", func() {
 		})
 
 		g.It("should panic due to conflicting 'wildcarded' routes", func() {
-			router := NewRouter(emptyHandler).(*router)
+			router := NewRouter(emptyRouterConfig).(*router)
 			router.Get("/:account", emptyHandler)
 			Expect(func() {
 				router.Get("/:transaction", emptyHandler)
@@ -389,7 +393,7 @@ var _ = g.Describe("Router", func() {
 		})
 
 		g.It("should panic due to conflicting mixing routes", func() {
-			router := NewRouter(emptyHandler).(*router)
+			router := NewRouter(emptyRouterConfig).(*router)
 			router.Get("/:account/detail", emptyHandler)
 			router.Get("/:account/id", emptyHandler)
 			Expect(func() {
@@ -398,7 +402,7 @@ var _ = g.Describe("Router", func() {
 		})
 
 		g.It("should not match any ropute", func() {
-			router := NewRouter(emptyHandler).(*router)
+			router := NewRouter(emptyRouterConfig).(*router)
 			router.Get("/:account/detail", emptyHandler)
 			router.Get("/:account/id", emptyHandler)
 			ok, _, _ := router.children["GET"].Matches(nil, nil)
@@ -408,7 +412,7 @@ var _ = g.Describe("Router", func() {
 
 	g.Describe("Group", func() {
 		g.It("should parse a GET", func() {
-			router := NewRouter(emptyHandler).(*router)
+			router := NewRouter(emptyRouterConfig).(*router)
 			group := router.Prefix("/group")
 			group.Get("/route", emptyHandler)
 
@@ -426,7 +430,7 @@ var _ = g.Describe("Router", func() {
 		})
 
 		g.It("should parse a POST", func() {
-			router := NewRouter(emptyHandler).(*router)
+			router := NewRouter(emptyRouterConfig).(*router)
 			group := router.Prefix("/group")
 			group.Post("/route", emptyHandler)
 
@@ -444,7 +448,7 @@ var _ = g.Describe("Router", func() {
 		})
 
 		g.It("should parse a PUT", func() {
-			router := NewRouter(emptyHandler).(*router)
+			router := NewRouter(emptyRouterConfig).(*router)
 			group := router.Prefix("/group")
 			group.Put("/route", emptyHandler)
 
@@ -462,7 +466,7 @@ var _ = g.Describe("Router", func() {
 		})
 
 		g.It("should parse a DELETE", func() {
-			router := NewRouter(emptyHandler).(*router)
+			router := NewRouter(emptyRouterConfig).(*router)
 			group := router.Prefix("/group")
 			group.Delete("/route", emptyHandler)
 
@@ -480,7 +484,7 @@ var _ = g.Describe("Router", func() {
 		})
 
 		g.It("should parse a HEAD", func() {
-			router := NewRouter(emptyHandler).(*router)
+			router := NewRouter(emptyRouterConfig).(*router)
 			group := router.Prefix("/group")
 			group.Head("/route", emptyHandler)
 
@@ -498,7 +502,7 @@ var _ = g.Describe("Router", func() {
 		})
 
 		g.It("should parse a OPTIONS", func() {
-			router := NewRouter(emptyHandler).(*router)
+			router := NewRouter(emptyRouterConfig).(*router)
 			group := router.Prefix("/group")
 			group.Options("/route", emptyHandler)
 
@@ -516,7 +520,7 @@ var _ = g.Describe("Router", func() {
 		})
 
 		g.It("should parse a PATCH", func() {
-			router := NewRouter(emptyHandler).(*router)
+			router := NewRouter(emptyRouterConfig).(*router)
 			group := router.Prefix("/group")
 			group.Patch("/route", emptyHandler)
 
@@ -534,7 +538,7 @@ var _ = g.Describe("Router", func() {
 		})
 
 		g.It("should check the subgroup", func() {
-			router := NewRouter(emptyHandler).(*router)
+			router := NewRouter(emptyRouterConfig).(*router)
 			group := router.Prefix("/group").(*route)
 			group2 := group.Prefix("/subgroup").(*route)
 
@@ -548,7 +552,7 @@ var _ = g.Describe("Router", func() {
 		var router Router
 
 		g.BeforeEach(func() {
-			router = NewRouter(emptyHandler)
+			router = NewRouter(emptyRouterConfig)
 		})
 
 		g.It("should resolve an empty route", func() {
@@ -705,10 +709,10 @@ var _ = g.Describe("Router", func() {
 		g.It("should call the not found callback for the index route", func() {
 			value1 := 1
 
-			router := NewRouter(func(req Request, res Response) Result {
+			router := NewRouter(RouterConfig{NotFoundHandler: func(req Request, res Response) Result {
 				value1 = 2
 				return res.End()
-			})
+			}})
 
 			router.Get("/account/transactions", func(req Request, res Response) Result {
 				g.Fail("should not be called")
@@ -723,10 +727,10 @@ var _ = g.Describe("Router", func() {
 		g.It("should call the not found callback for static routes", func() {
 			value1 := 1
 
-			router = NewRouter(func(req Request, res Response) Result {
+			router = NewRouter(RouterConfig{NotFoundHandler: func(req Request, res Response) Result {
 				value1 = 2
 				return res.End()
-			})
+			}})
 			router.Get("/account/transactions", func(req Request, res Response) Result {
 				g.Fail("should not be called")
 				return res.End()
@@ -739,10 +743,10 @@ var _ = g.Describe("Router", func() {
 		g.It("should call the not found callback for static routes half path", func() {
 			value1 := 1
 
-			router := NewRouter(func(req Request, res Response) Result {
+			router := NewRouter(RouterConfig{NotFoundHandler: func(req Request, res Response) Result {
 				value1 = 2
 				return res.End()
-			})
+			}})
 			router.Get("/account/transactions", func(req Request, res Response) Result {
 				g.Fail("should not be called")
 				return res.End()
@@ -755,10 +759,10 @@ var _ = g.Describe("Router", func() {
 
 		g.It("should call the not found callback for wildcard routes", func() {
 			value := 0
-			router := NewRouter(func(req Request, res Response) Result {
+			router := NewRouter(RouterConfig{NotFoundHandler: func(req Request, res Response) Result {
 				value++
 				return res.End()
-			})
+			}})
 			router.Get("/:account/transactions", func(req Request, res Response) Result {
 				g.Fail("should not be called")
 				return res.End()
@@ -783,10 +787,10 @@ var _ = g.Describe("Router", func() {
 
 		g.It("should call the not found callback for wildcard half path", func() {
 			value1 := 1
-			router := NewRouter(func(req Request, res Response) Result {
+			router := NewRouter(RouterConfig{NotFoundHandler: func(req Request, res Response) Result {
 				value1 = 2
 				return res.End()
-			})
+			}})
 			router.Get("/:account/transactions", func(req Request, res Response) Result {
 				g.Fail("should not be called")
 				return res.End()
@@ -800,10 +804,10 @@ var _ = g.Describe("Router", func() {
 		g.It("should call the not found callback for wrong method", func() {
 			value1 := 1
 
-			router := NewRouter(func(req Request, res Response) Result {
+			router := NewRouter(RouterConfig{NotFoundHandler: func(req Request, res Response) Result {
 				value1 = 2
 				return res.End()
-			})
+			}})
 			router.Get("/:account/transactions", func(req Request, res Response) Result {
 				g.Fail("should not be called")
 				return res.End()
@@ -817,10 +821,10 @@ var _ = g.Describe("Router", func() {
 		g.Describe("Middlewares", func() {
 			g.It("should call root middlewares with not found", func() {
 				calls := make([]string, 0)
-				router := NewRouter(func(req Request, res Response) Result {
+				router := NewRouter(RouterConfig{NotFoundHandler: func(req Request, res Response) Result {
 					calls = append(calls, "notfound")
 					return res.End()
-				})
+				}})
 				router.Use(func(req Request, res Response, next Handler) Result {
 					calls = append(calls, "middleware1")
 					return next(req, res)
@@ -991,7 +995,7 @@ func BenchmarkSplit(b *testing.B) {
 }
 
 func BenchmarkRouter_Handler(b *testing.B) {
-	router := NewRouter(emptyHandler)
+	router := NewRouter(RouterConfig{})
 	router.Get("/", emptyHandler)
 	ctx := fasthttp.RequestCtx{}
 	ctx.Request.SetRequestURI("/")
@@ -1004,7 +1008,7 @@ func BenchmarkRouter_Handler(b *testing.B) {
 }
 
 func BenchmarkRouter_HandlerWithParams(b *testing.B) {
-	router := NewRouter(emptyHandler)
+	router := NewRouter(RouterConfig{})
 	router.Get("/:id", emptyHandler)
 	ctx := fasthttp.RequestCtx{}
 	ctx.Request.SetRequestURI("/id")
@@ -1017,7 +1021,7 @@ func BenchmarkRouter_HandlerWithParams(b *testing.B) {
 }
 
 func BenchmarkRouter_HandlerWithMiddleware(b *testing.B) {
-	router := NewRouter(emptyHandler)
+	router := NewRouter(RouterConfig{})
 	router.With(func(req Request, res Response, next Handler) Result {
 		return next(req, res)
 	}).Get("/", emptyHandler)

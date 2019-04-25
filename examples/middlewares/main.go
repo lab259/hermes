@@ -9,7 +9,7 @@ import (
 	"github.com/lab259/http"
 )
 
-var config = http.Config{
+var config = http.ApplicationConfig{
 	Name: "Hello World (w/ Middlewares)",
 	HTTP: http.FasthttpServiceConfiguration{
 		Bind: ":8080",
@@ -17,7 +17,7 @@ var config = http.Config{
 }
 
 func router() http.Router {
-	router := http.NewRouter(nil)
+	router := http.NewRouter(http.RouterConfig{})
 	router.Use(
 		middlewares.RecoverableMiddleware,
 		logMiddleware,

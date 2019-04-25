@@ -11,12 +11,12 @@ import (
 var _ = describe("Http", func() {
 	describe("Application", func() {
 		it("should start and stop a app", func(done g.Done) {
-			app := NewApplication(Config{
+			app := NewApplication(ApplicationConfig{
 				Name: "Testing",
 				HTTP: FasthttpServiceConfiguration{
 					Bind: ":0",
 				},
-			}, NewRouter(nil))
+			}, NewRouter(RouterConfig{}))
 			var wg sync.WaitGroup
 			wg.Add(1)
 			go func() {
@@ -35,12 +35,12 @@ var _ = describe("Http", func() {
 		}, 1)
 
 		it("should restart a app", func(done g.Done) {
-			app := NewApplication(Config{
+			app := NewApplication(ApplicationConfig{
 				Name: "Testing",
 				HTTP: FasthttpServiceConfiguration{
 					Bind: ":0",
 				},
-			}, NewRouter(nil))
+			}, NewRouter(RouterConfig{}))
 
 			ch := make(chan string, 10)
 
@@ -71,29 +71,29 @@ var _ = describe("Http", func() {
 		}, 0.5)
 
 		it("should return name", func() {
-			app := NewApplication(Config{
+			app := NewApplication(ApplicationConfig{
 				Name: "Testing",
 				HTTP: FasthttpServiceConfiguration{
 					Bind: ":0",
 				},
-			}, NewRouter(nil))
+			}, NewRouter(RouterConfig{}))
 			Expect(app.Name()).To(Equal("Testing"))
 
-			app2 := NewApplication(Config{
+			app2 := NewApplication(ApplicationConfig{
 				HTTP: FasthttpServiceConfiguration{
 					Bind: ":0",
 				},
-			}, NewRouter(nil))
+			}, NewRouter(RouterConfig{}))
 			Expect(app2.Name()).To(Equal("Application"))
 		})
 
 		it("should fail with misconfiguration", func() {
-			app := NewApplication(Config{
+			app := NewApplication(ApplicationConfig{
 				Name: "Testing",
 				HTTP: FasthttpServiceConfiguration{
 					Bind: ":FAIL",
 				},
-			}, NewRouter(nil))
+			}, NewRouter(RouterConfig{}))
 			Expect(app.Start()).ToNot(BeNil())
 		})
 	})

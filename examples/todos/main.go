@@ -10,7 +10,7 @@ import (
 	"github.com/lab259/http/examples/todos/errors"
 )
 
-var config = http.Config{
+var config = http.ApplicationConfig{
 	Name: "TODO API",
 	HTTP: http.FasthttpServiceConfiguration{
 		Bind: ":8080",
@@ -18,7 +18,9 @@ var config = http.Config{
 }
 
 func router() http.Router {
-	router := http.NewRouter(notFound)
+	router := http.NewRouter(http.RouterConfig{
+		NotFoundHandler: notFound,
+	})
 
 	router.Use(
 		middlewares.RecoverableMiddleware,

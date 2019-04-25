@@ -12,7 +12,7 @@ import (
 var ErrModule = errors.Module("main")
 var ErrNotImplemented = errors.Wrap(errors.New("not implemented"), errors.Http(400), ErrModule, errors.Code("not-implemented"), errors.Message("This endpoint still under construction."))
 
-var config = http.Config{
+var config = http.ApplicationConfig{
 	Name: "Errors",
 	HTTP: http.FasthttpServiceConfiguration{
 		Bind: ":8080",
@@ -20,7 +20,7 @@ var config = http.Config{
 }
 
 func router() http.Router {
-	router := http.NewRouter(nil)
+	router := http.NewRouter(http.RouterConfig{})
 	router.Get("/hello", func(req http.Request, res http.Response) http.Result {
 		return res.Error(ErrNotImplemented)
 	})

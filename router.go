@@ -8,16 +8,20 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
+type RouterConfig struct {
+	NotFoundHandler Handler
+}
+
 type router struct {
 	route
 	children map[string]*node
 	notFound Handler
 }
 
-func NewRouter(notFound Handler) Router {
+func NewRouter(config RouterConfig) Router {
 	r := &router{
 		children: make(map[string]*node),
-		notFound: notFound,
+		notFound: config.NotFoundHandler,
 	}
 	r.router = r
 	return r

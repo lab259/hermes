@@ -1,16 +1,16 @@
 package http
 
-type Config struct {
+type ApplicationConfig struct {
 	Name string
 	HTTP FasthttpServiceConfiguration
 }
 
 type Application struct {
 	fasthttpService FasthttpService
-	Configuration   Config
+	Configuration   ApplicationConfig
 }
 
-func NewApplication(config Config, router Router) *Application {
+func NewApplication(config ApplicationConfig, router Router) *Application {
 	app := &Application{
 		Configuration: config,
 	}

@@ -543,9 +543,9 @@ var _ = g.Describe("Router", func() {
 			group := router.Prefix("/group").(*route)
 			group2 := group.Prefix("/subgroup").(*route)
 
-			Expect(group.prefix).To(Equal("/group"))
+			Expect(group.prefix).To(Equal("group"))
 			Expect(group2).NotTo(BeNil())
-			Expect(group2.prefix).To(Equal("/group/subgroup"))
+			Expect(group2.prefix).To(Equal("group/subgroup"))
 		})
 	})
 

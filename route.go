@@ -8,16 +8,26 @@ type route struct {
 	middlewares []Middleware
 }
 
+func (r *route) path(subpath string) string {
+	if len(subpath) > 0 && subpath[0] == '/' {
+		subpath = subpath[1:]
+	}
+	if subpath == "" {
+		return r.prefix
+	}
+	if r.prefix == "" {
+		return subpath
+	}
+	return fmt.Sprintf("%s/%s", r.prefix, subpath)
+}
+
 func (r *route) handle(method, subpath string, handler Handler) {
 	root, ok := r.router.children[method]
 	if !ok {
 		root = newNode()
 		r.router.children[method] = root
 	}
-	path := fmt.Sprintf("%s%s", r.prefix, subpath)
-	if len(path) > 0 && path[0] == '/' {
-		path = path[1:]
-	}
+	path := r.path(subpath)
 	root.Add(path, handler, nil, r.middlewares)
 }
 
@@ -51,7 +61,7 @@ func (r *route) Patch(path string, handler Handler) {
 
 func (r *route) Prefix(path string) Routable {
 	return &route{
-		prefix:      fmt.Sprintf("%s%s", r.prefix, path),
+		prefix:      r.path(path),
 		router:      r.router,
 		middlewares: r.middlewares,
 	}

@@ -23,7 +23,7 @@ func router() http.Router {
 
 func main() {
 	app := http.NewApplication(config, router())
-	fmt.Printf("%s listening at %s...\n", app.Name(), app.Configuration.HTTP.Bind)
+	fmt.Printf("%s listening at http://localhost%s ...\n", app.Name(), app.Configuration.HTTP.Bind)
 	app.Start()
 }
 

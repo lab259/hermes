@@ -53,3 +53,13 @@ To generate the HTML coverage report, execute:
 ```bash
 make coverage coverage-html
 ```
+
+### Running examples
+
+In the `src/github.com/lab259/http` directory, execute:
+
+```bash
+EXAMPLE="todos" make run
+```
+
+`EXAMPLE` is any example listed in `/examples` folder.

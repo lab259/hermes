@@ -858,6 +858,32 @@ var _ = g.Describe("Router", func() {
 				Expect(calls[2]).To(Equal("endpoint"))
 			})
 
+			g.It("should not call middlewares added after prefix/group", func() {
+				calls := make([]string, 0)
+				router.Use(func(req Request, res Response, next Handler) Result {
+					calls = append(calls, "middleware1")
+					return next(req, res)
+				}, func(req Request, res Response, next Handler) Result {
+					calls = append(calls, "middleware2")
+					return next(req, res)
+				})
+
+				router.Prefix("/api").Get("/:account/transactions", func(req Request, res Response) Result {
+					calls = append(calls, "endpoint")
+					return res.End()
+				})
+
+				router.Use(func(req Request, res Response, next Handler) Result {
+					calls = append(calls, "middleware3")
+					return next(req, res)
+				})
+				router.Handler()(createRequestCtxFromPath("GET", "/api/account/transactions"))
+				Expect(calls).To(HaveLen(3))
+				Expect(calls[0]).To(Equal("middleware1"))
+				Expect(calls[1]).To(Equal("middleware2"))
+				Expect(calls[2]).To(Equal("endpoint"))
+			})
+
 			g.It("should the middleware prevent a handler and  for being called", func() {
 				calls := make([]string, 0)
 				router.With(func(req Request, res Response, next Handler) Result {
@@ -902,6 +928,11 @@ var _ = g.Describe("Router", func() {
 						calls = append(calls, "endpoint")
 						return res.End()
 					})
+				})
+
+				group.Use(func(req Request, res Response, next Handler) Result {
+					calls = append(calls, "groupMiddleware3")
+					return next(req, res)
 				})
 				router.Handler()(createRequestCtxFromPath("GET", "/v1/subgroup/route1"))
 				Expect(calls).To(HaveLen(6))

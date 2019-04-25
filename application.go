@@ -10,10 +10,6 @@ type Application struct {
 	Configuration   Config
 }
 
-func (service *Application) Name() string {
-	return service.Configuration.Name
-}
-
 func NewApplication(config Config, router Router) *Application {
 	app := &Application{
 		Configuration: config,
@@ -23,10 +19,37 @@ func NewApplication(config Config, router Router) *Application {
 	return app
 }
 
+func (app *Application) Name() string {
+	if app.Configuration.Name == "" {
+		return "Application"
+	}
+	return app.Configuration.Name
+}
+
+func (app *Application) LoadConfiguration() (interface{}, error) {
+	return nil, nil
+}
+
+func (app *Application) ApplyConfiguration(interface{}) error {
+	return nil
+}
+
+func (app *Application) Restart() error {
+	err := app.Stop()
+	if err != nil {
+		return err
+	}
+	return app.Start()
+}
+
 func (app *Application) Start() error {
 	err := app.fasthttpService.ApplyConfiguration(app.Configuration.HTTP)
 	if err != nil {
 		return err
 	}
 	return app.fasthttpService.Start()
+}
+
+func (app *Application) Stop() error {
+	return app.fasthttpService.Stop()
 }

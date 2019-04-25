@@ -45,14 +45,14 @@ func (r *result) Data(data interface{}) Result {
 
 		switch dataType.Kind() {
 		case reflect.Struct, reflect.Array, reflect.Slice, reflect.Map:
-			r.r.SetContentTypeBytes(applicationJSON)
+			r.setContentType(applicationJSON)
 			e := json.NewEncoder(r.r.Response.BodyWriter())
 			err := e.Encode(data)
 			if err != nil {
 				panic(err)
 			}
 		default:
-			r.r.SetContentTypeBytes(textPlain)
+			r.setContentType(textPlain)
 			r.r.Response.AppendBodyString(fmt.Sprintf("%v", data))
 		}
 	}
@@ -83,6 +83,10 @@ func (r *result) setStatus() {
 	}
 
 	r.r.SetStatusCode(r.status)
+}
+
+func (r *result) setContentType(v []byte) {
+	r.r.SetContentTypeBytes(v)
 }
 
 func (r *result) defaultStatus(code int) {

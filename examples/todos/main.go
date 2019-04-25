@@ -3,13 +3,15 @@ package main
 import (
 	"fmt"
 
+	"github.com/lab259/http/middlewares"
+
 	"github.com/lab259/http"
 	"github.com/lab259/http/examples/todos/api"
 	"github.com/lab259/http/examples/todos/errors"
 )
 
 var config = http.Config{
-	Name: "TODO App",
+	Name: "TODO API",
 	HTTP: http.FasthttpServiceConfiguration{
 		Bind: ":8080",
 	},
@@ -17,6 +19,12 @@ var config = http.Config{
 
 func router() http.Router {
 	router := http.NewRouter(notFound)
+
+	router.Use(
+		middlewares.RecoverableMiddleware,
+		middlewares.LoggingMiddleware,
+	)
+
 	api.SetupRoutes(router)
 	return router
 }

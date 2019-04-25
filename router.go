@@ -70,12 +70,10 @@ func (router *router) Handler() fasthttp.RequestHandler {
 			path = bytes.Split(req.Path()[1:], routerHandlerSep)
 			if len(path) == 1 && len(path[0]) == 0 {
 				if node.handler != nil {
-					node.handler(req, res)
+					router.callHandler(req, res, router.middlewares, node.handler)
 					return
 				}
-				if router.notFound != nil {
-					router.notFound(req, res)
-				}
+				router.callNotFound(req, res)
 				return
 			}
 			found, node, values := node.Matches(path, nil)
@@ -83,26 +81,34 @@ func (router *router) Handler() fasthttp.RequestHandler {
 				for i, v := range values {
 					fCtx.SetUserValue(node.names[i], string(v))
 				}
-				if len(node.middlewares) > 0 {
-					middlewareIdx := 0
-					var next Handler
-					next = func(req2 Request, res2 Response) Result {
-						middlewareIdx++
-						if middlewareIdx < len(node.middlewares) {
-							return node.middlewares[middlewareIdx](req2, res2, next)
-						}
-
-						return node.handler(req2, res2)
-					}
-					node.middlewares[0](req, res, next)
-				} else {
-					node.handler(req, res)
-				}
+				router.callHandler(req, res, node.middlewares, node.handler)
 				return
 			}
 		}
-		if router.notFound != nil {
-			router.notFound(req, res)
+		router.callNotFound(req, res)
+	}
+}
+
+func (router *router) callHandler(req Request, res Response, middlewares []Middleware, handler Handler) {
+	if len(middlewares) > 0 {
+		middlewareIdx := 0
+		var next Handler
+		next = func(req2 Request, res2 Response) Result {
+			middlewareIdx++
+			if middlewareIdx < len(middlewares) {
+				return middlewares[middlewareIdx](req2, res2, next)
+			}
+
+			return handler(req2, res2)
 		}
+		middlewares[0](req, res, next)
+	} else {
+		handler(req, res)
+	}
+}
+
+func (router *router) callNotFound(req Request, res Response) {
+	if router.notFound != nil {
+		router.callHandler(req, res, router.middlewares, router.notFound)
 	}
 }

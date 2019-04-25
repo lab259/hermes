@@ -4,10 +4,15 @@ GOPATHCMD=GOPATH=$(GOPATH)
 COVERDIR=$(CURDIR)/.cover
 COVERAGEFILE=$(COVERDIR)/cover.out
 
+EXAMPLES=$(shell ls ./examples/)
+
 .PHONY: run dep-ensure dep-update vet test test-watch coverage coverage-ci coverage-html
 
 run:
 	@$(GOPATHCMD) go run examples/$(EXAMPLE)/main.go
+
+build:
+	@test -d ./examples && $(foreach example,$(EXAMPLES),$(GOPATHCMD) go build "-ldflags=$(LDFLAGS)" -o ./bin/$(example) -v ./examples/$(example) &&) :
 
 dep-ensure:
 	@$(GOPATHCMD) dep ensure -v

@@ -7,7 +7,19 @@ jobs:
     working_directory: /go/src/github.com/jamillosantos/http
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - deps-{{ .Branch }}-{{ checksum "Gopkg.lock" }}
+            - deps-{{ .Branch }}-
+            - deps-
       - run: go get -u github.com/onsi/ginkgo/ginkgo
       - run: make dep-ensure
+      - save_cache:
+          key: deps-{{ .Branch }}-{{ checksum "Gopkg.lock" }}
+          paths:
+            - vendor
+      - run: make build
       - run: make coverage-ci
       - run: bash <(curl -s https://codecov.io/bash)
+      - store_test_results:
+          path: test-results

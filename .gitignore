@@ -18,3 +18,5 @@ pkg/
 *.coverprofile
 vendor/
 .vscode/
+bin/
+test-results/

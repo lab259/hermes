@@ -10,6 +10,25 @@
   version = "v1.7.0"
 
 [[projects]]
+  digest = "1:e1ff887e232b2d8f4f7c7db15a5fac7be418025afc4dda53c59c765dbb5aa6b4"
+  name = "github.com/go-playground/locales"
+  packages = [
+    ".",
+    "currency",
+  ]
+  pruneopts = "UT"
+  revision = "f63010822830b6fe52288ee52d5a1151088ce039"
+  version = "v0.12.1"
+
+[[projects]]
+  digest = "1:e022cf244bcac1b6ef933f1a2e0adcf6a6dfd7b872d8d41e4d4179bb09a87cbc"
+  name = "github.com/go-playground/universal-translator"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "b32fa301c9fe55953584134cb6853a13c87ec0a1"
+  version = "v0.16.0"
+
+[[projects]]
   branch = "master"
   digest = "1:59392ed8afb901aab4287d4894df8191722e34f3957716f4350c8c133ce99046"
   name = "github.com/hpcloud/tail"
@@ -50,6 +69,22 @@
   pruneopts = "UT"
   revision = "05a8198c0f5a27739aec358908d7e12c64ce6eb7"
   version = "v1.2.1"
+
+[[projects]]
+  branch = "master"
+  digest = "1:3eaf8f7f3fa39b601304cbc85715612cdd25178ca6a9678bc8adf2e47701c45c"
+  name = "github.com/lab259/errors"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "f60793acdd1f7efea7a6b2bb1b36653e3e00ad99"
+
+[[projects]]
+  digest = "1:6782ffc812e8e700e6952ede1e60487ff1fd9da489eff762985be662a7cfc431"
+  name = "github.com/leodido/go-urn"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "70078a794e8ea4b497ba7c19a78cd60f90ccf0f4"
+  version = "v1.1.0"
 
 [[projects]]
   digest = "1:c658e84ad3916da105a761660dcaeb01e63416c8ec7bc62256a9b411a05fcd67"
@@ -192,6 +227,14 @@
   version = "v1.4.7"
 
 [[projects]]
+  digest = "1:7bb1ad654b21fb8f44c77c07840007d6796f70d42d1b470600f943a508ff8a72"
+  name = "gopkg.in/go-playground/validator.v9"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "46b4b1e301c24cac870ffcb4ba5c8a703d1ef475"
+  version = "v9.28.0"
+
+[[projects]]
   digest = "1:3c839a777de0e6da035c9de900b60cbec463b0a89351192c1ea083eaf9e0fce0"
   name = "gopkg.in/tomb.v1"
   packages = ["."]
@@ -212,6 +255,7 @@
   input-imports = [
     "github.com/fatih/color",
     "github.com/jamillosantos/macchiato",
+    "github.com/lab259/errors",
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
     "github.com/valyala/fasthttp",

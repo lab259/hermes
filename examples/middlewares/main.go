@@ -42,10 +42,10 @@ func main() {
 
 func recoverMiddleware(req http.Request, res http.Response, next http.Handler) http.Result {
 	defer func() {
-		e := recover()
-		if e != nil {
-			fmt.Printf("%s %s [recovered: %s]\n", time.Now().UTC().Format(time.RFC3339), req.Path(), e)
-			if err, ok := e.(error); ok {
+		recoveredData := recover()
+		if recoveredData != nil {
+			fmt.Printf("%s [%d] recovered: %s\n", time.Now().UTC().Format(time.RFC3339), req.Raw().ID(), recoveredData)
+			if err, ok := recoveredData.(error); ok {
 				res.Error(err)
 			} else {
 				res.Error(errors.New("internal server error"))
@@ -57,6 +57,6 @@ func recoverMiddleware(req http.Request, res http.Response, next http.Handler) h
 
 func logMiddleware(req http.Request, res http.Response, next http.Handler) http.Result {
 	now := time.Now()
-	defer fmt.Printf("%s %s [%s]\n", now.UTC().Format(time.RFC3339), req.Path(), time.Since(now))
+	defer fmt.Printf("%s [%d] %s: %s (took %s)\n", now.UTC().Format(time.RFC3339), req.Raw().ID(), req.Method(), req.Path(), time.Since(now))
 	return next(req, res)
 }

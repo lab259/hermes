@@ -6,6 +6,7 @@ import (
 	"io"
 	"reflect"
 
+	"github.com/lab259/errors"
 	"github.com/valyala/fasthttp"
 )
 
@@ -61,12 +62,14 @@ func (r *result) Error(err error) Result {
 		return r
 	}
 
-	r.defaultStatus(fasthttp.StatusInternalServerError)
+	errResponse := newErrorResponse(fasthttp.StatusInternalServerError)
+	if !errors.AggregateToResponse(err, errResponse) {
+		errResponse.SetParam("code", InternalServerErrorCode)
+		errResponse.SetParam("message", InternalServerErrorMessage)
+	}
 
-	// TODO: integrate with lab259/errors
-	return r.Data(map[string]interface{}{
-		"message": err.Error(),
-	})
+	r.defaultStatus(errResponse.Status)
+	return r.Data(errResponse.Data)
 }
 
 func (r *result) setStatus() {

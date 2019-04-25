@@ -820,6 +820,30 @@ var _ = g.Describe("Router", func() {
 		})
 
 		g.Describe("Middlewares", func() {
+			g.It("should call root middlewares with not found", func() {
+				calls := make([]string, 0)
+				router := NewRouter(func(req Request, res Response) Result {
+					calls = append(calls, "notfound")
+					return res.End()
+				})
+				router.Use(func(req Request, res Response, next Handler) Result {
+					calls = append(calls, "middleware1")
+					return next(req, res)
+				}, func(req Request, res Response, next Handler) Result {
+					calls = append(calls, "middleware2")
+					return next(req, res)
+				})
+				router.Get("/:account/transactions", func(req Request, res Response) Result {
+					calls = append(calls, "endpoint")
+					return res.End()
+				})
+				router.Handler()(createRequestCtxFromPath("GET", "/account_not_found"))
+				Expect(calls).To(HaveLen(3))
+				Expect(calls[0]).To(Equal("middleware1"))
+				Expect(calls[1]).To(Equal("middleware2"))
+				Expect(calls[2]).To(Equal("notfound"))
+			})
+
 			g.It("should call all the middlewares in sequence", func() {
 				calls := make([]string, 0)
 				router.With(func(req Request, res Response, next Handler) Result {
@@ -933,6 +957,7 @@ func BenchmarkSplit(b *testing.B) {
 	path := []byte("/path/with/four/parts")
 	tokens := make([][]byte, 0)
 
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		tokens = split(path, tokens)
 		tokens = tokens[0:0]
@@ -946,6 +971,7 @@ func BenchmarkRouter_Handler(b *testing.B) {
 	ctx.Request.SetRequestURI("/")
 
 	h := router.Handler()
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		h(&ctx)
 	}
@@ -960,6 +986,8 @@ func BenchmarkRouter_HandlerWithMiddleware(b *testing.B) {
 	ctx.Request.SetRequestURI("/")
 
 	h := router.Handler()
+
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		h(&ctx)
 	}

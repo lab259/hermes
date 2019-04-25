@@ -62,7 +62,9 @@ func (r *result) Error(err error) Result {
 		return r
 	}
 
-	errResponse := newErrorResponse(fasthttp.StatusInternalServerError)
+	errResponse := acquireErrorResponse(fasthttp.StatusInternalServerError)
+	defer releaseErrorResponse(errResponse)
+
 	if !errors.AggregateToResponse(err, errResponse) {
 		errResponse.SetParam("code", InternalServerErrorCode)
 		errResponse.SetParam("message", InternalServerErrorMessage)

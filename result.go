@@ -47,7 +47,10 @@ func (r *result) Data(data interface{}) Result {
 		case reflect.Struct, reflect.Array, reflect.Slice, reflect.Map:
 			r.r.SetContentTypeBytes(applicationJSON)
 			e := json.NewEncoder(r.r.Response.BodyWriter())
-			e.Encode(data)
+			err := e.Encode(data)
+			if err != nil {
+				panic(err)
+			}
 		default:
 			r.r.SetContentTypeBytes(textPlain)
 			r.r.Response.AppendBodyString(fmt.Sprintf("%v", data))

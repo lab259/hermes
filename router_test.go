@@ -69,7 +69,7 @@ var _ = g.Describe("Router", func() {
 
 		g.It("should parse a GET", func() {
 			router := NewRouter(emptyHandler).(*router)
-			router.GET("", emptyHandler)
+			router.Get("", emptyHandler)
 
 			Expect(router.children).To(HaveKey("GET"))
 			Expect(router.children["GET"].children).To(BeEmpty())
@@ -79,7 +79,7 @@ var _ = g.Describe("Router", func() {
 
 		g.It("should parse a GET", func() {
 			router := NewRouter(emptyHandler).(*router)
-			router.GET("/route", emptyHandler)
+			router.Get("/route", emptyHandler)
 
 			Expect(router.children).To(HaveKey("GET"))
 			Expect(router.children["GET"].children).To(HaveKey("route"))
@@ -88,7 +88,7 @@ var _ = g.Describe("Router", func() {
 
 		g.It("should parse a POST", func() {
 			router := NewRouter(emptyHandler).(*router)
-			router.POST("/route", emptyHandler)
+			router.Post("/route", emptyHandler)
 
 			Expect(router.children).To(HaveKey("POST"))
 			Expect(router.children["POST"].children).To(HaveKey("route"))
@@ -97,7 +97,7 @@ var _ = g.Describe("Router", func() {
 
 		g.It("should parse a PUT", func() {
 			router := NewRouter(emptyHandler).(*router)
-			router.PUT("/route", emptyHandler)
+			router.Put("/route", emptyHandler)
 
 			Expect(router.children).To(HaveKey("PUT"))
 			Expect(router.children["PUT"].children).To(HaveKey("route"))
@@ -106,7 +106,7 @@ var _ = g.Describe("Router", func() {
 
 		g.It("should parse a DELETE", func() {
 			router := NewRouter(emptyHandler).(*router)
-			router.DELETE("/route", emptyHandler)
+			router.Delete("/route", emptyHandler)
 
 			Expect(router.children).To(HaveKey("DELETE"))
 			Expect(router.children["DELETE"].children).To(HaveKey("route"))
@@ -115,7 +115,7 @@ var _ = g.Describe("Router", func() {
 
 		g.It("should parse a HEAD", func() {
 			router := NewRouter(emptyHandler).(*router)
-			router.HEAD("/route", emptyHandler)
+			router.Head("/route", emptyHandler)
 
 			Expect(router.children).To(HaveKey("HEAD"))
 			Expect(router.children["HEAD"].children).To(HaveKey("route"))
@@ -124,7 +124,7 @@ var _ = g.Describe("Router", func() {
 
 		g.It("should parse a OPTIONS", func() {
 			router := NewRouter(emptyHandler).(*router)
-			router.OPTIONS("/route", emptyHandler)
+			router.Options("/route", emptyHandler)
 
 			Expect(router.children).To(HaveKey("OPTIONS"))
 			Expect(router.children["OPTIONS"].children).To(HaveKey("route"))
@@ -133,7 +133,7 @@ var _ = g.Describe("Router", func() {
 
 		g.It("should parse a PATCH", func() {
 			router := NewRouter(emptyHandler).(*router)
-			router.PATCH("/route", emptyHandler)
+			router.Patch("/route", emptyHandler)
 
 			Expect(router.children).To(HaveKey("PATCH"))
 			Expect(router.children["PATCH"].children).To(HaveKey("route"))
@@ -142,7 +142,7 @@ var _ = g.Describe("Router", func() {
 
 		g.It("should parse a POST", func() {
 			router := NewRouter(emptyHandler).(*router)
-			router.POST("/route", emptyHandler)
+			router.Post("/route", emptyHandler)
 
 			Expect(router.children).To(HaveKey("POST"))
 			Expect(router.children["POST"].children).To(HaveKey("route"))
@@ -151,7 +151,7 @@ var _ = g.Describe("Router", func() {
 
 		g.It("should parse a complete static route", func() {
 			router := NewRouter(emptyHandler).(*router)
-			router.GET("/this/should/be/static", emptyHandler)
+			router.Get("/this/should/be/static", emptyHandler)
 
 			Expect(router.children).To(HaveKey("GET"))
 			Expect(router.children["GET"].children).To(HaveKey("this"))
@@ -170,8 +170,8 @@ var _ = g.Describe("Router", func() {
 
 		g.It("should parse multiple static routes related", func() {
 			router := NewRouter(emptyHandler).(*router)
-			router.GET("/this/should/be/static", emptyHandler)
-			router.GET("/this/should2/be/static", emptyHandler)
+			router.Get("/this/should/be/static", emptyHandler)
+			router.Get("/this/should2/be/static", emptyHandler)
 
 			Expect(router.children).To(HaveKey("GET"))
 			Expect(router.children["GET"].children).To(HaveKey("this"))
@@ -200,7 +200,7 @@ var _ = g.Describe("Router", func() {
 
 		g.It("should parse a complete a route starting static and ending with a wildcard", func() {
 			router := NewRouter(emptyHandler).(*router)
-			router.GET("/static/:wildcard", emptyHandler)
+			router.Get("/static/:wildcard", emptyHandler)
 
 			Expect(router.children).To(HaveKey("GET"))
 			Expect(router.children["GET"].wildcard).To(BeNil())
@@ -216,9 +216,9 @@ var _ = g.Describe("Router", func() {
 
 		g.It("should parse multiple static routes related and not", func() {
 			router := NewRouter(emptyHandler).(*router)
-			router.GET("/this/should/be/static", emptyHandler)
-			router.GET("/this/should2/be/static", emptyHandler)
-			router.GET("/this2/should/be/static", emptyHandler)
+			router.Get("/this/should/be/static", emptyHandler)
+			router.Get("/this/should2/be/static", emptyHandler)
+			router.Get("/this2/should/be/static", emptyHandler)
 
 			Expect(router.children).To(HaveKey("GET"))
 			Expect(router.children["GET"].children).To(HaveKey("this"))
@@ -259,7 +259,7 @@ var _ = g.Describe("Router", func() {
 
 		g.It("should parse a complete route with wildcard", func() {
 			router := NewRouter(emptyHandler).(*router)
-			router.GET("/:account/detail/another", emptyHandler)
+			router.Get("/:account/detail/another", emptyHandler)
 
 			Expect(router.children).To(HaveKey("GET"))
 			Expect(router.children["GET"].children).To(BeEmpty())
@@ -277,7 +277,7 @@ var _ = g.Describe("Router", func() {
 
 		g.It("should parse a complete route with a sequence of wildcards", func() {
 			router := NewRouter(emptyHandler).(*router)
-			router.GET("/:account/:transaction/:invoice", emptyHandler)
+			router.Get("/:account/:transaction/:invoice", emptyHandler)
 
 			Expect(router.children).To(HaveKey("GET"))
 			Expect(router.children["GET"].children).To(BeEmpty())
@@ -295,9 +295,9 @@ var _ = g.Describe("Router", func() {
 
 		g.It("should parse multiple routes starting with wildcards", func() {
 			router := NewRouter(emptyHandler).(*router)
-			router.GET("/:account/detail", emptyHandler)
-			router.GET("/:account/history", emptyHandler)
-			router.GET("/:transaction/invoice", emptyHandler)
+			router.Get("/:account/detail", emptyHandler)
+			router.Get("/:account/history", emptyHandler)
+			router.Get("/:transaction/invoice", emptyHandler)
 
 			Expect(router.children).To(HaveKey("GET"))
 			Expect(router.children["GET"].children).To(BeEmpty())
@@ -315,9 +315,9 @@ var _ = g.Describe("Router", func() {
 
 		g.It("should parse multiple mixed routes", func() {
 			router := NewRouter(emptyHandler).(*router)
-			router.GET("/accounts/:account/detail", emptyHandler)
-			router.GET("/accounts/:account/history", emptyHandler)
-			router.GET("/:transaction/invoice", emptyHandler)
+			router.Get("/accounts/:account/detail", emptyHandler)
+			router.Get("/accounts/:account/history", emptyHandler)
+			router.Get("/:transaction/invoice", emptyHandler)
 
 			Expect(router.children).To(HaveKey("GET"))
 			Expect(router.children["GET"].children).To(HaveLen(1))
@@ -349,15 +349,15 @@ var _ = g.Describe("Router", func() {
 			router := NewRouter(emptyHandler).(*router)
 
 			Expect(func() {
-				router.GET("//detail", emptyHandler)
+				router.Get("//detail", emptyHandler)
 			}).To(Panic())
 
 			Expect(func() {
-				router.GET("/account/detail//", emptyHandler)
+				router.Get("/account/detail//", emptyHandler)
 			}).To(Panic())
 
 			Expect(func() {
-				router.GET("/account//detail", emptyHandler)
+				router.Get("/account//detail", emptyHandler)
 			}).To(Panic())
 		})
 
@@ -365,47 +365,47 @@ var _ = g.Describe("Router", func() {
 			router := NewRouter(emptyHandler).(*router)
 
 			Expect(func() {
-				router.GET("/account/", emptyHandler)
+				router.Get("/account/", emptyHandler)
 			}).NotTo(Panic())
 
 			Expect(func() {
-				router.GET("/account/detail/", emptyHandler)
+				router.Get("/account/detail/", emptyHandler)
 			}).NotTo(Panic())
 
 			Expect(func() {
-				router.GET("/account/detail/:id/", emptyHandler)
+				router.Get("/account/detail/:id/", emptyHandler)
 			}).NotTo(Panic())
 		})
 
 		g.It("should panic due to conflicting static routes", func() {
 			router := NewRouter(emptyHandler).(*router)
-			router.GET("/account/detail", emptyHandler)
+			router.Get("/account/detail", emptyHandler)
 			Expect(func() {
-				router.GET("/account/detail", emptyHandler)
+				router.Get("/account/detail", emptyHandler)
 			}).To(Panic())
 		})
 
 		g.It("should panic due to conflicting 'wildcarded' routes", func() {
 			router := NewRouter(emptyHandler).(*router)
-			router.GET("/:account", emptyHandler)
+			router.Get("/:account", emptyHandler)
 			Expect(func() {
-				router.GET("/:transaction", emptyHandler)
+				router.Get("/:transaction", emptyHandler)
 			}).To(Panic())
 		})
 
 		g.It("should panic due to conflicting mixing routes", func() {
 			router := NewRouter(emptyHandler).(*router)
-			router.GET("/:account/detail", emptyHandler)
-			router.GET("/:account/id", emptyHandler)
+			router.Get("/:account/detail", emptyHandler)
+			router.Get("/:account/id", emptyHandler)
 			Expect(func() {
-				router.GET("/:transaction/id", emptyHandler)
+				router.Get("/:transaction/id", emptyHandler)
 			}).To(Panic())
 		})
 
 		g.It("should not match any ropute", func() {
 			router := NewRouter(emptyHandler).(*router)
-			router.GET("/:account/detail", emptyHandler)
-			router.GET("/:account/id", emptyHandler)
+			router.Get("/:account/detail", emptyHandler)
+			router.Get("/:account/id", emptyHandler)
 			ok, _, _ := router.children["GET"].Matches(nil, nil)
 			Expect(ok).To(BeFalse())
 		})
@@ -415,7 +415,7 @@ var _ = g.Describe("Router", func() {
 		g.It("should parse a GET", func() {
 			router := NewRouter(emptyHandler).(*router)
 			group := router.Prefix("/group")
-			group.GET("/route", emptyHandler)
+			group.Get("/route", emptyHandler)
 
 			Expect(router.children).To(HaveKey("GET"))
 			Expect(router.children["GET"].wildcard).To(BeNil())
@@ -433,7 +433,7 @@ var _ = g.Describe("Router", func() {
 		g.It("should parse a POST", func() {
 			router := NewRouter(emptyHandler).(*router)
 			group := router.Prefix("/group")
-			group.POST("/route", emptyHandler)
+			group.Post("/route", emptyHandler)
 
 			Expect(router.children).To(HaveKey("POST"))
 			Expect(router.children["POST"].wildcard).To(BeNil())
@@ -451,7 +451,7 @@ var _ = g.Describe("Router", func() {
 		g.It("should parse a PUT", func() {
 			router := NewRouter(emptyHandler).(*router)
 			group := router.Prefix("/group")
-			group.PUT("/route", emptyHandler)
+			group.Put("/route", emptyHandler)
 
 			Expect(router.children).To(HaveKey("PUT"))
 			Expect(router.children["PUT"].wildcard).To(BeNil())
@@ -469,7 +469,7 @@ var _ = g.Describe("Router", func() {
 		g.It("should parse a DELETE", func() {
 			router := NewRouter(emptyHandler).(*router)
 			group := router.Prefix("/group")
-			group.DELETE("/route", emptyHandler)
+			group.Delete("/route", emptyHandler)
 
 			Expect(router.children).To(HaveKey("DELETE"))
 			Expect(router.children["DELETE"].wildcard).To(BeNil())
@@ -487,7 +487,7 @@ var _ = g.Describe("Router", func() {
 		g.It("should parse a HEAD", func() {
 			router := NewRouter(emptyHandler).(*router)
 			group := router.Prefix("/group")
-			group.HEAD("/route", emptyHandler)
+			group.Head("/route", emptyHandler)
 
 			Expect(router.children).To(HaveKey("HEAD"))
 			Expect(router.children["HEAD"].wildcard).To(BeNil())
@@ -505,7 +505,7 @@ var _ = g.Describe("Router", func() {
 		g.It("should parse a OPTIONS", func() {
 			router := NewRouter(emptyHandler).(*router)
 			group := router.Prefix("/group")
-			group.OPTIONS("/route", emptyHandler)
+			group.Options("/route", emptyHandler)
 
 			Expect(router.children).To(HaveKey("OPTIONS"))
 			Expect(router.children["OPTIONS"].wildcard).To(BeNil())
@@ -523,7 +523,7 @@ var _ = g.Describe("Router", func() {
 		g.It("should parse a PATCH", func() {
 			router := NewRouter(emptyHandler).(*router)
 			group := router.Prefix("/group")
-			group.PATCH("/route", emptyHandler)
+			group.Patch("/route", emptyHandler)
 
 			Expect(router.children).To(HaveKey("PATCH"))
 			Expect(router.children["PATCH"].wildcard).To(BeNil())
@@ -558,7 +558,7 @@ var _ = g.Describe("Router", func() {
 
 		g.It("should resolve an empty route", func() {
 			value := 1
-			router.GET("", func(req Request, res Response) Result {
+			router.Get("", func(req Request, res Response) Result {
 				value = 2
 				return res.End()
 			})
@@ -570,7 +570,7 @@ var _ = g.Describe("Router", func() {
 
 		g.It("should resolve an empty trailing route", func() {
 			value := 1
-			router.GET("/", func(req Request, res Response) Result {
+			router.Get("/", func(req Request, res Response) Result {
 				value = 2
 				return res.End()
 			})
@@ -582,7 +582,7 @@ var _ = g.Describe("Router", func() {
 
 		g.It("should resolve a static route", func() {
 			value := 1
-			router.GET("/static", func(req Request, res Response) Result {
+			router.Get("/static", func(req Request, res Response) Result {
 				value = 2
 				return res.End()
 			})
@@ -594,7 +594,7 @@ var _ = g.Describe("Router", func() {
 
 		g.It("should resolve a static route not starting with /", func() {
 			value := 1
-			router.GET("static", func(req Request, res Response) Result {
+			router.Get("static", func(req Request, res Response) Result {
 				value = 2
 				return res.End()
 			})
@@ -609,17 +609,17 @@ var _ = g.Describe("Router", func() {
 			value2 := 1
 			value3 := 1
 
-			router.GET("/static", func(req Request, res Response) Result {
+			router.Get("/static", func(req Request, res Response) Result {
 				value1 = 2
 				return res.End()
 			})
 
-			router.GET("/static/second", func(req Request, res Response) Result {
+			router.Get("/static/second", func(req Request, res Response) Result {
 				value2 = 2
 				return res.End()
 			})
 
-			router.GET("/another", func(req Request, res Response) Result {
+			router.Get("/another", func(req Request, res Response) Result {
 				value3 = 2
 				return res.End()
 			})
@@ -635,7 +635,7 @@ var _ = g.Describe("Router", func() {
 
 		g.It("should resolve a wildcard route", func() {
 			value := 1
-			router.GET("/:wildcard", func(req Request, res Response) Result {
+			router.Get("/:wildcard", func(req Request, res Response) Result {
 				Expect(req.Param("wildcard")).To(Equal("value"))
 				value = 2
 				return res.End()
@@ -650,17 +650,17 @@ var _ = g.Describe("Router", func() {
 			value1 := 1
 			value2 := 1
 			value3 := 1
-			router.GET("/:account/transactions", func(req Request, res Response) Result {
+			router.Get("/:account/transactions", func(req Request, res Response) Result {
 				Expect(req.Param("account")).To(Equal("value1"))
 				value1 = 2
 				return res.End()
 			})
-			router.GET("/:account/profile", func(req Request, res Response) Result {
+			router.Get("/:account/profile", func(req Request, res Response) Result {
 				Expect(req.Param("account")).To(Equal("value2"))
 				value2 = 2
 				return res.End()
 			})
-			router.GET("/:user/roles", func(req Request, res Response) Result {
+			router.Get("/:user/roles", func(req Request, res Response) Result {
 				Expect(req.Param("user")).To(Equal("value3"))
 				value3 = 2
 				return res.End()
@@ -679,19 +679,19 @@ var _ = g.Describe("Router", func() {
 			value1 := 1
 			value2 := 1
 			value3 := 1
-			router.GET("/:account/:subscription/cancel", func(req Request, res Response) Result {
+			router.Get("/:account/:subscription/cancel", func(req Request, res Response) Result {
 				Expect(req.Param("account")).To(Equal("account1"))
 				Expect(req.Param("subscription")).To(Equal("subscription1"))
 				value1 = 2
 				return res.End()
 			})
-			router.GET("/:account/:subscription/history", func(req Request, res Response) Result {
+			router.Get("/:account/:subscription/history", func(req Request, res Response) Result {
 				Expect(req.Param("account")).To(Equal("account2"))
 				Expect(req.Param("subscription")).To(Equal("subscription2"))
 				value2 = 2
 				return res.End()
 			})
-			router.GET("/:account/:subscription", func(req Request, res Response) Result {
+			router.Get("/:account/:subscription", func(req Request, res Response) Result {
 				Expect(req.Param("account")).To(Equal("account3"))
 				Expect(req.Param("subscription")).To(Equal("subscription3"))
 				value3 = 2
@@ -715,7 +715,7 @@ var _ = g.Describe("Router", func() {
 				return res.End()
 			})
 
-			router.GET("/account/transactions", func(req Request, res Response) Result {
+			router.Get("/account/transactions", func(req Request, res Response) Result {
 				g.Fail("should not be called")
 				return res.End()
 			})
@@ -732,7 +732,7 @@ var _ = g.Describe("Router", func() {
 				value1 = 2
 				return res.End()
 			})
-			router.GET("/account/transactions", func(req Request, res Response) Result {
+			router.Get("/account/transactions", func(req Request, res Response) Result {
 				g.Fail("should not be called")
 				return res.End()
 			})
@@ -748,7 +748,7 @@ var _ = g.Describe("Router", func() {
 				value1 = 2
 				return res.End()
 			})
-			router.GET("/account/transactions", func(req Request, res Response) Result {
+			router.Get("/account/transactions", func(req Request, res Response) Result {
 				g.Fail("should not be called")
 				return res.End()
 			})
@@ -764,15 +764,15 @@ var _ = g.Describe("Router", func() {
 				value++
 				return res.End()
 			})
-			router.GET("/:account/transactions", func(req Request, res Response) Result {
+			router.Get("/:account/transactions", func(req Request, res Response) Result {
 				g.Fail("should not be called")
 				return res.End()
 			})
-			router.GET("/:account/profile", func(req Request, res Response) Result {
+			router.Get("/:account/profile", func(req Request, res Response) Result {
 				g.Fail("should not be called")
 				return res.End()
 			})
-			router.GET("/:user/roles", func(req Request, res Response) Result {
+			router.Get("/:user/roles", func(req Request, res Response) Result {
 				g.Fail("should not be called")
 				return res.End()
 			})
@@ -792,7 +792,7 @@ var _ = g.Describe("Router", func() {
 				value1 = 2
 				return res.End()
 			})
-			router.GET("/:account/transactions", func(req Request, res Response) Result {
+			router.Get("/:account/transactions", func(req Request, res Response) Result {
 				g.Fail("should not be called")
 				return res.End()
 			})
@@ -809,7 +809,7 @@ var _ = g.Describe("Router", func() {
 				value1 = 2
 				return res.End()
 			})
-			router.GET("/:account/transactions", func(req Request, res Response) Result {
+			router.Get("/:account/transactions", func(req Request, res Response) Result {
 				g.Fail("should not be called")
 				return res.End()
 			})
@@ -828,7 +828,7 @@ var _ = g.Describe("Router", func() {
 				}, func(req Request, res Response, next Handler) Result {
 					calls = append(calls, "middleware2")
 					return next(req, res)
-				}).GET("/:account/transactions", func(req Request, res Response) Result {
+				}).Get("/:account/transactions", func(req Request, res Response) Result {
 					calls = append(calls, "endpoint")
 					return res.End()
 				})
@@ -847,7 +847,7 @@ var _ = g.Describe("Router", func() {
 				}, func(req Request, res Response, next Handler) Result {
 					g.Fail("this middleware should not be called")
 					return next(req, res)
-				}).GET("/:account/transactions", func(req Request, res Response) Result {
+				}).Get("/:account/transactions", func(req Request, res Response) Result {
 					g.Fail("this endpoint should not be called")
 					return res.End()
 				})
@@ -879,7 +879,7 @@ var _ = g.Describe("Router", func() {
 					r.With(func(req Request, res Response, next Handler) Result {
 						calls = append(calls, "middleware1")
 						return next(req, res)
-					}).GET("/route1", func(req Request, res Response) Result {
+					}).Get("/route1", func(req Request, res Response) Result {
 						calls = append(calls, "endpoint")
 						return res.End()
 					})
@@ -914,7 +914,7 @@ var _ = g.Describe("Router", func() {
 					subgroup.With(func(req Request, res Response, next Handler) Result {
 						calls = append(calls, "middleware1")
 						return next(req, res)
-					}).GET("/route1", func(req Request, res Response) Result {
+					}).Get("/route1", func(req Request, res Response) Result {
 						calls = append(calls, "endpoint")
 						return res.End()
 					})
@@ -941,7 +941,7 @@ func BenchmarkSplit(b *testing.B) {
 
 func BenchmarkRouter_Handler(b *testing.B) {
 	router := NewRouter(emptyHandler)
-	router.GET("/", emptyHandler)
+	router.Get("/", emptyHandler)
 	ctx := fasthttp.RequestCtx{}
 	ctx.Request.SetRequestURI("/")
 
@@ -955,7 +955,7 @@ func BenchmarkRouter_HandlerWithMiddleware(b *testing.B) {
 	router := NewRouter(emptyHandler)
 	router.With(func(req Request, res Response, next Handler) Result {
 		return next(req, res)
-	}).GET("/", emptyHandler)
+	}).Get("/", emptyHandler)
 	ctx := fasthttp.RequestCtx{}
 	ctx.Request.SetRequestURI("/")
 

@@ -13,7 +13,7 @@ var config = http.Config{
 
 func router() http.Router {
 	router := http.NewRouter(nil)
-	router.GET("/hello", func(req http.Request, res http.Response) http.Result {
+	router.Get("/hello", func(req http.Request, res http.Response) http.Result {
 		return res.Data(map[string]interface{}{
 			"hello": "world",
 		})

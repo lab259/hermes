@@ -22,13 +22,13 @@ func router() http.Router {
 		logMiddleware,
 	)
 
-	router.GET("/hello", func(req http.Request, res http.Response) http.Result {
+	router.Get("/hello", func(req http.Request, res http.Response) http.Result {
 		return res.Data(map[string]interface{}{
 			"hello": "world",
 		})
 	})
 
-	router.GET("/crash", func(req http.Request, res http.Response) http.Result {
+	router.Get("/crash", func(req http.Request, res http.Response) http.Result {
 		panic("oops")
 	})
 

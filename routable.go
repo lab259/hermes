@@ -1,15 +1,13 @@
 package http
 
 type Routable interface {
-	handle(method, path string, handler Handler)
-
-	DELETE(path string, handler Handler)
-	GET(path string, handler Handler)
-	HEAD(path string, handler Handler)
-	OPTIONS(path string, handler Handler)
-	PATCH(path string, handler Handler)
-	POST(path string, handler Handler)
-	PUT(path string, handler Handler)
+	Delete(path string, handler Handler)
+	Get(path string, handler Handler)
+	Head(path string, handler Handler)
+	Options(path string, handler Handler)
+	Patch(path string, handler Handler)
+	Post(path string, handler Handler)
+	Put(path string, handler Handler)
 
 	Prefix(path string) Routable
 	Group(func(Routable))

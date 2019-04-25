@@ -21,31 +21,31 @@ func (r *route) handle(method, subpath string, handler Handler) {
 	root.Add(path, handler, nil, r.middlewares)
 }
 
-func (r *route) DELETE(path string, handler Handler) {
+func (r *route) Delete(path string, handler Handler) {
 	r.handle("DELETE", path, handler)
 }
 
-func (r *route) GET(path string, handler Handler) {
+func (r *route) Get(path string, handler Handler) {
 	r.handle("GET", path, handler)
 }
 
-func (r *route) POST(path string, handler Handler) {
+func (r *route) Post(path string, handler Handler) {
 	r.handle("POST", path, handler)
 }
 
-func (r *route) PUT(path string, handler Handler) {
+func (r *route) Put(path string, handler Handler) {
 	r.handle("PUT", path, handler)
 }
 
-func (r *route) HEAD(path string, handler Handler) {
+func (r *route) Head(path string, handler Handler) {
 	r.handle("HEAD", path, handler)
 }
 
-func (r *route) OPTIONS(path string, handler Handler) {
+func (r *route) Options(path string, handler Handler) {
 	r.handle("OPTIONS", path, handler)
 }
 
-func (r *route) PATCH(path string, handler Handler) {
+func (r *route) Patch(path string, handler Handler) {
 	r.handle("PATCH", path, handler)
 }
 

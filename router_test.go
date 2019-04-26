@@ -17,7 +17,7 @@ func createRequestCtxFromPath(method, path string) *fasthttp.RequestCtx {
 }
 
 var emptyRouterConfig = RouterConfig{
-	NotFoundHandler: emptyHandler,
+	NotFound: emptyHandler,
 }
 
 var emptyResult = &result{}
@@ -74,7 +74,7 @@ var _ = g.Describe("Router", func() {
 
 		g.It("should parse a GET", func() {
 			router := NewRouter(emptyRouterConfig).(*router)
-			router.Get("", emptyHandler)
+			router.Get("/", emptyHandler)
 
 			Expect(router.children).To(HaveKey("GET"))
 			Expect(router.children["GET"].children).To(BeEmpty())
@@ -82,7 +82,7 @@ var _ = g.Describe("Router", func() {
 			Expect(router.children["GET"].handler).NotTo(BeNil())
 		})
 
-		g.It("should parse a GET", func() {
+		g.It("should parse a GET²", func() {
 			router := NewRouter(emptyRouterConfig).(*router)
 			router.Get("/route", emptyHandler)
 
@@ -555,18 +555,6 @@ var _ = g.Describe("Router", func() {
 			router = NewRouter(emptyRouterConfig)
 		})
 
-		g.It("should resolve an empty route", func() {
-			value := 1
-			router.Get("", func(req Request, res Response) Result {
-				value = 2
-				return res.End()
-			})
-
-			router.Handler()(createRequestCtxFromPath("GET", "/"))
-
-			Expect(value).To(Equal(2))
-		})
-
 		g.It("should resolve an empty trailing route", func() {
 			value := 1
 			router.Get("/", func(req Request, res Response) Result {
@@ -582,18 +570,6 @@ var _ = g.Describe("Router", func() {
 		g.It("should resolve a static route", func() {
 			value := 1
 			router.Get("/static", func(req Request, res Response) Result {
-				value = 2
-				return res.End()
-			})
-
-			router.Handler()(createRequestCtxFromPath("GET", "/static"))
-
-			Expect(value).To(Equal(2))
-		})
-
-		g.It("should resolve a static route not starting with /", func() {
-			value := 1
-			router.Get("static", func(req Request, res Response) Result {
 				value = 2
 				return res.End()
 			})
@@ -709,7 +685,7 @@ var _ = g.Describe("Router", func() {
 		g.It("should call the not found callback for the index route", func() {
 			value1 := 1
 
-			router := NewRouter(RouterConfig{NotFoundHandler: func(req Request, res Response) Result {
+			router := NewRouter(RouterConfig{NotFound: func(req Request, res Response) Result {
 				value1 = 2
 				return res.End()
 			}})
@@ -727,7 +703,7 @@ var _ = g.Describe("Router", func() {
 		g.It("should call the not found callback for static routes", func() {
 			value1 := 1
 
-			router = NewRouter(RouterConfig{NotFoundHandler: func(req Request, res Response) Result {
+			router = NewRouter(RouterConfig{NotFound: func(req Request, res Response) Result {
 				value1 = 2
 				return res.End()
 			}})
@@ -743,7 +719,7 @@ var _ = g.Describe("Router", func() {
 		g.It("should call the not found callback for static routes half path", func() {
 			value1 := 1
 
-			router := NewRouter(RouterConfig{NotFoundHandler: func(req Request, res Response) Result {
+			router := NewRouter(RouterConfig{NotFound: func(req Request, res Response) Result {
 				value1 = 2
 				return res.End()
 			}})
@@ -759,7 +735,7 @@ var _ = g.Describe("Router", func() {
 
 		g.It("should call the not found callback for wildcard routes", func() {
 			value := 0
-			router := NewRouter(RouterConfig{NotFoundHandler: func(req Request, res Response) Result {
+			router := NewRouter(RouterConfig{NotFound: func(req Request, res Response) Result {
 				value++
 				return res.End()
 			}})
@@ -787,7 +763,7 @@ var _ = g.Describe("Router", func() {
 
 		g.It("should call the not found callback for wildcard half path", func() {
 			value1 := 1
-			router := NewRouter(RouterConfig{NotFoundHandler: func(req Request, res Response) Result {
+			router := NewRouter(RouterConfig{NotFound: func(req Request, res Response) Result {
 				value1 = 2
 				return res.End()
 			}})
@@ -804,7 +780,7 @@ var _ = g.Describe("Router", func() {
 		g.It("should call the not found callback for wrong method", func() {
 			value1 := 1
 
-			router := NewRouter(RouterConfig{NotFoundHandler: func(req Request, res Response) Result {
+			router := NewRouter(RouterConfig{NotFound: func(req Request, res Response) Result {
 				value1 = 2
 				return res.End()
 			}})
@@ -821,7 +797,7 @@ var _ = g.Describe("Router", func() {
 		g.Describe("Middlewares", func() {
 			g.It("should call root middlewares with not found", func() {
 				calls := make([]string, 0)
-				router := NewRouter(RouterConfig{NotFoundHandler: func(req Request, res Response) Result {
+				router := NewRouter(RouterConfig{NotFound: func(req Request, res Response) Result {
 					calls = append(calls, "notfound")
 					return res.End()
 				}})

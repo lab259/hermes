@@ -21,14 +21,16 @@ func (r *route) path(subpath string) string {
 	return fmt.Sprintf("%s/%s", r.prefix, subpath)
 }
 
-func (r *route) handle(method, subpath string, handler Handler) {
+func (r *route) handle(method, path string, handler Handler) {
+	if path[0] != '/' {
+		panic("path must begin with '/' in path '" + path + "'")
+	}
 	root, ok := r.router.children[method]
 	if !ok {
 		root = newNode()
 		r.router.children[method] = root
 	}
-	path := r.path(subpath)
-	root.Add(path, handler, nil, r.middlewares)
+	root.Add(r.path(path), handler, nil, r.middlewares)
 }
 
 func (r *route) Delete(path string, handler Handler) {

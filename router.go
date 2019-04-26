@@ -9,20 +9,63 @@ import (
 )
 
 type RouterConfig struct {
-	NotFoundHandler Handler
+	NotFound         Handler
+	MethodNotAllowed Handler
 }
 
 type router struct {
 	route
-	children map[string]*node
-	notFound Handler
+	children         map[string]*node
+	notFound         Handler
+	methodNotAllowed Handler
+	defaultOptions   Handler
+}
+
+func NewDefaultRouter() Router {
+	return NewRouter(RouterConfig{})
 }
 
 func NewRouter(config RouterConfig) Router {
 	r := &router{
-		children: make(map[string]*node),
-		notFound: config.NotFoundHandler,
+		children:         make(map[string]*node),
+		notFound:         config.NotFound,
+		methodNotAllowed: config.MethodNotAllowed,
 	}
+
+	if config.NotFound == nil {
+		r.notFound = func(req Request, res Response) Result {
+			if req.WantsJSON() {
+				errResponse := acquireErrorResponse(fasthttp.StatusNotFound)
+				defer releaseErrorResponse(errResponse)
+
+				errResponse.SetParam("code", NotFoundErrorCode)
+				errResponse.SetParam("message", NotFoundErrorMessage)
+				return res.Status(errResponse.Status).Data(errResponse.Data)
+			}
+
+			return res.Status(fasthttp.StatusNotFound).Data(NotFoundErrorMessage)
+		}
+	}
+
+	if config.MethodNotAllowed == nil {
+		r.methodNotAllowed = func(req Request, res Response) Result {
+			if req.WantsJSON() {
+				errResponse := acquireErrorResponse(fasthttp.StatusMethodNotAllowed)
+				defer releaseErrorResponse(errResponse)
+
+				errResponse.SetParam("code", MethodNotAllowedErrorCode)
+				errResponse.SetParam("message", MethodNotAllowedErrorMessage)
+				return res.Status(errResponse.Status).Data(errResponse.Data)
+			}
+
+			return res.Status(fasthttp.StatusMethodNotAllowed).Data(MethodNotAllowedErrorMessage)
+		}
+	}
+
+	r.defaultOptions = func(req Request, res Response) Result {
+		return res.End()
+	}
+
 	r.router = r
 	return r
 }
@@ -53,6 +96,29 @@ var pathPool = sync.Pool{
 	},
 }
 
+func acquirePath() [][]byte {
+	return pathPool.Get().([][]byte)
+}
+
+func releasePath(path [][]byte) {
+	path = path[0:0]
+	pathPool.Put(path)
+}
+
+func (router *router) findHandler(root *node, reqPath []byte) (bool, *node, [][]byte) {
+	path := acquirePath()
+	defer releasePath(path)
+
+	path = split(reqPath, path)
+	path = bytes.Split(reqPath[1:], routerHandlerSep)
+	if len(path) == 1 && len(path[0]) == 0 {
+		if root.handler != nil {
+			return true, root, nil
+		}
+	}
+	return root.Matches(path, nil)
+}
+
 func (router *router) Handler() fasthttp.RequestHandler {
 	return func(fCtx *fasthttp.RequestCtx) {
 		req := acquireRequest(context.Background(), fCtx)
@@ -61,25 +127,9 @@ func (router *router) Handler() fasthttp.RequestHandler {
 		res := acquireResponse(fCtx)
 		defer releaseResponse(res)
 
-		node, ok := router.children[string(req.Method())]
-		if ok {
-			path := pathPool.Get().([][]byte)
-			path = split(req.Path(), path)
-			defer func() {
-				path = path[0:0]
-				pathPool.Put(path)
-			}()
-			path = bytes.Split(req.Path()[1:], routerHandlerSep)
-			if len(path) == 1 && len(path[0]) == 0 {
-				if node.handler != nil {
-					node.handler(req, res)
-					return
-				}
-				router.callNotFound(req, res)
-				return
-			}
-			found, node, values := node.Matches(path, nil)
-			if found {
+		method := string(req.Method())
+		if root, ok := router.children[method]; ok {
+			if found, node, values := router.findHandler(root, req.Path()); found {
 				for i, v := range values {
 					fCtx.SetUserValue(node.names[i], string(v))
 				}
@@ -87,7 +137,24 @@ func (router *router) Handler() fasthttp.RequestHandler {
 				return
 			}
 		}
-		router.callNotFound(req, res)
+
+		if method == "OPTIONS" {
+			// handle OPTIONS requests
+			if allow := router.allowed(req.Path(), method); len(allow) > 0 {
+				res.Header("Allow", allow)
+				router.callHandler(req, res, router.middlewares, router.defaultOptions)
+				return
+			}
+		} else {
+			// handle 405
+			if allow := router.allowed(req.Path(), method); len(allow) > 0 {
+				res.Header("Allow", allow)
+				router.callHandler(req, res, router.middlewares, router.methodNotAllowed)
+				return
+			}
+		}
+
+		router.callHandler(req, res, router.middlewares, router.notFound)
 	}
 }
 
@@ -109,8 +176,44 @@ func (router *router) callHandler(req Request, res Response, middlewares []Middl
 	}
 }
 
-func (router *router) callNotFound(req Request, res Response) {
-	if router.notFound != nil {
-		router.callHandler(req, res, router.middlewares, router.notFound)
+var (
+	optionsServerWide      = []byte("*")
+	optionsSlashServerWide = []byte("/*")
+)
+
+func (r *router) allowed(path []byte, reqMethod string) (allow string) {
+	if bytes.Equal(path, optionsServerWide) || bytes.Equal(path, optionsSlashServerWide) { // server-wide
+		for method := range r.children {
+			if method == "OPTIONS" {
+				continue
+			}
+
+			// add request method to list of allowed methods
+			if len(allow) == 0 {
+				allow = method
+			} else {
+				allow += ", " + method
+			}
+		}
+	} else { // specific path
+		for method := range r.children {
+			// Skip the requested method - we already tried this one
+			if method == reqMethod || method == "OPTIONS" {
+				continue
+			}
+
+			if found, _, _ := r.findHandler(r.children[method], path); found {
+				// add request method to list of allowed methods
+				if len(allow) == 0 {
+					allow = method
+				} else {
+					allow += ", " + method
+				}
+			}
+		}
 	}
+	if len(allow) > 0 {
+		allow += ", OPTIONS"
+	}
+	return
 }

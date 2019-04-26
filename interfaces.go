@@ -14,8 +14,11 @@ type Request interface {
 	// Method returns the HTTP method
 	Method() []byte
 
-	// IsJSON return weather request accepts application/json
+	// IsJSON return weather request body is application/json
 	IsJSON() bool
+
+	// WantsJSON return weather request accepts application/json
+	WantsJSON() bool
 
 	// URI returns the raw URI
 	URI() *fasthttp.URI

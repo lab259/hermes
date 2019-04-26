@@ -38,7 +38,7 @@ var _ = describe("Http", func() {
 				"foo": "bar",
 			})
 
-			Expect(string(res.r.Response.Header.ContentType())).To(Equal("application/json"))
+			Expect(string(res.r.Response.Header.ContentType())).To(Equal("application/json; charset=utf-8"))
 			tmp := bytes.NewBufferString("")
 			res.r.Response.BodyWriteTo(tmp)
 			Expect(strings.TrimSpace(tmp.String())).To(Equal(`{"foo":"bar"}`))
@@ -50,7 +50,7 @@ var _ = describe("Http", func() {
 				Foo: "bar",
 			})
 
-			Expect(string(res.r.Response.Header.ContentType())).To(Equal("application/json"))
+			Expect(string(res.r.Response.Header.ContentType())).To(Equal("application/json; charset=utf-8"))
 			tmp := bytes.NewBufferString("")
 			res.r.Response.BodyWriteTo(tmp)
 			Expect(strings.TrimSpace(tmp.String())).To(Equal(`{"foo":"bar"}`))
@@ -62,7 +62,7 @@ var _ = describe("Http", func() {
 				Foo: "bar",
 			})
 
-			Expect(string(res.r.Response.Header.ContentType())).To(Equal("application/json"))
+			Expect(string(res.r.Response.Header.ContentType())).To(Equal("application/json; charset=utf-8"))
 			tmp := bytes.NewBufferString("")
 			res.r.Response.BodyWriteTo(tmp)
 			Expect(strings.TrimSpace(tmp.String())).To(Equal(`{"foo":"bar"}`))
@@ -79,7 +79,7 @@ var _ = describe("Http", func() {
 				},
 			})
 
-			Expect(string(res.r.Response.Header.ContentType())).To(Equal("application/json"))
+			Expect(string(res.r.Response.Header.ContentType())).To(Equal("application/json; charset=utf-8"))
 			tmp := bytes.NewBufferString("")
 			res.r.Response.BodyWriteTo(tmp)
 			Expect(strings.TrimSpace(tmp.String())).To(Equal(`[{"foo":"bar"},{"foo":"baz"}]`))
@@ -123,18 +123,18 @@ var _ = describe("Http", func() {
 			res := newResponse()
 			res.Error(errForced)
 
-			Expect(string(res.r.Response.Header.ContentType())).To(Equal("application/json"))
+			Expect(string(res.r.Response.Header.ContentType())).To(Equal("application/json; charset=utf-8"))
 			tmp := bytes.NewBufferString("")
 			res.r.Response.BodyWriteTo(tmp)
 			Expect(res.r.Response.StatusCode()).To(Equal(500))
-			Expect(strings.TrimSpace(tmp.String())).To(Equal(`{"code":"internal-server-error","message":"The server encountered an internal error or misconfiguration and was unable to complete your request."}`))
+			Expect(strings.TrimSpace(tmp.String())).To(Equal(`{"code":"internal-server-error","message":"We encountered an internal error or misconfiguration and was unable to complete your request."}`))
 		})
 
 		it("should serialize wrapped error", func() {
 			res := newResponse()
 			res.Error(errors.Wrap(errForced, errors.Http(400), errors.Module("tests"), errors.Code("forced-error"), errors.Message("An error was forced.")))
 
-			Expect(string(res.r.Response.Header.ContentType())).To(Equal("application/json"))
+			Expect(string(res.r.Response.Header.ContentType())).To(Equal("application/json; charset=utf-8"))
 			tmp := bytes.NewBufferString("")
 			res.r.Response.BodyWriteTo(tmp)
 			Expect(res.r.Response.StatusCode()).To(Equal(400))
@@ -145,7 +145,7 @@ var _ = describe("Http", func() {
 			res := newResponse()
 			res.Status(403).Error(errors.Wrap(errForced, errors.Http(400), errors.Module("tests"), errors.Code("forced-error"), errors.Message("An error was forced.")))
 
-			Expect(string(res.r.Response.Header.ContentType())).To(Equal("application/json"))
+			Expect(string(res.r.Response.Header.ContentType())).To(Equal("application/json; charset=utf-8"))
 			tmp := bytes.NewBufferString("")
 			res.r.Response.BodyWriteTo(tmp)
 			Expect(res.r.Response.StatusCode()).To(Equal(403))

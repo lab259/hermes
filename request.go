@@ -107,3 +107,10 @@ func (req *request) IsJSON() bool {
 	return bytes.Equal(ct, applicationJSON) ||
 		((laj < len(ct)) && bytes.Equal(ct[:laj], applicationJSON) && (ct[laj] == ';'))
 }
+
+func (req *request) WantsJSON() bool {
+	accept := req.r.Request.Header.Peek("Accept")
+	laj := len(applicationJSON)
+	return bytes.Equal(accept, applicationJSON) ||
+		((laj < len(accept)) && bytes.Equal(accept[:laj], applicationJSON))
+}

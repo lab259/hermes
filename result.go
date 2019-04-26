@@ -45,14 +45,14 @@ func (r *result) Data(data interface{}) Result {
 
 		switch dataType.Kind() {
 		case reflect.Struct, reflect.Array, reflect.Slice, reflect.Map:
-			r.setContentType(applicationJSON)
+			r.setContentType(defaultJSONContentType)
 			e := json.NewEncoder(r.r.Response.BodyWriter())
 			err := e.Encode(data)
 			if err != nil {
 				panic(err)
 			}
 		default:
-			r.setContentType(textPlain)
+			r.setContentType(defaultContentType)
 			r.r.Response.AppendBodyString(fmt.Sprintf("%v", data))
 		}
 	}

@@ -8,7 +8,7 @@ import (
 func Delete(req http.Request, res http.Response) http.Result {
 	id := req.Param("id")
 	if _, found := db[id]; !found {
-		return res.Status(404).Error(errors.ErrNotFound)
+		return res.Status(404).Error(errors.ErrTodoNotFound)
 	}
 	delete(db, id)
 	return res.Status(204).Data("")

@@ -9,7 +9,7 @@ func Update(req http.Request, res http.Response) http.Result {
 	id := req.Param("id")
 	_, found := db[id]
 	if !found {
-		return res.Status(404).Error(errors.ErrNotFound)
+		return res.Status(404).Error(errors.ErrTodoNotFound)
 	}
 
 	var todo Todo

@@ -4,7 +4,13 @@ import "sync"
 
 var (
 	InternalServerErrorCode    = "internal-server-error"
-	InternalServerErrorMessage = "The server encountered an internal error or misconfiguration and was unable to complete your request."
+	InternalServerErrorMessage = "We encountered an internal error or misconfiguration and was unable to complete your request."
+
+	NotFoundErrorCode    = "not-found"
+	NotFoundErrorMessage = "We could not find the resource you requested."
+
+	MethodNotAllowedErrorCode    = "method-not-allowed"
+	MethodNotAllowedErrorMessage = "We believe that the used request method is inappropriate for the resource you requested."
 )
 
 var errorResponsePool = &sync.Pool{

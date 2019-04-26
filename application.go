@@ -1,5 +1,9 @@
 package http
 
+import (
+	"fmt"
+)
+
 type ApplicationConfig struct {
 	Name string
 	HTTP FasthttpServiceConfiguration
@@ -15,7 +19,12 @@ func NewApplication(config ApplicationConfig, router Router) *Application {
 		Configuration: config,
 	}
 
+	if config.Name != "" {
+		app.fasthttpService.Server.Name = fmt.Sprintf("fasthttp/%s", config.Name)
+	}
+
 	app.fasthttpService.Server.Handler = router.Handler()
+
 	return app
 }
 

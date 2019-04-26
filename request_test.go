@@ -35,6 +35,24 @@ var _ = describe("Http", func() {
 			Expect(req.Context().Value(contextKeyTestID)).To(Equal("123"))
 		})
 
+		it("should want JSON", func() {
+			req := newRequest()
+			req.Raw().Request.Header.Set("Accept", "application/json, text/html")
+			Expect(req.WantsJSON()).To(BeTrue())
+		})
+
+		it("should not want JSON", func() {
+			req := newRequest()
+			req.Raw().Request.Header.Set("Accept", "text/html, application/xhtml+xml, application/xml")
+			Expect(req.WantsJSON()).To(BeFalse())
+		})
+
+		it("should not want JSON if not first", func() {
+			req := newRequest()
+			req.Raw().Request.Header.Set("Accept", "text/html,application/json")
+			Expect(req.WantsJSON()).To(BeFalse())
+		})
+
 		it("should accept the Content-type as JSON", func() {
 			req := newRequest()
 			req.Raw().Request.Header.SetContentType("application/json")

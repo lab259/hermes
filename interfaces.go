@@ -94,6 +94,8 @@ type Result interface {
 	Data(data interface{}) Result
 	Error(error) Result
 	Redirect(uri string, code int) Result
+	// End release the resources
+	End()
 }
 
 type Handler func(req Request, res Response) Result

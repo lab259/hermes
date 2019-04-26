@@ -23,7 +23,7 @@ var emptyRouterConfig = RouterConfig{
 var emptyResult = &result{}
 
 var emptyHandler = func(req Request, res Response) Result {
-	return emptyResult
+	return res.End()
 }
 
 var _ = g.Describe("Router", func() {

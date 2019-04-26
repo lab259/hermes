@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"reflect"
+	"sync"
 
 	"github.com/lab259/errors"
 	"github.com/valyala/fasthttp"
@@ -17,8 +18,21 @@ type result struct {
 	hasSentData bool
 }
 
-func newResult(r *fasthttp.RequestCtx, status int) *result {
-	return &result{r: r, status: status}
+var resultPool = &sync.Pool{
+	New: func() interface{} {
+		return &result{}
+	},
+}
+
+func acquireResult(r *fasthttp.RequestCtx, status int) *result {
+	result := resultPool.Get().(*result)
+	result.r = r
+	result.status = status
+	return result
+}
+
+func releaseResult(r *result) {
+	resultPool.Put(r)
 }
 
 func (r *result) Data(data interface{}) Result {
@@ -98,4 +112,12 @@ func (r *result) defaultStatus(code int) {
 func (r *result) Redirect(uri string, code int) Result {
 	r.r.Redirect(uri, code)
 	return r
+}
+
+func (r *result) End() {
+	// reset and release
+	r.r = nil
+	r.status = 0
+	r.hasSentData = false
+	releaseResult(r)
 }

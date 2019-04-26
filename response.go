@@ -66,5 +66,5 @@ func (res *response) End() Result {
 }
 
 func (res *response) newResult() Result {
-	return newResult(res.r, res.status)
+	return acquireResult(res.r, res.status)
 }

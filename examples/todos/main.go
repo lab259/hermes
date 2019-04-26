@@ -9,7 +9,7 @@ import (
 )
 
 var config = http.ApplicationConfig{
-	Name: "TODO API",
+	Name: "Todo (v0.1.0)",
 	HTTP: http.FasthttpServiceConfiguration{
 		Bind: ":8080",
 	},

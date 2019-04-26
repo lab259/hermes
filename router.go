@@ -133,7 +133,7 @@ func (router *router) Handler() fasthttp.RequestHandler {
 				for i, v := range values {
 					fCtx.SetUserValue(node.names[i], string(v))
 				}
-				node.handler(req, res)
+				node.handler(req, res).End()
 				return
 			}
 		}
@@ -142,23 +142,23 @@ func (router *router) Handler() fasthttp.RequestHandler {
 			// handle OPTIONS requests
 			if allow := router.allowed(req.Path(), method); len(allow) > 0 {
 				res.Header("Allow", allow)
-				router.callHandler(req, res, router.middlewares, router.defaultOptions)
+				router.callHandler(req, res, router.middlewares, router.defaultOptions).End()
 				return
 			}
 		} else {
 			// handle 405
 			if allow := router.allowed(req.Path(), method); len(allow) > 0 {
 				res.Header("Allow", allow)
-				router.callHandler(req, res, router.middlewares, router.methodNotAllowed)
+				router.callHandler(req, res, router.middlewares, router.methodNotAllowed).End()
 				return
 			}
 		}
 
-		router.callHandler(req, res, router.middlewares, router.notFound)
+		router.callHandler(req, res, router.middlewares, router.notFound).End()
 	}
 }
 
-func (router *router) callHandler(req Request, res Response, middlewares []Middleware, handler Handler) {
+func (router *router) callHandler(req Request, res Response, middlewares []Middleware, handler Handler) Result {
 	if len(middlewares) > 0 {
 		middlewareIdx := 0
 		var next Handler
@@ -167,13 +167,11 @@ func (router *router) callHandler(req Request, res Response, middlewares []Middl
 			if middlewareIdx < len(middlewares) {
 				return middlewares[middlewareIdx](req2, res2, next)
 			}
-
 			return handler(req2, res2)
 		}
-		middlewares[0](req, res, next)
-	} else {
-		handler(req, res)
+		return middlewares[0](req, res, next)
 	}
+	return handler(req, res)
 }
 
 var (

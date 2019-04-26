@@ -92,26 +92,25 @@ var routerHandlerSep = []byte{'/'}
 
 var pathPool = sync.Pool{
 	New: func() interface{} {
-		return make([][]byte, 0, 255)
+		return make([][]byte, 0, 4)
 	},
 }
 
-func acquirePath() [][]byte {
-	return pathPool.Get().([][]byte)
-}
+// func acquirePath() [][]byte {
+// 	return
+// }
 
-func releasePath(path [][]byte) {
-	path = path[0:0]
-	pathPool.Put(path)
-}
+// func releasePath(path [][]byte) {
+
+// }
 
 func (router *router) findHandler(root *node, reqPath []byte) (bool, *node, [][]byte) {
-	path := acquirePath()
-	defer releasePath(path)
+	path := pathPool.Get().([][]byte)
+	defer pathPool.Put(path)
 
 	path = split(reqPath, path)
-	path = bytes.Split(reqPath[1:], routerHandlerSep)
-	if len(path) == 1 && len(path[0]) == 0 {
+	// path = bytes.Split(reqPath[1:], routerHandlerSep)
+	if len(path) == 0 || len(path[0]) == 0 {
 		if root.handler != nil {
 			return true, root, nil
 		}

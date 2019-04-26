@@ -68,6 +68,13 @@ var _ = g.Describe("Router", func() {
 			tokens = split(path, tokens)
 			Expect(tokens).To(BeEmpty())
 		})
+
+		// g.FIt("should split an empty path", func() {
+		// 	path := []byte("/")
+		// 	tokens := make([][]byte, 0)
+		// 	tokens = bytes.Split(path, []byte{'/'})
+		// 	Expect(tokens).To(BeEmpty())
+		// })
 	})
 
 	g.Describe("Parse", func() {

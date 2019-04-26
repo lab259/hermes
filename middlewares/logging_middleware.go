@@ -11,6 +11,6 @@ func Logger(req http.Request) rlog.Logger {
 
 func LoggingMiddleware(req http.Request, res http.Response, next http.Handler) http.Result {
 	logger := Logger(req)
-	logger.Infof("%s: %s", req.Method(), req.Path())
+	logger.Infof("%8s: %s", req.Method(), req.Path())
 	return next(req, res)
 }

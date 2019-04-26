@@ -3,7 +3,7 @@ package http
 import (
 	"io/ioutil"
 	"os"
-	"path"
+	pathlib "path"
 )
 
 type FileConfigurationLoader struct {
@@ -17,7 +17,7 @@ func NewFileConfigurationLoader(dir string) *FileConfigurationLoader {
 }
 
 func (loader *FileConfigurationLoader) Load(id string) ([]byte, error) {
-	file, err := os.Open(path.Join(loader.Directory, id))
+	file, err := os.Open(pathlib.Join(loader.Directory, id))
 	if err != nil {
 		return nil, err
 	}

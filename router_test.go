@@ -26,48 +26,67 @@ var emptyHandler = func(req Request, res Response) Result {
 	return res.End()
 }
 
+func createPathDescriptor() *pathDescriptor {
+	return &pathDescriptor{
+		m: make(map[int][]byte, 10),
+		n: 0,
+	}
+}
+
 var _ = g.Describe("Router", func() {
 
 	g.Describe("Split", func() {
 		g.It("should split the path", func() {
 			path := []byte("/path/with/four/parts")
-			tokens := make([][]byte, 0)
-			tokens = split(path, tokens)
-			Expect(tokens).To(HaveLen(4))
-			Expect(tokens[0]).To(Equal([]byte("path")))
-			Expect(tokens[1]).To(Equal([]byte("with")))
-			Expect(tokens[2]).To(Equal([]byte("four")))
-			Expect(tokens[3]).To(Equal([]byte("parts")))
+
+			tokens := createPathDescriptor()
+			split(path, tokens)
+			Expect(tokens.n).To(Equal(4))
+			Expect(tokens.m).To(HaveLen(4))
+			Expect(tokens.m[0]).To(Equal([]byte("path")))
+			Expect(tokens.m[1]).To(Equal([]byte("with")))
+			Expect(tokens.m[2]).To(Equal([]byte("four")))
+			Expect(tokens.m[3]).To(Equal([]byte("parts")))
 		})
 
 		g.It("should split the path not starting with /", func() {
 			path := []byte("path/with/four/parts")
-			tokens := make([][]byte, 0)
-			tokens = split(path, tokens)
-			Expect(tokens).To(HaveLen(4))
-			Expect(tokens[0]).To(Equal([]byte("path")))
-			Expect(tokens[1]).To(Equal([]byte("with")))
-			Expect(tokens[2]).To(Equal([]byte("four")))
-			Expect(tokens[3]).To(Equal([]byte("parts")))
+			tokens := createPathDescriptor()
+			split(path, tokens)
+			Expect(tokens.n).To(Equal(4))
+			Expect(tokens.m).To(HaveLen(4))
+			Expect(tokens.m[0]).To(Equal([]byte("path")))
+			Expect(tokens.m[1]).To(Equal([]byte("with")))
+			Expect(tokens.m[2]).To(Equal([]byte("four")))
+			Expect(tokens.m[3]).To(Equal([]byte("parts")))
 		})
 
 		g.It("should split the path ending with /", func() {
 			path := []byte("/path/with/four/parts/")
-			tokens := make([][]byte, 0)
-			tokens = split(path, tokens)
-			Expect(tokens).To(HaveLen(4))
-			Expect(tokens[0]).To(Equal([]byte("path")))
-			Expect(tokens[1]).To(Equal([]byte("with")))
-			Expect(tokens[2]).To(Equal([]byte("four")))
-			Expect(tokens[3]).To(Equal([]byte("parts")))
+			tokens := createPathDescriptor()
+			split(path, tokens)
+			Expect(tokens.n).To(Equal(4))
+			Expect(tokens.m).To(HaveLen(4))
+			Expect(tokens.m[0]).To(Equal([]byte("path")))
+			Expect(tokens.m[1]).To(Equal([]byte("with")))
+			Expect(tokens.m[2]).To(Equal([]byte("four")))
+			Expect(tokens.m[3]).To(Equal([]byte("parts")))
 		})
 
 		g.It("should split an empty path", func() {
 			path := []byte("/")
-			tokens := make([][]byte, 0)
-			tokens = split(path, tokens)
-			Expect(tokens).To(BeEmpty())
+			tokens := createPathDescriptor()
+			split(path, tokens)
+			Expect(tokens.m).To(BeEmpty())
+			Expect(tokens.n).To(Equal(0))
 		})
+
+		// g.FIt("should split an empty path", func() {
+		// 	path := []byte("/")
+		// 	tokens := make([][]byte, 0)
+		// 	tokens = bytes.Split(path, []byte{'/'})
+		// 	Expect(tokens).To(BeEmpty())
+		// })
 	})
 
 	g.Describe("Parse", func() {
@@ -405,7 +424,7 @@ var _ = g.Describe("Router", func() {
 			router := NewRouter(emptyRouterConfig).(*router)
 			router.Get("/:account/detail", emptyHandler)
 			router.Get("/:account/id", emptyHandler)
-			ok, _, _ := router.children["GET"].Matches(nil, nil)
+			ok, _, _ := router.children["GET"].Matches(0, createPathDescriptor(), nil)
 			Expect(ok).To(BeFalse())
 		})
 	})
@@ -961,12 +980,12 @@ var _ = g.Describe("Router", func() {
 
 func BenchmarkSplit(b *testing.B) {
 	path := []byte("/path/with/four/parts")
-	tokens := make([][]byte, 0)
+	tokens := createPathDescriptor()
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		tokens = split(path, tokens)
-		tokens = tokens[0:0]
+		split(path, tokens)
+		tokens.n = 0
 	}
 }
 
@@ -999,6 +1018,48 @@ func BenchmarkRouter_HandlerWithParams(b *testing.B) {
 func BenchmarkRouter_HandlerWithMiddleware(b *testing.B) {
 	router := NewRouter(RouterConfig{})
 	router.With(func(req Request, res Response, next Handler) Result {
+		return next(req, res)
+	}).Get("/", emptyHandler)
+	ctx := fasthttp.RequestCtx{}
+	ctx.Request.SetRequestURI("/")
+
+	h := router.Handler()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		h(&ctx)
+	}
+}
+
+func BenchmarkRouter_HandlerWithMiddleware2(b *testing.B) {
+	router := NewRouter(RouterConfig{})
+	router.With(func(req Request, res Response, next Handler) Result {
+		return next(req, res)
+	}, func(req Request, res Response, next Handler) Result {
+		return next(req, res)
+	}).Get("/", emptyHandler)
+	ctx := fasthttp.RequestCtx{}
+	ctx.Request.SetRequestURI("/")
+
+	h := router.Handler()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		h(&ctx)
+	}
+}
+
+func BenchmarkRouter_HandlerWithMiddleware5(b *testing.B) {
+	router := NewRouter(RouterConfig{})
+	router.With(func(req Request, res Response, next Handler) Result {
+		return next(req, res)
+	}, func(req Request, res Response, next Handler) Result {
+		return next(req, res)
+	}, func(req Request, res Response, next Handler) Result {
+		return next(req, res)
+	}, func(req Request, res Response, next Handler) Result {
+		return next(req, res)
+	}, func(req Request, res Response, next Handler) Result {
 		return next(req, res)
 	}).Get("/", emptyHandler)
 	ctx := fasthttp.RequestCtx{}

@@ -103,14 +103,13 @@ func newHandler(h Handler, m []Middleware) Handler {
 	return sagas[0]
 }
 
-func (n *node) Matches(path [][]byte, values [][]byte) (bool, *node, [][]byte) {
-	lpath := len(path)
-	for i := 0; i < lpath; i++ {
-		token := string(path[i])
+func (n *node) Matches(s int, path *pathDescriptor, values [][]byte) (bool, *node, [][]byte) {
+	for i := s; i < path.n; i++ {
+		token := string(path.m[i])
 		node, ok := n.children[token]
 		if ok {
-			if i+1 < lpath {
-				return node.Matches(path[i+1:], values)
+			if i+1 < path.n {
+				return node.Matches(i+1, path, values)
 			} else if node.handler == nil {
 				return false, nil, nil
 			} else {
@@ -118,12 +117,12 @@ func (n *node) Matches(path [][]byte, values [][]byte) (bool, *node, [][]byte) {
 			}
 		} else if n.wildcard != nil {
 			if values == nil {
-				values = [][]byte{path[i]}
+				values = [][]byte{path.m[i]}
 			} else {
-				values = append(values, path[i])
+				values = append(values, path.m[i])
 			}
-			if i+1 < lpath {
-				return n.wildcard.Matches(path[i+1:], values)
+			if i+1 < path.n {
+				return n.wildcard.Matches(i+1, path, values)
 			} else if n.wildcard.handler == nil {
 				return false, nil, nil
 			} else {

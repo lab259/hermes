@@ -34,8 +34,8 @@ test-watch:
 
 bench:
 	@mkdir -p ./bench-results
-	@${GOPATHCMD} go test -benchmem -run=github.com/lab259/http -bench=$(TARGET)$$ -test.parallel=1 -cpuprofile ./bench-results/profile.out
-	@${GOPATHCMD} go tool pprof -svg profile.out > ./bench-results/profile.svg
+	@${GOPATHCMD} go test -benchmem -run=github.com/lab259/http -bench=$(TARGET)$$ -test.parallel=1 -cpuprofile ./bench-results/cpu.prof -memprofile ./bench-results/mem.prof
+	# @${GOPATHCMD} go tool pprof -svg ./bench-results/cpu.prof > ./bench-results/cpu-prof.svg
 
 coverage-ci:
 	@mkdir -p $(COVERDIR)

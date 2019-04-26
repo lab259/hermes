@@ -70,53 +70,61 @@ func NewRouter(config RouterConfig) Router {
 	return r
 }
 
-func split(source []byte, dest [][]byte) [][]byte {
+var routerHandlerSep = []byte{'/'}
+
+type pathDescriptor struct {
+	m map[int][]byte
+	n int
+}
+
+var pathPool = sync.Pool{
+	New: func() interface{} {
+		return &pathDescriptor{
+			m: make(map[int][]byte, 10),
+			n: 0,
+		}
+	},
+}
+
+func acquirePath() *pathDescriptor {
+	return pathPool.Get().(*pathDescriptor)
+}
+
+func releasePath(path *pathDescriptor) {
+	path.n = 0
+	pathPool.Put(path)
+}
+
+func split(source []byte, dest *pathDescriptor) {
 	lSource := len(source)
 	s := 0
 	for i := 0; i < lSource; i++ {
 		if source[i] == '/' {
 			if i != s {
-				dest = append(dest, source[s:i])
+				dest.m[dest.n] = source[s:i]
+				dest.n++
 			}
 			s = i + 1
 		} else if i+1 == lSource {
 			if i != s {
-				dest = append(dest, source[s:i+1])
+				dest.m[dest.n] = source[s : i+1]
+				dest.n++
 			}
 		}
 	}
-	return dest
-}
-
-var routerHandlerSep = []byte{'/'}
-
-var pathPool = sync.Pool{
-	New: func() interface{} {
-		return make([][]byte, 0, 255)
-	},
-}
-
-func acquirePath() [][]byte {
-	return pathPool.Get().([][]byte)
-}
-
-func releasePath(path [][]byte) {
-	path = path[0:0]
-	pathPool.Put(path)
 }
 
 func (router *router) findHandler(root *node, reqPath []byte) (bool, *node, [][]byte) {
 	path := acquirePath()
 	defer releasePath(path)
 
-	path = split(reqPath, path)
-	path = bytes.Split(reqPath[1:], routerHandlerSep)
-	if len(path) == 1 && len(path[0]) == 0 {
+	split(reqPath, path)
+	if path.n == 0 {
 		if root.handler != nil {
 			return true, root, nil
 		}
 	}
-	return root.Matches(path, nil)
+	return root.Matches(0, path, nil)
 }
 
 func (router *router) Handler() fasthttp.RequestHandler {

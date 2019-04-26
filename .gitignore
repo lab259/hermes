@@ -20,3 +20,4 @@ vendor/
 .vscode/
 bin/
 test-results/
+bench-results/

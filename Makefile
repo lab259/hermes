@@ -32,6 +32,11 @@ test:
 test-watch:
 	@${GOPATHCMD} ginkgo watch -cover -r ./...
 
+bench:
+	@mkdir -p ./bench-results
+	@${GOPATHCMD} go test -benchmem -run=github.com/lab259/http -bench=$(TARGET)$$ -test.parallel=1 -cpuprofile ./bench-results/profile.out
+	@${GOPATHCMD} go tool pprof -svg profile.out > ./bench-results/profile.svg
+
 coverage-ci:
 	@mkdir -p $(COVERDIR)
 	@${GOPATHCMD} ginkgo -r -covermode=count --cover --trace ./

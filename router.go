@@ -73,14 +73,14 @@ func NewRouter(config RouterConfig) Router {
 var routerHandlerSep = []byte{'/'}
 
 type tokensDescriptor struct {
-	m map[int][]byte
+	m [][]byte
 	n int
 }
 
 var tokensDescriptorPool = sync.Pool{
 	New: func() interface{} {
 		return &tokensDescriptor{
-			m: make(map[int][]byte, 10),
+			m: make([][]byte, 0, 10),
 			n: 0,
 		}
 	},
@@ -92,6 +92,7 @@ func acquireTokensDescriptor() *tokensDescriptor {
 
 func releaseTokensDescriptor(path *tokensDescriptor) {
 	path.n = 0
+	path.m = path.m[:0]
 	tokensDescriptorPool.Put(path)
 }
 
@@ -101,13 +102,13 @@ func split(source []byte, dest *tokensDescriptor) {
 	for i := 0; i < lSource; i++ {
 		if source[i] == '/' {
 			if i != s {
-				dest.m[dest.n] = source[s:i]
+				dest.m = append(dest.m, source[s:i])
 				dest.n++
 			}
 			s = i + 1
 		} else if i+1 == lSource {
 			if i != s {
-				dest.m[dest.n] = source[s : i+1]
+				dest.m = append(dest.m, source[s:i+1])
 				dest.n++
 			}
 		}
@@ -141,10 +142,8 @@ func (router *router) Handler() fasthttp.RequestHandler {
 		method := string(req.Method())
 		if root, ok := router.children[method]; ok {
 			if found, node := router.findHandler(root, req.Path(), values); found {
-				for i := 0; i < values.n; i++ {
-					req.validParams = append(req.validParams, node.names[i])
-					req.params[i] = values.m[i]
-				}
+				req.params = values.m[:]
+				req.validParams = node.names[:]
 				node.handler(req, res).End()
 				return
 			}

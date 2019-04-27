@@ -24,7 +24,7 @@ vet:
 	@$(GOPATHCMD) go vet ./...
 
 fmt:
-	@$(GOPATHCMD) gofmt -e -s -d *.go
+	@$(GOPATHCMD) gofmt -e -s *.go
 
 test:
 	@${GOPATHCMD} ginkgo --failFast ./...

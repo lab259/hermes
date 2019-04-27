@@ -30,7 +30,7 @@ var emptyHandler = func(req Request, res Response) Result {
 
 func createPathDescriptor() *tokensDescriptor {
 	return &tokensDescriptor{
-		m: make(map[int][]byte, 10),
+		m: make([][]byte, 0, 10),
 		n: 0,
 	}
 }
@@ -1054,6 +1054,7 @@ func BenchmarkSplit(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		split(path, tokens)
 		tokens.n = 0
+		tokens.m = tokens.m[:0]
 	}
 }
 

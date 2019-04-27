@@ -13,7 +13,7 @@ var requestPool = &sync.Pool{
 	New: func() interface{} {
 		return &request{
 			validParams: make([]string, 0, 10),
-			params:      make(map[int][]byte, 10),
+			params:      make([][]byte, 0, 10),
 		}
 	},
 }
@@ -22,7 +22,7 @@ type request struct {
 	ctx         context.Context
 	r           *fasthttp.RequestCtx
 	validParams []string
-	params      map[int][]byte
+	params      [][]byte
 }
 
 func acquireRequest(ctx context.Context, r *fasthttp.RequestCtx) *request {
@@ -41,6 +41,7 @@ func (req *request) reset() {
 	req.r = nil
 	req.ctx = nil
 	req.validParams = req.validParams[:0]
+	req.params = req.params[:0]
 }
 
 func (req *request) Raw() *fasthttp.RequestCtx {

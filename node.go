@@ -117,7 +117,7 @@ func (n *node) Matches(s int, path *tokensDescriptor, values *tokensDescriptor) 
 			}
 		} else if n.wildcard != nil {
 			if values != nil {
-				values.m[values.n] = path.m[i]
+				values.m = append(values.m, path.m[i])
 				values.n++
 			}
 			if i+1 < path.n {

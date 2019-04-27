@@ -35,7 +35,12 @@ test-watch:
 bench:
 	@mkdir -p ./bench-results
 	@${GOPATHCMD} go test -benchmem -run=github.com/lab259/http -bench=$(TARGET)$$ -test.parallel=1 -cpuprofile ./bench-results/cpu.prof -memprofile ./bench-results/mem.prof
-	# @${GOPATHCMD} go tool pprof -svg ./bench-results/cpu.prof > ./bench-results/cpu-prof.svg
+	
+plot-cpu:
+	@${GOPATHCMD} go tool pprof -http :8080 ./bench-results/cpu.prof
+
+plot-mem:
+	@${GOPATHCMD} go tool pprof -alloc_space -http :8080 ./bench-results/mem.prof
 
 coverage-ci:
 	@mkdir -p $(COVERDIR)

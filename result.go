@@ -8,6 +8,8 @@ import (
 	"sync"
 
 	"github.com/lab259/errors"
+	"github.com/valyala/bytebufferpool"
+
 	"github.com/valyala/fasthttp"
 )
 
@@ -111,6 +113,23 @@ func (r *result) defaultStatus(code int) {
 
 func (r *result) Redirect(uri string, code int) Result {
 	r.r.Redirect(uri, code)
+	return r
+}
+
+func (r *result) File(filepath string) Result {
+	r.r.SendFile(filepath)
+	return r
+}
+
+func (r *result) FileDownload(filepath, filename string) Result {
+	r.r.SendFile(filepath)
+	buff := bytebufferpool.Get()
+	defer bytebufferpool.Put(buff)
+
+	buff.SetString("attachment; filename=")
+	buff.WriteString(filename)
+
+	r.r.Response.Header.Set("Content-Disposition", buff.String())
 	return r
 }
 

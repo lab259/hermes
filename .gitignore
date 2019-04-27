@@ -21,3 +21,4 @@ vendor/
 bin/
 test-results/
 bench-results/
+*.fasthttp.gz

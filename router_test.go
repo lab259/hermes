@@ -1,6 +1,8 @@
 package http
 
 import (
+	"strings"
+
 	g "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -796,21 +798,87 @@ var _ = g.Describe("Router", func() {
 			Expect(value1).To(Equal(2))
 		})
 
-		g.It("should call the not found callback for wrong method", func() {
-			value1 := 1
-
-			router := NewRouter(RouterConfig{NotFound: func(req Request, res Response) Result {
-				value1 = 2
+		g.It("should call the default not found callback", func() {
+			router := NewDefaultRouter()
+			router.Get("/:account/transactions", func(req Request, res Response) Result {
+				g.Fail("should not be called")
 				return res.End()
-			}})
+			})
+			ctx := createRequestCtxFromPath("GET", "/value1")
+			router.Handler()(ctx)
+			Expect(ctx.Response.StatusCode()).To(Equal(fasthttp.StatusNotFound))
+		})
+
+		g.It("should call the default method not allowed handler for wrong method", func() {
+			router := NewDefaultRouter()
 			router.Get("/:account/transactions", func(req Request, res Response) Result {
 				g.Fail("should not be called")
 				return res.End()
 			})
 
-			router.Handler()(createRequestCtxFromPath("POST", "/value1"))
+			ctx := createRequestCtxFromPath("POST", "/value1/transactions")
+			router.Handler()(ctx)
+			methods := string(ctx.Response.Header.Peek("Allow"))
+			Expect(strings.Split(methods, ", ")).To(ConsistOf("GET", "OPTIONS"))
+			Expect(ctx.Response.StatusCode()).To(Equal(fasthttp.StatusMethodNotAllowed))
+		})
 
-			Expect(value1).To(Equal(2))
+		g.It("should call the default not found callback (JSON)", func() {
+			router := NewDefaultRouter()
+			router.Get("/:account/transactions", func(req Request, res Response) Result {
+				g.Fail("should not be called")
+				return res.End()
+			})
+			ctx := createRequestCtxFromPath("GET", "/value1")
+			ctx.Request.Header.Set("Accept", "application/json, text/html, text/plain")
+			router.Handler()(ctx)
+			Expect(ctx.Response.StatusCode()).To(Equal(fasthttp.StatusNotFound))
+			Expect(string(ctx.Response.Header.Peek("Content-Type"))).To(Equal("application/json; charset=utf-8"))
+		})
+
+		g.It("should call the default method not allowed handler for wrong method (JSON)", func() {
+			router := NewDefaultRouter()
+			router.Get("/:account/transactions", func(req Request, res Response) Result {
+				g.Fail("should not be called")
+				return res.End()
+			})
+
+			ctx := createRequestCtxFromPath("POST", "/value1/transactions")
+			ctx.Request.Header.Set("Accept", "application/json, text/html, text/plain")
+			router.Handler()(ctx)
+			methods := string(ctx.Response.Header.Peek("Allow"))
+			Expect(strings.Split(methods, ", ")).To(ConsistOf("GET", "OPTIONS"))
+			Expect(ctx.Response.StatusCode()).To(Equal(fasthttp.StatusMethodNotAllowed))
+			Expect(string(ctx.Response.Header.Peek("Content-Type"))).To(Equal("application/json; charset=utf-8"))
+		})
+
+		g.Describe("Options request", func() {
+			g.It("should resolve server-wide", func() {
+				router.Get("/todos", emptyHandler)
+				router.Post("/todos", emptyHandler)
+				ctx := createRequestCtxFromPath("OPTIONS", "*")
+				router.Handler()(ctx)
+				methods := string(ctx.Response.Header.Peek("Allow"))
+				Expect(strings.Split(methods, ", ")).To(ConsistOf("GET", "POST", "OPTIONS"))
+			})
+
+			g.It("should resolve server-wide²", func() {
+				router.Get("/todos", emptyHandler)
+				router.Post("/todos", emptyHandler)
+				ctx := createRequestCtxFromPath("OPTIONS", "/*")
+				router.Handler()(ctx)
+				methods := string(ctx.Response.Header.Peek("Allow"))
+				Expect(strings.Split(methods, ", ")).To(ConsistOf("GET", "POST", "OPTIONS"))
+			})
+
+			g.It("should resolve specific path", func() {
+				router.Get("/todos", emptyHandler)
+				router.Post("/todos", emptyHandler)
+				ctx := createRequestCtxFromPath("OPTIONS", "/todos")
+				router.Handler()(ctx)
+				methods := string(ctx.Response.Header.Peek("Allow"))
+				Expect(strings.Split(methods, ", ")).To(ConsistOf("GET", "POST", "OPTIONS"))
+			})
 		})
 
 		g.Describe("Middlewares", func() {

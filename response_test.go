@@ -189,5 +189,22 @@ var _ = describe("Http", func() {
 			Expect(tmp.String()).To(Equal(`this is a test`))
 			Expect(string(res.r.Response.Header.Peek("Content-Type"))).To(Equal("awesome/test"))
 		})
+
+		it("should send file", func() {
+			res := newResponse()
+			res.File("examples/files/sample.pdf")
+
+			Expect(res.r.Response.StatusCode()).To(Equal(200))
+			Expect(string(res.r.Response.Header.Peek("Content-Type"))).To(Equal("application/pdf"))
+		})
+
+		it("should send file (download)", func() {
+			res := newResponse()
+			res.FileDownload("examples/files/sample.pdf", "expected.pdf")
+
+			Expect(res.r.Response.StatusCode()).To(Equal(200))
+			Expect(string(res.r.Response.Header.Peek("Content-Type"))).To(Equal("application/pdf"))
+			Expect(string(res.r.Response.Header.Peek("Content-Disposition"))).To(Equal("attachment; filename=expected.pdf"))
+		})
 	})
 })

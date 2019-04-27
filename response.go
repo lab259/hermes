@@ -61,6 +61,14 @@ func (res *response) Redirect(uri string, code int) Result {
 	return res.newResult().Redirect(uri, code)
 }
 
+func (res *response) File(filepath string) Result {
+	return res.newResult().File(filepath)
+}
+
+func (res *response) FileDownload(filepath, filename string) Result {
+	return res.newResult().FileDownload(filepath, filename)
+}
+
 func (res *response) End() Result {
 	return res.newResult()
 }

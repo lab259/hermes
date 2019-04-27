@@ -82,6 +82,10 @@ type Response interface {
 	// Error sends the default 500 response
 	Error(error) Result
 
+	File(filepath string) Result
+
+	FileDownload(filepath, filename string) Result
+
 	// Redirect redirects the client to a URL
 	Redirect(uri string, code int) Result
 
@@ -94,6 +98,8 @@ type Result interface {
 	Data(data interface{}) Result
 	Error(error) Result
 	Redirect(uri string, code int) Result
+	File(filepath string) Result
+	FileDownload(filepath, filename string) Result
 	// End release the resources
 	End()
 }

@@ -54,3 +54,4 @@ coverage: coverage-ci
 
 coverage-html: coverage
 	@$(GOPATHCMD) go tool cover -html="${COVERAGEFILE}" -o .cover/report.html
+	@xdg-open .cover/report.html 2> /dev/null > /dev/null

@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  branch = "master"
+  digest = "1:c8f7b96e81567a984ec03bea711fdc6adb25a4571904fdf286b7e7d631334007"
+  name = "github.com/AdhityaRamadhanus/fasthttpcors"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "d4c07198763ad28118e1530c107162de17297d13"
+
+[[projects]]
   digest = "1:865079840386857c809b72ce300be7580cb50d3d3129ce11bf9aa6ca2bc1934a"
   name = "github.com/fatih/color"
   packages = ["."]
@@ -272,6 +280,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/AdhityaRamadhanus/fasthttpcors",
     "github.com/fatih/color",
     "github.com/jamillosantos/macchiato",
     "github.com/lab259/errors",
@@ -279,6 +288,7 @@
     "github.com/onsi/ginkgo",
     "github.com/onsi/ginkgo/reporters",
     "github.com/onsi/gomega",
+    "github.com/valyala/bytebufferpool",
     "github.com/valyala/fasthttp",
     "gopkg.in/go-playground/validator.v9",
     "gopkg.in/yaml.v2",

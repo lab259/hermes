@@ -21,7 +21,7 @@ type router struct {
 	defaultOptions   Handler
 }
 
-func NewDefaultRouter() Router {
+func DefaultRouter() Router {
 	return NewRouter(RouterConfig{})
 }
 

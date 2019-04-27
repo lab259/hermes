@@ -4,12 +4,11 @@ import (
 	"fmt"
 
 	"github.com/lab259/http"
-	"github.com/lab259/http/examples/todos/api"
 	"github.com/lab259/http/middlewares"
 )
 
 var config = http.ApplicationConfig{
-	Name: "Todo (v0.1.0)",
+	Name: "cors/v0.1.0",
 	HTTP: http.FasthttpServiceConfiguration{
 		Bind: ":8080",
 	},
@@ -17,18 +16,17 @@ var config = http.ApplicationConfig{
 
 func router() http.Router {
 	router := http.DefaultRouter()
-
-	router.Use(
-		middlewares.RecoverableMiddleware,
-		middlewares.LoggingMiddleware,
-	)
-
-	api.SetupRoutes(router)
+	router.Use(middlewares.DefaultCorsMiddleware())
+	router.Get("/hello", func(req http.Request, res http.Response) http.Result {
+		return res.Data(map[string]interface{}{
+			"hello": "world",
+		})
+	})
 	return router
 }
 
 func main() {
 	app := http.NewApplication(config, router())
-	fmt.Printf("%s listening at http://localhost%s ...\n", app.Name(), app.Configuration.HTTP.Bind)
+	fmt.Println("Go to http://localhost:8080/hello")
 	app.Start()
 }

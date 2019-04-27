@@ -799,7 +799,7 @@ var _ = g.Describe("Router", func() {
 		})
 
 		g.It("should call the default not found callback", func() {
-			router := NewDefaultRouter()
+			router := DefaultRouter()
 			router.Get("/:account/transactions", func(req Request, res Response) Result {
 				g.Fail("should not be called")
 				return res.End()
@@ -810,7 +810,7 @@ var _ = g.Describe("Router", func() {
 		})
 
 		g.It("should call the default method not allowed handler for wrong method", func() {
-			router := NewDefaultRouter()
+			router := DefaultRouter()
 			router.Get("/:account/transactions", func(req Request, res Response) Result {
 				g.Fail("should not be called")
 				return res.End()
@@ -824,7 +824,7 @@ var _ = g.Describe("Router", func() {
 		})
 
 		g.It("should call the default not found callback (JSON)", func() {
-			router := NewDefaultRouter()
+			router := DefaultRouter()
 			router.Get("/:account/transactions", func(req Request, res Response) Result {
 				g.Fail("should not be called")
 				return res.End()
@@ -837,7 +837,7 @@ var _ = g.Describe("Router", func() {
 		})
 
 		g.It("should call the default method not allowed handler for wrong method (JSON)", func() {
-			router := NewDefaultRouter()
+			router := DefaultRouter()
 			router.Get("/:account/transactions", func(req Request, res Response) Result {
 				g.Fail("should not be called")
 				return res.End()

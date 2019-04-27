@@ -13,7 +13,7 @@ var requestPool = &sync.Pool{
 	New: func() interface{} {
 		return &request{
 			validParams: make([]string, 0, 10),
-			params:      make(map[string][]byte, 10),
+			params:      make(map[int][]byte, 10),
 		}
 	},
 }
@@ -22,7 +22,7 @@ type request struct {
 	ctx         context.Context
 	r           *fasthttp.RequestCtx
 	validParams []string
-	params      map[string][]byte
+	params      map[int][]byte
 }
 
 func acquireRequest(ctx context.Context, r *fasthttp.RequestCtx) *request {
@@ -71,9 +71,9 @@ func (req *request) Param(name string) string {
 	// req.params is not safe, since its reused over requests
 	// but validParams is, so we check if name is one of the
 	// valid params, before actually return the value
-	for _, p := range req.validParams {
+	for i, p := range req.validParams {
 		if p == name {
-			return string(req.params[name])
+			return string(req.params[i])
 		}
 	}
 	return ""

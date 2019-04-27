@@ -143,7 +143,7 @@ func (router *router) Handler() fasthttp.RequestHandler {
 			if found, node := router.findHandler(root, req.Path(), values); found {
 				for i := 0; i < values.n; i++ {
 					req.validParams = append(req.validParams, node.names[i])
-					req.params[node.names[i]] = values.m[i]
+					req.params[i] = values.m[i]
 				}
 				node.handler(req, res).End()
 				return

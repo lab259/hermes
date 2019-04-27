@@ -26,8 +26,8 @@ var emptyHandler = func(req Request, res Response) Result {
 	return res.End()
 }
 
-func createPathDescriptor() *pathDescriptor {
-	return &pathDescriptor{
+func createPathDescriptor() *tokensDescriptor {
+	return &tokensDescriptor{
 		m: make(map[int][]byte, 10),
 		n: 0,
 	}
@@ -424,7 +424,7 @@ var _ = g.Describe("Router", func() {
 			router := NewRouter(emptyRouterConfig).(*router)
 			router.Get("/:account/detail", emptyHandler)
 			router.Get("/:account/id", emptyHandler)
-			ok, _, _ := router.children["GET"].Matches(0, createPathDescriptor(), nil)
+			ok, _ := router.children["GET"].Matches(0, createPathDescriptor(), nil)
 			Expect(ok).To(BeFalse())
 		})
 	})

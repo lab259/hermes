@@ -72,30 +72,30 @@ func NewRouter(config RouterConfig) Router {
 
 var routerHandlerSep = []byte{'/'}
 
-type pathDescriptor struct {
+type tokensDescriptor struct {
 	m map[int][]byte
 	n int
 }
 
-var pathPool = sync.Pool{
+var tokensDescriptorPool = sync.Pool{
 	New: func() interface{} {
-		return &pathDescriptor{
+		return &tokensDescriptor{
 			m: make(map[int][]byte, 10),
 			n: 0,
 		}
 	},
 }
 
-func acquirePath() *pathDescriptor {
-	return pathPool.Get().(*pathDescriptor)
+func acquireTokensDescriptor() *tokensDescriptor {
+	return tokensDescriptorPool.Get().(*tokensDescriptor)
 }
 
-func releasePath(path *pathDescriptor) {
+func releaseTokensDescriptor(path *tokensDescriptor) {
 	path.n = 0
-	pathPool.Put(path)
+	tokensDescriptorPool.Put(path)
 }
 
-func split(source []byte, dest *pathDescriptor) {
+func split(source []byte, dest *tokensDescriptor) {
 	lSource := len(source)
 	s := 0
 	for i := 0; i < lSource; i++ {
@@ -114,17 +114,17 @@ func split(source []byte, dest *pathDescriptor) {
 	}
 }
 
-func (router *router) findHandler(root *node, reqPath []byte) (bool, *node, [][]byte) {
-	path := acquirePath()
-	defer releasePath(path)
+func (router *router) findHandler(root *node, reqPath []byte, values *tokensDescriptor) (bool, *node) {
+	path := acquireTokensDescriptor()
+	defer releaseTokensDescriptor(path)
 
 	split(reqPath, path)
 	if path.n == 0 {
 		if root.handler != nil {
-			return true, root, nil
+			return true, root
 		}
 	}
-	return root.Matches(0, path, nil)
+	return root.Matches(0, path, values)
 }
 
 func (router *router) Handler() fasthttp.RequestHandler {
@@ -135,11 +135,15 @@ func (router *router) Handler() fasthttp.RequestHandler {
 		res := acquireResponse(fCtx)
 		defer releaseResponse(res)
 
+		values := acquireTokensDescriptor()
+		defer releaseTokensDescriptor(values)
+
 		method := string(req.Method())
 		if root, ok := router.children[method]; ok {
-			if found, node, values := router.findHandler(root, req.Path()); found {
-				for i, v := range values {
-					fCtx.SetUserValue(node.names[i], string(v))
+			if found, node := router.findHandler(root, req.Path(), values); found {
+				for i := 0; i < values.n; i++ {
+					req.validParams = append(req.validParams, node.names[i])
+					req.params[node.names[i]] = values.m[i]
 				}
 				node.handler(req, res).End()
 				return
@@ -208,7 +212,7 @@ func (r *router) allowed(path []byte, reqMethod string) (allow string) {
 				continue
 			}
 
-			if found, _, _ := r.findHandler(r.children[method], path); found {
+			if found, _ := r.findHandler(r.children[method], path, nil); found {
 				// add request method to list of allowed methods
 				if len(allow) == 0 {
 					allow = method

@@ -11,13 +11,18 @@ import (
 
 var requestPool = &sync.Pool{
 	New: func() interface{} {
-		return &request{}
+		return &request{
+			validParams: make([]string, 0, 10),
+			params:      make(map[string][]byte, 10),
+		}
 	},
 }
 
 type request struct {
-	ctx context.Context
-	r   *fasthttp.RequestCtx
+	ctx         context.Context
+	r           *fasthttp.RequestCtx
+	validParams []string
+	params      map[string][]byte
 }
 
 func acquireRequest(ctx context.Context, r *fasthttp.RequestCtx) *request {
@@ -35,6 +40,7 @@ func releaseRequest(req *request) {
 func (req *request) reset() {
 	req.r = nil
 	req.ctx = nil
+	req.validParams = req.validParams[:0]
 }
 
 func (req *request) Raw() *fasthttp.RequestCtx {
@@ -62,8 +68,13 @@ func (req *request) Host() []byte {
 }
 
 func (req *request) Param(name string) string {
-	if p, ok := req.r.UserValue(name).(string); ok {
-		return p
+	// req.params is not safe, since its reused over requests
+	// but validParams is, so we check if name is one of the
+	// valid params, before actually return the value
+	for _, p := range req.validParams {
+		if p == name {
+			return string(req.params[name])
+		}
 	}
 	return ""
 }

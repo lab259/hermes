@@ -2,7 +2,6 @@ package http
 
 import (
 	"bytes"
-	"encoding/json"
 	"strings"
 
 	"github.com/lab259/errors"
@@ -86,13 +85,13 @@ var _ = describe("Http", func() {
 		})
 
 		it("should fail serializing a JSON struct", func() {
-			defer func() {
-				err := recover()
-				Expect(err).To(BeAssignableToTypeOf(&json.MarshalerError{}))
-			}()
-
 			res := newResponse()
 			res.Data(&errornousJson{})
+			Expect(string(res.result.r.Response.Header.ContentType())).To(Equal("application/json; charset=utf-8"))
+			tmp := bytes.NewBufferString("")
+			res.result.r.Response.BodyWriteTo(tmp)
+			Expect(res.result.r.Response.StatusCode()).To(Equal(500))
+			Expect(strings.TrimSpace(tmp.String())).To(Equal(`{"code":"internal-server-error","message":"We encountered an internal error or misconfiguration and was unable to complete your request."}`))
 		})
 
 		it("should write bytes to the context body", func() {

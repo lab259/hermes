@@ -28,9 +28,6 @@ func (r *result) Data(data interface{}) Result {
 		return r.Error(err)
 	}
 
-	r.hasSentData = true
-
-	r.setStatus()
 	if v, ok := data.([]byte); ok {
 		r.r.Response.AppendBody(v)
 	} else if v, ok := data.(io.Reader); ok {
@@ -45,9 +42,8 @@ func (r *result) Data(data interface{}) Result {
 		case reflect.Struct, reflect.Array, reflect.Slice, reflect.Map:
 			r.setContentType(defaultJSONContentType)
 			e := json.NewEncoder(r.r.Response.BodyWriter())
-			err := e.Encode(data)
-			if err != nil {
-				panic(err)
+			if err := e.Encode(data); err != nil {
+				return r.Error(err)
 			}
 		default:
 			r.setContentType(defaultContentType)
@@ -55,6 +51,8 @@ func (r *result) Data(data interface{}) Result {
 		}
 	}
 
+	r.setStatus()
+	r.hasSentData = true
 	return r
 }
 

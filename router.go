@@ -115,11 +115,7 @@ func split(source []byte, dest *tokensDescriptor) {
 	}
 }
 
-func (router *router) findHandler(root *node, reqPath []byte, values *tokensDescriptor) (bool, *node) {
-	path := acquireTokensDescriptor()
-	defer releaseTokensDescriptor(path)
-
-	split(reqPath, path)
+func (router *router) findHandler(root *node, path *tokensDescriptor, values *tokensDescriptor) (bool, *node) {
 	if path.n == 0 {
 		if root.handler != nil {
 			return true, root
@@ -128,20 +124,27 @@ func (router *router) findHandler(root *node, reqPath []byte, values *tokensDesc
 	return root.Matches(0, path, values)
 }
 
+func (router *router) releaseResources(req *request, res *response, path *tokensDescriptor, values *tokensDescriptor) {
+	releaseRequest(req)
+	releaseResponse(res)
+	releaseTokensDescriptor(path)
+	releaseTokensDescriptor(values)
+}
+
 func (router *router) Handler() fasthttp.RequestHandler {
 	return func(fCtx *fasthttp.RequestCtx) {
 		req := acquireRequest(context.Background(), fCtx)
-		defer releaseRequest(req)
-
 		res := acquireResponse(fCtx)
-		defer releaseResponse(res)
-
 		values := acquireTokensDescriptor()
-		defer releaseTokensDescriptor(values)
+		path := acquireTokensDescriptor()
+		defer router.releaseResources(req, res, path, values)
+
+		// split request path into tokenDescriptor
+		split(req.Path(), path)
 
 		method := string(req.Method())
 		if root, ok := router.children[method]; ok {
-			if found, node := router.findHandler(root, req.Path(), values); found {
+			if found, node := router.findHandler(root, path, values); found {
 				req.params = values.m[:]
 				req.validParams = node.names[:]
 				node.handler(req, res).End()
@@ -151,14 +154,14 @@ func (router *router) Handler() fasthttp.RequestHandler {
 
 		if method == "OPTIONS" {
 			// handle OPTIONS requests
-			if allow := router.allowed(req.Path(), method); len(allow) > 0 {
+			if allow := router.allowed(req.Path(), method, path); len(allow) > 0 {
 				res.Header("Allow", allow)
 				router.callHandler(req, res, router.middlewares, router.defaultOptions).End()
 				return
 			}
 		} else {
 			// handle 405
-			if allow := router.allowed(req.Path(), method); len(allow) > 0 {
+			if allow := router.allowed(req.Path(), method, path); len(allow) > 0 {
 				res.Header("Allow", allow)
 				router.callHandler(req, res, router.middlewares, router.methodNotAllowed).End()
 				return
@@ -190,8 +193,8 @@ var (
 	optionsSlashServerWide = []byte("/*")
 )
 
-func (r *router) allowed(path []byte, reqMethod string) (allow string) {
-	if bytes.Equal(path, optionsServerWide) || bytes.Equal(path, optionsSlashServerWide) { // server-wide
+func (r *router) allowed(reqPath []byte, reqMethod string, path *tokensDescriptor) (allow string) {
+	if bytes.Equal(reqPath, optionsServerWide) || bytes.Equal(reqPath, optionsSlashServerWide) { // server-wide
 		for method := range r.children {
 			if method == "OPTIONS" {
 				continue

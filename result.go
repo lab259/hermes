@@ -62,15 +62,15 @@ func (r *result) Error(err error) Result {
 	}
 
 	errResponse := acquireErrorResponse(fasthttp.StatusInternalServerError)
-	defer releaseErrorResponse(errResponse)
-
 	if !errors.AggregateToResponse(err, errResponse) {
 		errResponse.SetParam("code", InternalServerErrorCode)
 		errResponse.SetParam("message", InternalServerErrorMessage)
 	}
 
 	r.defaultStatus(errResponse.Status)
-	return r.Data(errResponse.Data)
+	r.Data(errResponse.Data)
+	releaseErrorResponse(errResponse)
+	return r
 }
 
 func (r *result) setStatus() {
@@ -104,12 +104,10 @@ func (r *result) File(filepath string) Result {
 func (r *result) FileDownload(filepath, filename string) Result {
 	r.r.SendFile(filepath)
 	buff := bytebufferpool.Get()
-	defer bytebufferpool.Put(buff)
-
 	buff.SetString("attachment; filename=")
 	buff.WriteString(filename)
-
 	r.r.Response.Header.Set("Content-Disposition", buff.String())
+	bytebufferpool.Put(buff)
 	return r
 }
 

@@ -1084,60 +1084,62 @@ func BenchmarkRouter_HandlerWithParams(b *testing.B) {
 	}
 }
 
-func BenchmarkRouter_HandlerWithMiddleware(b *testing.B) {
+func BenchmarkRouter_Handler2Levels(b *testing.B) {
 	router := NewRouter(RouterConfig{})
-	router.With(func(req Request, res Response, next Handler) Result {
-		return next(req, res)
-	}).Get("/", emptyHandler)
+	router.Get("/hello/world", emptyHandler)
 	ctx := fasthttp.RequestCtx{}
-	ctx.Request.SetRequestURI("/")
+	ctx.Request.SetRequestURI("/hello/world")
 
 	h := router.Handler()
-
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		h(&ctx)
 	}
+}
+
+func BenchmarkRouter_Handler2LevelsWithParams(b *testing.B) {
+	router := NewRouter(RouterConfig{})
+	router.Get("/:id/:name", emptyHandler)
+	ctx := fasthttp.RequestCtx{}
+	ctx.Request.SetRequestURI("/id/meu-nome")
+
+	h := router.Handler()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		h(&ctx)
+	}
+}
+
+func benchmarkHandlerWithMiddlewares(n int, b *testing.B) {
+	router := DefaultRouter()
+	m := make([]Middleware, 0, n)
+	for i := 0; i < n; i++ {
+		m = append(m, func(req Request, res Response, next Handler) Result {
+			return next(req, res)
+		})
+	}
+	router.With(m...).Get("/", emptyHandler)
+	ctx := fasthttp.RequestCtx{}
+	ctx.Request.SetRequestURI("/")
+	h := router.Handler()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		h(&ctx)
+	}
+}
+
+func BenchmarkRouter_HandlerWithMiddleware(b *testing.B) {
+	benchmarkHandlerWithMiddlewares(1, b)
 }
 
 func BenchmarkRouter_HandlerWithMiddleware2(b *testing.B) {
-	router := NewRouter(RouterConfig{})
-	router.With(func(req Request, res Response, next Handler) Result {
-		return next(req, res)
-	}, func(req Request, res Response, next Handler) Result {
-		return next(req, res)
-	}).Get("/", emptyHandler)
-	ctx := fasthttp.RequestCtx{}
-	ctx.Request.SetRequestURI("/")
-
-	h := router.Handler()
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		h(&ctx)
-	}
+	benchmarkHandlerWithMiddlewares(2, b)
 }
 
 func BenchmarkRouter_HandlerWithMiddleware5(b *testing.B) {
-	router := NewRouter(RouterConfig{})
-	router.With(func(req Request, res Response, next Handler) Result {
-		return next(req, res)
-	}, func(req Request, res Response, next Handler) Result {
-		return next(req, res)
-	}, func(req Request, res Response, next Handler) Result {
-		return next(req, res)
-	}, func(req Request, res Response, next Handler) Result {
-		return next(req, res)
-	}, func(req Request, res Response, next Handler) Result {
-		return next(req, res)
-	}).Get("/", emptyHandler)
-	ctx := fasthttp.RequestCtx{}
-	ctx.Request.SetRequestURI("/")
+	benchmarkHandlerWithMiddlewares(5, b)
+}
 
-	h := router.Handler()
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		h(&ctx)
-	}
+func BenchmarkRouter_HandlerWithMiddleware10(b *testing.B) {
+	benchmarkHandlerWithMiddlewares(10, b)
 }

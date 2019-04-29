@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"reflect"
-	"sync"
 
 	"github.com/lab259/errors"
 	"github.com/valyala/bytebufferpool"
@@ -18,23 +17,6 @@ type result struct {
 
 	status      int
 	hasSentData bool
-}
-
-var resultPool = &sync.Pool{
-	New: func() interface{} {
-		return &result{}
-	},
-}
-
-func acquireResult(r *fasthttp.RequestCtx, status int) *result {
-	result := resultPool.Get().(*result)
-	result.r = r
-	result.status = status
-	return result
-}
-
-func releaseResult(r *result) {
-	resultPool.Put(r)
 }
 
 func (r *result) Data(data interface{}) Result {
@@ -134,9 +116,7 @@ func (r *result) FileDownload(filepath, filename string) Result {
 }
 
 func (r *result) End() {
-	// reset and release
 	r.r = nil
 	r.status = 0
 	r.hasSentData = false
-	releaseResult(r)
 }

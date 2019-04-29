@@ -8,24 +8,23 @@ import (
 
 var responsePool = &sync.Pool{
 	New: func() interface{} {
-		return &response{}
+		return &response{
+			result: result{},
+		}
 	},
 }
 
 type response struct {
-	r *fasthttp.RequestCtx
-
-	status int
+	result result
 }
 
 func (res *response) reset() {
-	res.r = nil
-	res.status = 0
+	// result is resetted on .End()
 }
 
 func acquireResponse(r *fasthttp.RequestCtx) *response {
 	res := responsePool.Get().(*response)
-	res.r = r
+	res.result.r = r
 	return res
 }
 
@@ -35,44 +34,40 @@ func releaseResponse(res *response) {
 }
 
 func (res *response) Cookie(cookie *fasthttp.Cookie) Response {
-	res.r.Response.Header.SetCookie(cookie)
+	res.result.r.Response.Header.SetCookie(cookie)
 	return res
 }
 
 func (res *response) Status(status int) Response {
-	res.status = status
+	res.result.status = status
 	return res
 }
 
 func (res *response) Header(name, value string) Response {
-	res.r.Response.Header.Set(name, value)
+	res.result.r.Response.Header.Set(name, value)
 	return res
 }
 
 func (res *response) Data(data interface{}) Result {
-	return res.newResult().Data(data)
+	return res.result.Data(data)
 }
 
 func (res *response) Error(err error) Result {
-	return res.newResult().Error(err)
+	return res.result.Error(err)
 }
 
 func (res *response) Redirect(uri string, code int) Result {
-	return res.newResult().Redirect(uri, code)
+	return res.result.Redirect(uri, code)
 }
 
 func (res *response) File(filepath string) Result {
-	return res.newResult().File(filepath)
+	return res.result.File(filepath)
 }
 
 func (res *response) FileDownload(filepath, filename string) Result {
-	return res.newResult().FileDownload(filepath, filename)
+	return res.result.FileDownload(filepath, filename)
 }
 
 func (res *response) End() Result {
-	return res.newResult()
-}
-
-func (res *response) newResult() Result {
-	return acquireResult(res.r, res.status)
+	return &res.result
 }

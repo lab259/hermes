@@ -18,19 +18,19 @@ sugar to the fasthttp "daily" usage.
 
 ## Routing
 
-`Routable` is described as an interface which have the DELETE, GET, HEAD,
-OPTIONS, PATCH, POST, PUT methods for routing. This aims to replace the
-fasthttprouter implementation ([#fasthttprouter](check why here)).
+`Routable` is described as an interface which have the Delete, Get, Head,
+Options, Patch, Post, Put methods for routing. This aims to [replace the
+fasthttprouter implementation](#fasthttprouter).
 
 In order to get things going, the below example shows how to define an endpoint
 serving a GET method:
 
 ```go
-	router := http.NewRouter()
+router := http.DefaultRouter()
 
-	router.GET("/api/v1/user", func(ctx *Context) {
-		fmt.Fprint(ctx, "the user is: Snake Eyes")
-	})
+router.Get("/api/v1/user", func(req http.Request, res http.Response) http.Result {
+	res.Data("the user is: Snake Eyes")
+})
 ```
 
 ### Grouping
@@ -38,20 +38,19 @@ serving a GET method:
 When dealing with routes, groups are awesome!
 
 ```go
-	router := http.NewRouter()
+router := http.DefaultRouter()
 
-	apiGroup := router.Group("/api") // This retuns a `Routable` that can be used
-	                                 // to create other subgroups or define routes.
+apiGroup := router.Prefix("/api") // This retuns a `Routable` that can be used
+                                  // to create other subgroups or define routes.
 
-	apiv1 := apiGroup.Group("/v1")   // This is what we define as a subgroup.
-
-	apiv1.GET(                       // Now a definition of the route itself.
-		"/user",
-		func(ctx *Context) {
-			fmt.Fprint(ctx, "the user is: Snake Eyes")
-		},
-	)
-	// many other routes using `apiv1` ...
+apiv1 := apiGroup.Prefix("/v1")   // This is what we define as a subgroup.
+apiv1.Get(                        // Now a definition of the route itself.
+	"/user",
+	func(req http.Request, res http.Response) http.Result {
+		return res.Data("the user is: Snake Eyes")
+	},
+)
+// many other routes using `apiv1` ...
 ```
 
 There is no difference from using, or not, grouping into the routes definition.
@@ -66,69 +65,72 @@ Middlewares can implement some verification or extension logic and decide
 whether or not continue to run the "next" middleware/handler.
 
 ```go
-	router := http.NewRouter()
+router := http.DefaultRouter()
 
-	apiGroup := router.Group("/api")
-	apiv1 := apiGroup.Group("/v1")
-	apiv1.GET(
-		"/user",
-		func(ctx *Context) {
-			fmt.Fprint(ctx, "the user is: Snake Eyes")
-		},
-		func(ctx *Context, next Handler) {
-			// This is a middleware that could do something smart...
-			next(ctx)
-		},
-	)
+apiGroup := router.Prefix("/api")
+
+apiv1 := apiGroup.Prefix("/v1")
+
+apiv1.Use(func(req http.Request, res http.Response, next http.Handler) http.Result {
+	// This is a middleware that could do something smart...
+	return next(req, res)
+})
+
+apiv1.Get(
+	"/user",
+	func(req http.Request, res http.Response) http.Result {
+		return res.Data("the user is: Snake Eyes")
+	},
+)
 ```
 
 Yet, you can also define multiple middlewares for each route and their priority
 will be from the left to the right.
 
 ```go
-	router := http.NewRouter()
+router := http.DefaultRouter()
 
-	apiGroup := router.Group("/api")
-	apiv1 := apiGroup.Group("/v1")
-	apiv1.GET(
-		"/user",
-		func(ctx *Context) {
-			fmt.Fprint(ctx, "the user is: Snake Eyes")
-		},
-		func(ctx *Context, next Handler) {
-			// This is a middleware that could do something smart...
-			next(ctx)
-		},
-		func(ctx *Context, next Handler) {
-			// This is a second middleware for the endpoint...
-			next(ctx)
-		},
-	)
+apiGroup := router.Prefix("/api")
+apiv1 := apiGroup.Prefix("/v1")
+apiv1.With(
+	func(req http.Request, res http.Response, next http.Handler) http.Result {
+		// This is a middleware that could do something smart...
+		return next(ctx)
+	},
+	func(req http.Request, res http.Response, next http.Handler) http.Result {
+		// This is a second middleware for the endpoint...
+		return next(ctx)
+	},
+).Get(
+	"/user",
+	func(req http.Request, res http.Response) http.Result {
+		return res.Data("the user is: Snake Eyes")
+	},
+)
 ```
 
 Middlewares are also supported on groups:
 
 ```go
-	router := http.NewRouter()
+router := http.DefaultRouter()
 
-	apiGroup := router.Group("/api", func(ctx *Context, next Handler) {
-		// This is a middleware that could do something smart...
-		next(ctx)
-	})
-	apiv1 := apiGroup.Group("/v1", func(ctx *Context, next Handler) {
-		// Yet another middleware applied just for this subgroup...
-		next(ctx)
-	})
-	apiv1.GET(
-		"/user",
-		func(ctx *Context) {
-			fmt.Fprint(ctx, "the user is: Snake Eyes")
-		},
-		func(ctx *Context, next Handler) {
-			// This is a middleware that is applied just for this endpoint
-			next(ctx)
-		},
-	)
+apiGroup := router.Prefix("/api").With(func(req http.Request, res http.Resonse, next http.Handler) http.Result {
+	// This is a middleware that could do something smart...
+	return next(ctx)
+})
+apiv1 := apiGroup.Prefix("/v1").With(func(req http.Request, res http.Resonse, next http.Handler) http.Result {
+	// Yet another middleware applied just for this subgroup...
+	return next(ctx)
+})
+apiv1.With(func(req http.Request, res http.Resonse, next http.Handler) http.Result {
+	// This is a middleware that is applied just for this endpoint
+	return next(ctx)
+}).Get(
+	"/user",
+	func(req http.Request, res http.Resonse) http.Result {
+		return res.Data("the user is: Snake Eyes")
+	},
+)
 ```
 
 Again, there is no performance difference when using middlewares in a specific
@@ -137,51 +139,48 @@ middleware definitions into one big sequence of middlewares for each route.
 
 ### Thin JSON layer
 
-For simple sake of ease the use of sending and receiving JSON objects `SendJson`
-and `BodyJson` methods were added to the `Context`.
+For simple sake of ease the use of sending and receiving JSON objects `res.Data`
+and `req.Data` methods were added.
 
 #### Sending a JSON
 
-Above an example of sending a JSON document:
+The following is an example of sending a JSON document:
 
 ```go
-	router := http.NewRouter()
+router := http.DefaultRouter()
 
-	apiGroup := router.Group("/api")
-	apiv1 := apiGroup.Group("/v1")
-	apiv1.GET(
-		"/user",
-		func(ctx *Context) {
-			ctx.SendJson(map[string]interface{}{
-				"name": "Snake Eyes",
-				"email": "s.eyes@gijoe.com",
-			})
-		},
-	)
+apiv1 := router.Prefix("/api/v1")
+apiv1.Get(
+	"/user",
+	func(req http.Request, res http.Response) http.Result {
+		return res.Data(map[string]interface{}{
+			"name": "Snake Eyes",
+			"email": "s.eyes@gijoe.com",
+		})
+	},
+)
 ```
 
 ### Receiving a JSON
 
-Above an example of sending a JSON document:
+The following is an example of receiving a JSON document:
 
 ```go
-	router := http.NewRouter()
+router := http.DefaultRouter()
 
-	apiGroup := router.Group("/api")
-	apiv1 := apiGroup.Group("/v1")
-	apiv1.POST(
-		"/user",
-		func(ctx *Context) {
-			user := make(map[string]interface{})
-			err = ctx.BodyJson(&user)
-			if err != nil {
-				fmt.SendJson(map[string]interface{}{
-					"error": "user data invalid"
-				})
-			}
-			// To process the user information
-		},
-	)
+apiv1 := router.Group("/api/v1")
+apiv1.Post(
+	"/user",
+	func(req http.Request, res http.Response) http.Result {
+		user := make(map[string]interface{})
+		if err := req.Data(&user); err != nil {
+			return res.Status(400).Data(map[string]interface{}{
+				"error": "user data invalid"
+			})
+		}
+		// To process the user information
+	},
+)
 ```
 
 ## fasthttprouter

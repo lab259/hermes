@@ -2,9 +2,10 @@ package http
 
 import (
 	"errors"
-	"github.com/valyala/fasthttp"
 	"io"
 	"net"
+
+	"github.com/valyala/fasthttp"
 )
 
 // FasthttpServiceConfiguration keeps all the configuration needed to start the
@@ -16,7 +17,6 @@ type FasthttpServiceConfiguration struct {
 // FasthttpService implements the server for starting
 type FasthttpService struct {
 	running       bool
-	Router        *Router
 	Configuration FasthttpServiceConfiguration
 	Listener      net.Listener
 	Server        fasthttp.Server
@@ -56,7 +56,6 @@ func (service *FasthttpService) Restart() error {
 // Start ListenAndServe the server. This method is blocking because it uses
 // the fasthttp.ListenAndServe implementation.
 func (service *FasthttpService) Start() error {
-	service.Server.Handler = service.Router.Handler
 	ln, err := net.Listen("tcp4", service.Configuration.Bind)
 	if err != nil {
 		return err

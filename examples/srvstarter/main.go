@@ -1,8 +1,9 @@
 package main
 
 import (
-	"../.."
 	"time"
+
+	"github.com/lab259/http"
 )
 
 type Service1 struct{}

@@ -1,190 +1,231 @@
 package http
 
 import (
-	"github.com/valyala/fasthttp"
-	"fmt"
-	"sync"
 	"bytes"
+	"context"
+	"sync"
+
+	"github.com/valyala/fasthttp"
 )
 
-type Router struct {
-	children map[string]*node
-	NotFound Handler
+type RouterConfig struct {
+	NotFound         Handler
+	MethodNotAllowed Handler
 }
 
-func NewRouter() *Router {
-	return &Router{
-		children: make(map[string]*node),
+type router struct {
+	route
+	children         map[string]*node
+	notFound         Handler
+	methodNotAllowed Handler
+	defaultOptions   Handler
+}
+
+func DefaultRouter() Router {
+	return NewRouter(RouterConfig{})
+}
+
+func NewRouter(config RouterConfig) Router {
+	r := &router{
+		children:         make(map[string]*node),
+		notFound:         config.NotFound,
+		methodNotAllowed: config.MethodNotAllowed,
 	}
-}
 
-func (router *Router) handle(method, path string, handler Handler, middlewares ...Middleware) {
-	root, ok := router.children[method]
-	if !ok {
-		root = newNode()
-		router.children[method] = root
+	if config.NotFound == nil {
+		r.notFound = func(req Request, res Response) Result {
+			if req.WantsJSON() {
+				errResponse := acquireErrorResponse(fasthttp.StatusNotFound)
+				defer releaseErrorResponse(errResponse)
+
+				errResponse.SetParam("code", NotFoundErrorCode)
+				errResponse.SetParam("message", NotFoundErrorMessage)
+				return res.Status(errResponse.Status).Data(errResponse.Data)
+			}
+
+			return res.Status(fasthttp.StatusNotFound).Data(NotFoundErrorMessage)
+		}
 	}
 
-	if len(path) > 0 && path[0] == '/' {
-		path = path[1:]
+	if config.MethodNotAllowed == nil {
+		r.methodNotAllowed = func(req Request, res Response) Result {
+			if req.WantsJSON() {
+				errResponse := acquireErrorResponse(fasthttp.StatusMethodNotAllowed)
+				defer releaseErrorResponse(errResponse)
+
+				errResponse.SetParam("code", MethodNotAllowedErrorCode)
+				errResponse.SetParam("message", MethodNotAllowedErrorMessage)
+				return res.Status(errResponse.Status).Data(errResponse.Data)
+			}
+
+			return res.Status(fasthttp.StatusMethodNotAllowed).Data(MethodNotAllowedErrorMessage)
+		}
 	}
-	root.Add(path, handler, nil, middlewares)
-}
 
-func (router *Router) DELETE(path string, handler Handler, middlewares ...Middleware) {
-	router.handle("DELETE", path, handler, middlewares...)
-}
-
-func (router *Router) GET(path string, handler Handler, middlewares ...Middleware) {
-	router.handle("GET", path, handler, middlewares...)
-}
-
-func (router *Router) POST(path string, handler Handler, middlewares ...Middleware) {
-	router.handle("POST", path, handler, middlewares...)
-}
-
-func (router *Router) PUT(path string, handler Handler, middlewares ...Middleware) {
-	router.handle("PUT", path, handler, middlewares...)
-}
-
-func (router *Router) HEAD(path string, handler Handler, middlewares ...Middleware) {
-	router.handle("HEAD", path, handler, middlewares...)
-}
-
-func (router *Router) OPTIONS(path string, handler Handler, middlewares ...Middleware) {
-	router.handle("OPTIONS", path, handler, middlewares...)
-}
-
-func (router *Router) PATCH(path string, handler Handler, middlewares ...Middleware) {
-	router.handle("PATCH", path, handler, middlewares...)
-}
-
-func (router *Router) Group(path string, middlewares ... Middleware) Routable {
-	return &routerGroup{
-		prefix:      path,
-		router:      router,
-		middlewares: middlewares,
+	r.defaultOptions = func(req Request, res Response) Result {
+		return res.End()
 	}
+
+	r.router = r
+	return r
 }
 
-func Split(source []byte, dest [][]byte) [][]byte {
+var routerHandlerSep = []byte{'/'}
+
+type tokensDescriptor struct {
+	m [][]byte
+	n int
+}
+
+var tokensDescriptorPool = sync.Pool{
+	New: func() interface{} {
+		return &tokensDescriptor{
+			m: make([][]byte, 0, 10),
+			n: 0,
+		}
+	},
+}
+
+func acquireTokensDescriptor() *tokensDescriptor {
+	return tokensDescriptorPool.Get().(*tokensDescriptor)
+}
+
+func releaseTokensDescriptor(path *tokensDescriptor) {
+	path.n = 0
+	path.m = path.m[:0]
+	tokensDescriptorPool.Put(path)
+}
+
+func split(source []byte, dest *tokensDescriptor) {
 	lSource := len(source)
 	s := 0
 	for i := 0; i < lSource; i++ {
 		if source[i] == '/' {
 			if i != s {
-				dest = append(dest, source[s:i])
+				dest.m = append(dest.m, source[s:i])
+				dest.n++
 			}
 			s = i + 1
 		} else if i+1 == lSource {
 			if i != s {
-				dest = append(dest, source[s:i+1])
+				dest.m = append(dest.m, source[s:i+1])
+				dest.n++
 			}
 		}
 	}
-	return dest
 }
 
-var routerHandlerSep = []byte{'/'}
-
-var pathPool = sync.Pool{
-	New: func() interface{} {
-		return make([][]byte, 0, 255)
-	},
-}
-
-func (router *Router) Handler(fCtx *fasthttp.RequestCtx) {
-	method := string(fCtx.Method())
-	node, ok := router.children[method]
-	ctx := &Context{
-		Ctx:      fCtx,
-		Request:  &fCtx.Request,
-		Response: &fCtx.Response,
+func (router *router) findHandler(root *node, path *tokensDescriptor, values *tokensDescriptor) (bool, *node) {
+	if path.n == 0 {
+		if root.handler != nil {
+			return true, root
+		}
 	}
-	if ok {
-		path := pathPool.Get().([][]byte)
-		path = Split(ctx.Request.URI().Path(), path)
-		defer func() {
-			path = path[0:0]
-			pathPool.Put(path)
-		}()
-		path = bytes.Split(ctx.Request.URI().Path()[1:], routerHandlerSep)
-		if len(path) == 1 && len(path[0]) == 0 {
-			if node.handler != nil {
-				node.handler(ctx)
+	return root.Matches(0, path, values)
+}
+
+func (router *router) releaseResources(req *request, res *response, path *tokensDescriptor, values *tokensDescriptor) {
+	releaseRequest(req)
+	releaseResponse(res)
+	releaseTokensDescriptor(path)
+	releaseTokensDescriptor(values)
+}
+
+func (router *router) Handler() fasthttp.RequestHandler {
+	return func(fCtx *fasthttp.RequestCtx) {
+		req := acquireRequest(context.Background(), fCtx)
+		res := acquireResponse(fCtx)
+		values := acquireTokensDescriptor()
+		path := acquireTokensDescriptor()
+		defer router.releaseResources(req, res, path, values)
+
+		// split request path into tokenDescriptor
+		split(req.Path(), path)
+
+		method := string(req.Method())
+		if root, ok := router.children[method]; ok {
+			if found, node := router.findHandler(root, path, values); found {
+				req.params = values.m[:]
+				req.validParams = node.names[:]
+				node.handler(req, res).End()
 				return
 			}
-			if router.NotFound != nil {
-				router.NotFound(ctx)
-			}
-			return
 		}
-		found, node, values := node.Matches(path, nil)
-		if found {
-			for i, v := range values {
-				ctx.Ctx.SetUserValue(node.names[i], string(v))
+
+		if method == "OPTIONS" {
+			// handle OPTIONS requests
+			if allow := router.allowed(req.Path(), method, path); len(allow) > 0 {
+				res.Header("Allow", allow)
+				router.callHandler(req, res, router.middlewares, router.defaultOptions).End()
+				return
 			}
-			if len(node.middlewares) > 0 {
-				middlewareIdx := 0
-				var next Handler
-				next = func(ctx *Context) {
-					middlewareIdx++
-					if middlewareIdx < len(node.middlewares) {
-						node.middlewares[middlewareIdx](ctx, next)
-					} else {
-						node.handler(ctx)
-					}
-				}
-				node.middlewares[0](ctx, next)
+		} else {
+			// handle 405
+			if allow := router.allowed(req.Path(), method, path); len(allow) > 0 {
+				res.Header("Allow", allow)
+				router.callHandler(req, res, router.middlewares, router.methodNotAllowed).End()
+				return
+			}
+		}
+
+		router.callHandler(req, res, router.middlewares, router.notFound).End()
+	}
+}
+
+func (router *router) callHandler(req Request, res Response, middlewares []Middleware, handler Handler) Result {
+	if len(middlewares) > 0 {
+		middlewareIdx := 0
+		var next Handler
+		next = func(req2 Request, res2 Response) Result {
+			middlewareIdx++
+			if middlewareIdx < len(middlewares) {
+				return middlewares[middlewareIdx](req2, res2, next)
+			}
+			return handler(req2, res2)
+		}
+		return middlewares[0](req, res, next)
+	}
+	return handler(req, res)
+}
+
+var (
+	optionsServerWide      = []byte("*")
+	optionsSlashServerWide = []byte("/*")
+)
+
+func (r *router) allowed(reqPath []byte, reqMethod string, path *tokensDescriptor) (allow string) {
+	if bytes.Equal(reqPath, optionsServerWide) || bytes.Equal(reqPath, optionsSlashServerWide) { // server-wide
+		for method := range r.children {
+			if method == "OPTIONS" {
+				continue
+			}
+
+			// add request method to list of allowed methods
+			if len(allow) == 0 {
+				allow = method
 			} else {
-				node.handler(ctx)
+				allow += ", " + method
 			}
-			return
+		}
+	} else { // specific path
+		for method := range r.children {
+			// Skip the requested method - we already tried this one
+			if method == reqMethod || method == "OPTIONS" {
+				continue
+			}
+
+			if found, _ := r.findHandler(r.children[method], path, nil); found {
+				// add request method to list of allowed methods
+				if len(allow) == 0 {
+					allow = method
+				} else {
+					allow += ", " + method
+				}
+			}
 		}
 	}
-	if router.NotFound != nil {
-		router.NotFound(ctx)
+	if len(allow) > 0 {
+		allow += ", OPTIONS"
 	}
-}
-
-type routerGroup struct {
-	prefix      string
-	router      Routable
-	middlewares []Middleware
-}
-
-func (group *routerGroup) DELETE(path string, handler Handler, middlewares ...Middleware) {
-	group.router.DELETE(fmt.Sprintf("%s%s", group.prefix, path), handler, append(group.middlewares, middlewares...)...)
-}
-
-func (group *routerGroup) GET(path string, handler Handler, middlewares ...Middleware) {
-	group.router.GET(fmt.Sprintf("%s%s", group.prefix, path), handler, append(group.middlewares, middlewares...)...)
-}
-
-func (group *routerGroup) POST(path string, handler Handler, middlewares ...Middleware) {
-	group.router.POST(fmt.Sprintf("%s%s", group.prefix, path), handler, append(group.middlewares, middlewares...)...)
-}
-
-func (group *routerGroup) PUT(path string, handler Handler, middlewares ...Middleware) {
-	group.router.PUT(fmt.Sprintf("%s%s", group.prefix, path), handler, append(group.middlewares, middlewares...)...)
-}
-
-func (group *routerGroup) HEAD(path string, handler Handler, middlewares ...Middleware) {
-	group.router.HEAD(fmt.Sprintf("%s%s", group.prefix, path), handler, append(group.middlewares, middlewares...)...)
-}
-
-func (group *routerGroup) OPTIONS(path string, handler Handler, middlewares ...Middleware) {
-	group.router.OPTIONS(fmt.Sprintf("%s%s", group.prefix, path), handler, append(group.middlewares, middlewares...)...)
-}
-
-func (group *routerGroup) PATCH(path string, handler Handler, middlewares ...Middleware) {
-	group.router.PATCH(fmt.Sprintf("%s%s", group.prefix, path), handler, append(group.middlewares, middlewares...)...)
-}
-
-func (group *routerGroup) Group(path string, middlewares ... Middleware) Routable {
-	return &routerGroup{
-		prefix:      path,
-		router:      group,
-		middlewares: middlewares,
-	}
+	return
 }

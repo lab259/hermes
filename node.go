@@ -6,11 +6,10 @@ import (
 )
 
 type node struct {
-	wildcard    *node
-	children    map[string]*node
-	handler     Handler
-	names       []string
-	middlewares []Middleware
+	wildcard *node
+	children map[string]*node
+	handler  Handler
+	names    []string
 }
 
 func newNode() *node {
@@ -50,9 +49,8 @@ func (n *node) Add(path string, handler Handler, names []string, middlewares []M
 						panic(fmt.Sprintf("conflict adding '%s'", path))
 					}
 					// Initialize stuff
-					node.handler = handler
 					node.names = names
-					node.middlewares = middlewares
+					node.handler = newHandler(handler, middlewares)
 				}
 				continue
 			} else {
@@ -72,9 +70,8 @@ func (n *node) Add(path string, handler Handler, names []string, middlewares []M
 					if ok && node.handler != nil {
 						panic(fmt.Sprintf("conflict adding '%s'", path))
 					}
-					node.handler = handler
 					node.names = names
-					node.middlewares = middlewares
+					node.handler = newHandler(handler, middlewares)
 					return
 				}
 			}
@@ -83,42 +80,56 @@ func (n *node) Add(path string, handler Handler, names []string, middlewares []M
 			panic("empty token")
 		} else {
 			// Just set the node info
-			n.handler = handler
 			n.names = names
-			n.middlewares = middlewares
+			n.handler = newHandler(handler, middlewares)
 		}
 	}
 }
 
-func (n *node) Matches(path [][]byte, values [][]byte) (bool, *node, [][]byte) {
-	lpath := len(path)
-	for i := 0; i < lpath; i++ {
-		token := string(path[i])
+func newHandler(h Handler, m []Middleware) Handler {
+	sagas := make([]Handler, len(m)+1)
+
+	sagas[len(m)] = h
+
+	idx := len(m) - 1
+	for idx > -1 {
+		i := idx
+		sagas[i] = func(nextReq Request, nextRes Response) Result {
+			return m[i](nextReq, nextRes, sagas[i+1])
+		}
+		idx--
+	}
+
+	return sagas[0]
+}
+
+func (n *node) Matches(s int, path *tokensDescriptor, values *tokensDescriptor) (bool, *node) {
+	for i := s; i < path.n; i++ {
+		token := string(path.m[i])
 		node, ok := n.children[token]
 		if ok {
-			if i+1 < lpath {
-				return node.Matches(path[i+1:], values)
+			if i+1 < path.n {
+				return node.Matches(i+1, path, values)
 			} else if node.handler == nil {
-				return false, nil, nil
+				return false, nil
 			} else {
-				return true, node, values
+				return true, node
 			}
 		} else if n.wildcard != nil {
-			if values == nil {
-				values = [][]byte{path[i]}
-			} else {
-				values = append(values, path[i])
+			if values != nil {
+				values.m = append(values.m, path.m[i])
+				values.n++
 			}
-			if i+1 < lpath {
-				return n.wildcard.Matches(path[i+1:], values)
+			if i+1 < path.n {
+				return n.wildcard.Matches(i+1, path, values)
 			} else if n.wildcard.handler == nil {
-				return false, nil, nil
+				return false, nil
 			} else {
-				return true, n.wildcard, values
+				return true, n.wildcard
 			}
 		} else {
-			return false, nil, nil
+			return false, nil
 		}
 	}
-	return false, nil, nil
+	return false, nil
 }

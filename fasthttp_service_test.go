@@ -98,12 +98,12 @@ var _ = g.Describe("Services", func() {
 				ch <- "service:step1:end"
 			}()
 
-			time.Sleep(time.Millisecond*50) // Waits for the service a bit
+			time.Sleep(time.Millisecond * 50) // Waits for the service a bit
 
 			go func() {
 				ch <- "service:step2:begin"
 				service.Restart()
-				time.Sleep(time.Millisecond*50)
+				time.Sleep(time.Millisecond * 50)
 				ch <- "service:step2:end"
 			}()
 

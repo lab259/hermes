@@ -1,8 +1,9 @@
 package http_test
 
 import (
-	"."
 	"errors"
+
+	"github.com/lab259/http"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

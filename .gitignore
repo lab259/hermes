@@ -10,10 +10,15 @@
 *.test
 
 # Output of the go coverage tool, specifically when used with LiteIDE
+coverage.txt
 *.out
 pkg/
 .cover/
 .idea/
 *.coverprofile
-.gopath/
+vendor/
 .vscode/
+bin/
+test-results/
+bench-results/
+*.fasthttp.gz

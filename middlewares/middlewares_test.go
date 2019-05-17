@@ -15,13 +15,13 @@ func TestMiddlewares(t *testing.T) {
 	log.SetOutput(ginkgo.GinkgoWriter)
 	gomega.RegisterFailHandler(ginkgo.Fail)
 
-	description := "Http Test Suite"
+	description := "Http/Middleware Test Suite"
 	if os.Getenv("CI") == "" {
 		macchiato.RunSpecs(t, description)
 	} else {
-		reporterOutputDir := "./test-results"
+		reporterOutputDir := "../test-results"
 		os.MkdirAll(reporterOutputDir, os.ModePerm)
-		junitReporter := reporters.NewJUnitReporter("./test-results/http.xml")
+		junitReporter := reporters.NewJUnitReporter("../test-results/middlewares.xml")
 		macchiatoReporter := macchiato.NewReporter()
 		ginkgo.RunSpecsWithCustomReporters(t, description, []ginkgo.Reporter{macchiatoReporter, junitReporter})
 	}

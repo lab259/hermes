@@ -11,8 +11,8 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
-var _ = Describe("Http", func() {
-	Describe("Application", func() {
+var _ = Describe("Middlewares", func() {
+	Describe("Recoverable Middleware", func() {
 		It("should recover from panic", func() {
 			r := http.DefaultRouter()
 			r.Use(middlewares.RecoverableMiddleware)

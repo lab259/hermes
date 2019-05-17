@@ -14,7 +14,7 @@ var stackBuffPool = sync.Pool{
 	},
 }
 
-func RecoverableMiddleware(req http.Request, res http.Response, next http.Handler) http.Result {
+func RecoverableMiddleware(req http.Request, res http.Response, next http.Handler) (r http.Result) {
 	defer func() {
 		if recoveryData := recover(); recoveryData != nil {
 			logger := Logger(req)
@@ -27,9 +27,9 @@ func RecoverableMiddleware(req http.Request, res http.Response, next http.Handle
 			logger.Debug(string(stack[:n]))
 
 			if err, ok := recoveryData.(error); ok {
-				res.Error(err)
+				r = res.Error(err)
 			} else {
-				res.Error(errors.New("unexpected panic"))
+				r = res.Error(errors.New("unexpected panic"))
 			}
 		}
 	}()

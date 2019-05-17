@@ -6,12 +6,14 @@ import (
 	"testing"
 
 	"github.com/jamillosantos/macchiato"
+	"github.com/lab259/rlog"
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/ginkgo/reporters"
 	"github.com/onsi/gomega"
 )
 
 func TestHttp(t *testing.T) {
+	rlog.SetOutput(ginkgo.GinkgoWriter)
 	log.SetOutput(ginkgo.GinkgoWriter)
 	gomega.RegisterFailHandler(ginkgo.Fail)
 

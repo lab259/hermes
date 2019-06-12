@@ -79,12 +79,20 @@
   version = "v1.2.1"
 
 [[projects]]
-  branch = "master"
-  digest = "1:3eaf8f7f3fa39b601304cbc85715612cdd25178ca6a9678bc8adf2e47701c45c"
+  branch = "issue-9"
+  digest = "1:4534c84fa7e3752325d4f8657fe39c6e0188b8336d8a340c5cec840bc9ca1f13"
   name = "github.com/lab259/errors"
   packages = ["."]
   pruneopts = "UT"
-  revision = "f60793acdd1f7efea7a6b2bb1b36653e3e00ad99"
+  revision = "4493f0d47dc31cb387f019ed6f6a054a49e64247"
+
+[[projects]]
+  digest = "1:b7a7153f385c5abb03409c8f350c874ad913fa73dfdabc012c88b4e2b582427c"
+  name = "github.com/lab259/go-rscsrv"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "db5ebd4d519ae7f3096f1b13c21097305b11fffa"
+  version = "v0.1.0"
 
 [[projects]]
   digest = "1:b625eb1694124e10a585355e4605f35b2cef495841c1015ecbee7019fa2b0e35"
@@ -175,7 +183,7 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:15ad8a80098fcc7a194b9db6b26d74072a852e4faa957848c8118193d3c69230"
+  digest = "1:8d6e2d89065f56a560ce647c05cc8add82ca5d214bcb6cc8b3f4e9329fa6898b"
   name = "github.com/valyala/fasthttp"
   packages = [
     ".",
@@ -183,8 +191,8 @@
     "stackless",
   ]
   pruneopts = "UT"
-  revision = "e5f51c11919d4f66400334047b897ef0a94c6f3c"
-  version = "v20180529"
+  revision = "46469b532d0621287a2184a890564a59a3d528f3"
+  version = "v1.3.0"
 
 [[projects]]
   branch = "master"
@@ -281,9 +289,9 @@
   analyzer-version = 1
   input-imports = [
     "github.com/AdhityaRamadhanus/fasthttpcors",
-    "github.com/fatih/color",
     "github.com/jamillosantos/macchiato",
     "github.com/lab259/errors",
+    "github.com/lab259/go-rscsrv",
     "github.com/lab259/rlog",
     "github.com/onsi/ginkgo",
     "github.com/onsi/ginkgo/reporters",
@@ -291,7 +299,6 @@
     "github.com/valyala/bytebufferpool",
     "github.com/valyala/fasthttp",
     "gopkg.in/go-playground/validator.v9",
-    "gopkg.in/yaml.v2",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

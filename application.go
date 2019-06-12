@@ -2,6 +2,9 @@ package http
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 type ApplicationConfig struct {
@@ -56,7 +59,23 @@ func (app *Application) Start() error {
 	if err != nil {
 		return err
 	}
-	return app.fasthttpService.Start()
+
+	done := make(chan bool, 1)
+	go func() {
+		signals := make(chan os.Signal, 1)
+		signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
+		<-signals
+
+		app.Stop()
+		close(done)
+	}()
+
+	if err := app.fasthttpService.Start(); err != nil {
+		return err
+	}
+
+	<-done
+	return nil
 }
 
 func (app *Application) Stop() error {

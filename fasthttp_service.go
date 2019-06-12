@@ -12,6 +12,14 @@ import (
 // `FasthttpService`.
 type FasthttpServiceConfiguration struct {
 	Bind string
+	TLS  *FasthttpServiceConfigurationTLS
+}
+
+// FasthttpServiceConfigurationTLS keeps the configuration for starting a TLS
+// server.
+type FasthttpServiceConfigurationTLS struct {
+	CertFile string
+	KeyFile  string
 }
 
 // FasthttpService implements the server for starting
@@ -62,7 +70,11 @@ func (service *FasthttpService) Start() error {
 	}
 	service.Listener = ln
 	service.running = true
-	err = service.Server.Serve(ln)
+	if service.Configuration.TLS == nil {
+		err = service.Server.Serve(ln)
+	} else {
+		err = service.Server.ServeTLS(ln, service.Configuration.TLS.CertFile, service.Configuration.TLS.KeyFile)
+	}
 	if err == io.EOF && !service.running {
 		return nil
 	}

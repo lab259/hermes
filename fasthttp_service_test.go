@@ -1,10 +1,12 @@
 package http
 
 import (
-	g "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 	"sync"
 	"time"
+
+	"github.com/lab259/go-rscsrv"
+	g "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
 var _ = g.Describe("Services", func() {
@@ -37,7 +39,7 @@ var _ = g.Describe("Services", func() {
 			var service FasthttpService
 			Expect(service.ApplyConfiguration(map[string]interface{}{
 				"bind": "12345",
-			})).To(Equal(ErrWrongConfigurationInformed))
+			})).To(Equal(rscsrv.ErrWrongConfigurationInformed))
 		})
 
 		g.It("should start and stop the service", func(done g.Done) {
@@ -115,6 +117,6 @@ var _ = g.Describe("Services", func() {
 			Expect(<-ch).To(Equal("service:step1:end"))
 			Expect(<-ch).To(Equal("service:step2:end"))
 			done <- true
-		}, 0.5)
+		}, 1)
 	})
 })

@@ -5,11 +5,14 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/lab259/go-rscsrv"
 )
 
 type ApplicationConfig struct {
-	Name string
-	HTTP FasthttpServiceConfiguration
+	Name           string
+	ServiceStarter *rscsrv.ServiceStarter
+	HTTP           FasthttpServiceConfiguration
 }
 
 type Application struct {
@@ -47,8 +50,7 @@ func (app *Application) ApplyConfiguration(interface{}) error {
 }
 
 func (app *Application) Restart() error {
-	err := app.Stop()
-	if err != nil {
+	if err := app.Stop(); err != nil {
 		return err
 	}
 	return app.Start()
@@ -79,5 +81,8 @@ func (app *Application) Start() error {
 }
 
 func (app *Application) Stop() error {
+	if app.Configuration.ServiceStarter != nil {
+		defer app.Configuration.ServiceStarter.Stop(true)
+	}
 	return app.fasthttpService.Stop()
 }

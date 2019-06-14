@@ -61,7 +61,7 @@ func (r *result) Error(err error) Result {
 		return r
 	}
 
-	errResponse := acquireErrorResponse(fasthttp.StatusInternalServerError)
+	errResponse := acquireErrorResponse(StatusInternalServerError)
 	if !errors.AggregateToResponse(err, errResponse) {
 		errResponse.SetParam("code", InternalServerErrorCode)
 		errResponse.SetParam("message", InternalServerErrorMessage)
@@ -75,7 +75,7 @@ func (r *result) Error(err error) Result {
 
 func (r *result) setStatus() {
 	if r.status == 0 {
-		r.status = fasthttp.StatusOK
+		r.status = StatusOK
 	}
 
 	r.r.SetStatusCode(r.status)

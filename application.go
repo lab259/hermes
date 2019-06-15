@@ -18,6 +18,7 @@ type ApplicationConfig struct {
 type Application struct {
 	fasthttpService FasthttpService
 	Configuration   ApplicationConfig
+	running         bool
 	done            chan bool
 	signals         chan os.Signal
 }
@@ -65,14 +66,16 @@ func (app *Application) Start() error {
 	}
 
 	app.done = make(chan bool, 1)
+	app.signals = make(chan os.Signal, 1)
+
 	go func() {
-		app.signals = make(chan os.Signal, 1)
 		signal.Notify(app.signals, syscall.SIGINT, syscall.SIGTERM)
 		if _, ok := <-app.signals; ok {
 			app.Stop()
 		}
 	}()
 
+	app.running = true
 	if err := app.fasthttpService.Start(); err != nil {
 		return err
 	}
@@ -82,12 +85,16 @@ func (app *Application) Start() error {
 }
 
 func (app *Application) Stop() error {
-	defer func() {
-		if app.Configuration.ServiceStarter != nil {
-			app.Configuration.ServiceStarter.Stop(true)
-		}
-		close(app.signals)
-		close(app.done)
-	}()
-	return app.fasthttpService.Stop()
+	if app.running {
+		defer func() {
+			if app.Configuration.ServiceStarter != nil {
+				app.Configuration.ServiceStarter.Stop(true)
+			}
+			close(app.signals)
+			close(app.done)
+			app.running = false
+		}()
+		return app.fasthttpService.Stop()
+	}
+	return nil
 }

@@ -28,7 +28,7 @@ var _ = Describe("Middlewares", func() {
 
 			tmp := bytes.NewBufferString("")
 			ctx.Response.BodyWriteTo(tmp)
-			Expect(ctx.Response.StatusCode()).To(Equal(fasthttp.StatusInternalServerError))
+			Expect(ctx.Response.StatusCode()).To(Equal(http.StatusInternalServerError))
 			Expect(strings.TrimSpace(tmp.String())).To(Equal(`{"code":"internal-server-error","message":"We encountered an internal error or misconfiguration and was unable to complete your request."}`))
 		})
 	})

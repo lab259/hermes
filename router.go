@@ -35,7 +35,7 @@ func NewRouter(config RouterConfig) Router {
 	if config.NotFound == nil {
 		r.notFound = func(req Request, res Response) Result {
 			if req.WantsJSON() {
-				errResponse := acquireErrorResponse(fasthttp.StatusNotFound)
+				errResponse := acquireErrorResponse(StatusNotFound)
 				defer releaseErrorResponse(errResponse)
 
 				errResponse.SetParam("code", NotFoundErrorCode)
@@ -43,14 +43,14 @@ func NewRouter(config RouterConfig) Router {
 				return res.Status(errResponse.Status).Data(errResponse.Data)
 			}
 
-			return res.Status(fasthttp.StatusNotFound).Data(NotFoundErrorMessage)
+			return res.Status(StatusNotFound).Data(NotFoundErrorMessage)
 		}
 	}
 
 	if config.MethodNotAllowed == nil {
 		r.methodNotAllowed = func(req Request, res Response) Result {
 			if req.WantsJSON() {
-				errResponse := acquireErrorResponse(fasthttp.StatusMethodNotAllowed)
+				errResponse := acquireErrorResponse(StatusMethodNotAllowed)
 				defer releaseErrorResponse(errResponse)
 
 				errResponse.SetParam("code", MethodNotAllowedErrorCode)
@@ -58,7 +58,7 @@ func NewRouter(config RouterConfig) Router {
 				return res.Status(errResponse.Status).Data(errResponse.Data)
 			}
 
-			return res.Status(fasthttp.StatusMethodNotAllowed).Data(MethodNotAllowedErrorMessage)
+			return res.Status(StatusMethodNotAllowed).Data(MethodNotAllowedErrorMessage)
 		}
 	}
 

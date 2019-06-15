@@ -806,7 +806,7 @@ var _ = g.Describe("Router", func() {
 			})
 			ctx := createRequestCtxFromPath("GET", "/value1")
 			router.Handler()(ctx)
-			Expect(ctx.Response.StatusCode()).To(Equal(fasthttp.StatusNotFound))
+			Expect(ctx.Response.StatusCode()).To(Equal(StatusNotFound))
 		})
 
 		g.It("should call the default method not allowed handler for wrong method", func() {
@@ -820,7 +820,7 @@ var _ = g.Describe("Router", func() {
 			router.Handler()(ctx)
 			methods := string(ctx.Response.Header.Peek("Allow"))
 			Expect(strings.Split(methods, ", ")).To(ConsistOf("GET", "OPTIONS"))
-			Expect(ctx.Response.StatusCode()).To(Equal(fasthttp.StatusMethodNotAllowed))
+			Expect(ctx.Response.StatusCode()).To(Equal(StatusMethodNotAllowed))
 		})
 
 		g.It("should call the default not found callback (JSON)", func() {
@@ -832,7 +832,7 @@ var _ = g.Describe("Router", func() {
 			ctx := createRequestCtxFromPath("GET", "/value1")
 			ctx.Request.Header.Set("Accept", "application/json, text/html, text/plain")
 			router.Handler()(ctx)
-			Expect(ctx.Response.StatusCode()).To(Equal(fasthttp.StatusNotFound))
+			Expect(ctx.Response.StatusCode()).To(Equal(StatusNotFound))
 			Expect(string(ctx.Response.Header.Peek("Content-Type"))).To(Equal("application/json; charset=utf-8"))
 		})
 
@@ -848,7 +848,7 @@ var _ = g.Describe("Router", func() {
 			router.Handler()(ctx)
 			methods := string(ctx.Response.Header.Peek("Allow"))
 			Expect(strings.Split(methods, ", ")).To(ConsistOf("GET", "OPTIONS"))
-			Expect(ctx.Response.StatusCode()).To(Equal(fasthttp.StatusMethodNotAllowed))
+			Expect(ctx.Response.StatusCode()).To(Equal(StatusMethodNotAllowed))
 			Expect(string(ctx.Response.Header.Peek("Content-Type"))).To(Equal("application/json; charset=utf-8"))
 		})
 

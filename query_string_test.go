@@ -1,10 +1,10 @@
-package http
+package hermes
 
 import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = describe("Http", func() {
+var _ = describe("Hermes", func() {
 	describe("QueryString", func() {
 		it("should get bool values", func() {
 			req := newRequest()

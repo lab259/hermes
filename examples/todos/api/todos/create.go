@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/lab259/http"
-	"github.com/lab259/http/examples/todos/errors"
+	"github.com/lab259/hermes"
+	"github.com/lab259/hermes/examples/todos/errors"
 )
 
-func Create(req http.Request, res http.Response) http.Result {
+func Create(req hermes.Request, res hermes.Response) hermes.Result {
 	now := time.Now()
 
 	var todo Todo

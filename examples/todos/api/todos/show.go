@@ -1,11 +1,11 @@
 package todos
 
 import (
-	"github.com/lab259/http"
-	"github.com/lab259/http/examples/todos/errors"
+	"github.com/lab259/hermes"
+	"github.com/lab259/hermes/examples/todos/errors"
 )
 
-func Show(req http.Request, res http.Response) http.Result {
+func Show(req hermes.Request, res hermes.Response) hermes.Result {
 	id := req.Param("id")
 	todo, found := db[id]
 	if !found {

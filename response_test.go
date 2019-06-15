@@ -1,4 +1,4 @@
-package http
+package hermes
 
 import (
 	"bytes"
@@ -29,7 +29,7 @@ func newResponse() *response {
 	}
 }
 
-var _ = describe("Http", func() {
+var _ = describe("Hermes", func() {
 	describe("Response", func() {
 		it("should serialize and send a map as JSON with the rightful 'Content-type' header", func() {
 			res := newResponse()

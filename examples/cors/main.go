@@ -3,21 +3,21 @@ package main
 import (
 	"fmt"
 
-	"github.com/lab259/http"
-	"github.com/lab259/http/middlewares"
+	"github.com/lab259/hermes"
+	"github.com/lab259/hermes/middlewares"
 )
 
-var config = http.ApplicationConfig{
+var config = hermes.ApplicationConfig{
 	Name: "cors/v0.1.0",
-	HTTP: http.FasthttpServiceConfiguration{
+	HTTP: hermes.FasthttpServiceConfiguration{
 		Bind: ":8080",
 	},
 }
 
-func router() http.Router {
-	router := http.DefaultRouter()
+func router() hermes.Router {
+	router := hermes.DefaultRouter()
 	router.Use(middlewares.DefaultCorsMiddleware())
-	router.Get("/hello", func(req http.Request, res http.Response) http.Result {
+	router.Get("/hello", func(req hermes.Request, res hermes.Response) hermes.Result {
 		return res.Data(map[string]interface{}{
 			"hello": "world",
 		})
@@ -26,7 +26,7 @@ func router() http.Router {
 }
 
 func main() {
-	app := http.NewApplication(config, router())
+	app := hermes.NewApplication(config, router())
 	fmt.Println("Go to http://localhost:8080/hello")
 	app.Start()
 }

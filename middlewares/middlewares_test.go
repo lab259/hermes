@@ -17,7 +17,7 @@ func TestMiddlewares(t *testing.T) {
 	log.SetOutput(ginkgo.GinkgoWriter)
 	gomega.RegisterFailHandler(ginkgo.Fail)
 
-	description := "Http/Middleware Test Suite"
+	description := "Hermes/Middleware Test Suite"
 	if os.Getenv("CI") == "" {
 		macchiato.RunSpecs(t, description)
 	} else {

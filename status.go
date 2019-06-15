@@ -1,4 +1,4 @@
-package http
+package hermes
 
 // HTTP status codes were stolen from valyala/fasthttp.
 const (

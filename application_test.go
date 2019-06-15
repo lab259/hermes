@@ -1,4 +1,4 @@
-package http
+package hermes
 
 import (
 	"sync"
@@ -8,7 +8,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = describe("Http", func() {
+var _ = describe("Hermes", func() {
 	describe("Application", func() {
 		it("should start and stop a app", func(done g.Done) {
 			app := NewApplication(ApplicationConfig{

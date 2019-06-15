@@ -5,7 +5,7 @@ import (
 	"runtime"
 	"sync"
 
-	"github.com/lab259/http"
+	"github.com/lab259/hermes"
 )
 
 var stackBuffPool = sync.Pool{
@@ -14,7 +14,7 @@ var stackBuffPool = sync.Pool{
 	},
 }
 
-func RecoverableMiddleware(req http.Request, res http.Response, next http.Handler) (r http.Result) {
+func RecoverableMiddleware(req hermes.Request, res hermes.Response, next hermes.Handler) (r hermes.Result) {
 	defer func() {
 		if recoveryData := recover(); recoveryData != nil {
 			logger := Logger(req)

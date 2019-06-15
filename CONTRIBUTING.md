@@ -23,20 +23,20 @@ For start developing the SDK you must create a fake `GOPATH` structure:
 Use the following command:
 
 ```bash
-mkdir -p src/github.com/lab259/http && git clone git@github.com:lab259/http.git src/github.com/lab259/http
+mkdir -p src/github.com/lab259/hermes && git clone git@github.com:lab259/hermes.git src/github.com/lab259/hermes
 ```
 
 Now, the dependencies must be installed.
 
 ```
-cd src/github.com/lab259/http && make dep-ensure
+cd src/github.com/lab259/hermes && make dep-ensure
 ```
 
 :wink: Finally, you are done to start developing.
 
 ### Running tests
 
-In the `src/github.com/lab259/http` directory, execute:
+In the `src/github.com/lab259/hermes` directory, execute:
 
 ```bash
 make test
@@ -56,7 +56,7 @@ make coverage coverage-html
 
 ### Running examples
 
-In the `src/github.com/lab259/http` directory, execute:
+In the `src/github.com/lab259/hermes` directory, execute:
 
 ```bash
 EXAMPLE="todos" make run

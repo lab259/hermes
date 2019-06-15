@@ -2,16 +2,25 @@ package http
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
+
+	"github.com/lab259/go-rscsrv"
 )
 
 type ApplicationConfig struct {
-	Name string
-	HTTP FasthttpServiceConfiguration
+	Name           string
+	ServiceStarter *rscsrv.ServiceStarter
+	HTTP           FasthttpServiceConfiguration
 }
 
 type Application struct {
 	fasthttpService FasthttpService
 	Configuration   ApplicationConfig
+	running         bool
+	done            chan bool
+	signals         chan os.Signal
 }
 
 func NewApplication(config ApplicationConfig, router Router) *Application {
@@ -44,8 +53,7 @@ func (app *Application) ApplyConfiguration(interface{}) error {
 }
 
 func (app *Application) Restart() error {
-	err := app.Stop()
-	if err != nil {
+	if err := app.Stop(); err != nil {
 		return err
 	}
 	return app.Start()
@@ -56,9 +64,37 @@ func (app *Application) Start() error {
 	if err != nil {
 		return err
 	}
-	return app.fasthttpService.Start()
+
+	app.done = make(chan bool, 1)
+	app.signals = make(chan os.Signal, 1)
+
+	go func() {
+		signal.Notify(app.signals, syscall.SIGINT, syscall.SIGTERM)
+		if _, ok := <-app.signals; ok {
+			app.Stop()
+		}
+	}()
+
+	app.running = true
+	if err := app.fasthttpService.Start(); err != nil {
+		return err
+	}
+
+	<-app.done
+	return nil
 }
 
 func (app *Application) Stop() error {
-	return app.fasthttpService.Stop()
+	if app.running {
+		defer func() {
+			if app.Configuration.ServiceStarter != nil {
+				app.Configuration.ServiceStarter.Stop(true)
+			}
+			close(app.signals)
+			close(app.done)
+			app.running = false
+		}()
+		return app.fasthttpService.Stop()
+	}
+	return nil
 }

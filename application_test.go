@@ -40,7 +40,7 @@ var _ = describe("Http", func() {
 				HTTP: FasthttpServiceConfiguration{
 					Bind: ":0",
 				},
-			}, NewRouter(RouterConfig{}))
+			}, DefaultRouter())
 
 			ch := make(chan string, 10)
 
@@ -51,16 +51,16 @@ var _ = describe("Http", func() {
 				ch <- "service:step1:end"
 			}()
 
-			time.Sleep(time.Millisecond * 50) // Waits for the service a bit
+			time.Sleep(time.Millisecond * 500) // Waits for the service a bit
 
 			go func() {
 				ch <- "service:step2:begin"
 				app.Restart()
-				time.Sleep(time.Millisecond * 50)
+				time.Sleep(time.Millisecond * 500)
 				ch <- "service:step2:end"
 			}()
 
-			time.Sleep(time.Millisecond * 50) // Waits for the service a bit
+			time.Sleep(time.Millisecond * 500) // Waits for the service a bit
 
 			Expect(app.Stop()).To(BeNil())
 			Expect(<-ch).To(Equal("service:step1:begin"))
@@ -68,7 +68,7 @@ var _ = describe("Http", func() {
 			Expect(<-ch).To(Equal("service:step1:end"))
 			Expect(<-ch).To(Equal("service:step2:end"))
 			done <- true
-		}, 0.5)
+		}, 2)
 
 		it("should return name", func() {
 			app := NewApplication(ApplicationConfig{

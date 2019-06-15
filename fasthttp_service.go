@@ -2,9 +2,8 @@ package http
 
 import (
 	"errors"
-	"io"
-	"net"
 
+	rscsrv "github.com/lab259/go-rscsrv"
 	"github.com/valyala/fasthttp"
 )
 
@@ -26,7 +25,6 @@ type FasthttpServiceConfigurationTLS struct {
 type FasthttpService struct {
 	running       bool
 	Configuration FasthttpServiceConfiguration
-	Listener      net.Listener
 	Server        fasthttp.Server
 }
 
@@ -47,10 +45,10 @@ func (service *FasthttpService) ApplyConfiguration(configuration interface{}) er
 		service.Configuration = c
 		return nil
 	}
-	return ErrWrongConfigurationInformed
+	return rscsrv.ErrWrongConfigurationInformed
 }
 
-// Reload returns an error due to fasthttp not being able to stop the service.
+// Restart returns an error due to fasthttp not being able to stop the service.
 func (service *FasthttpService) Restart() error {
 	if service.running {
 		err := service.Stop()
@@ -64,31 +62,24 @@ func (service *FasthttpService) Restart() error {
 // Start ListenAndServe the server. This method is blocking because it uses
 // the fasthttp.ListenAndServe implementation.
 func (service *FasthttpService) Start() error {
-	ln, err := net.Listen("tcp4", service.Configuration.Bind)
-	if err != nil {
-		return err
-	}
-	service.Listener = ln
 	service.running = true
+
 	if service.Configuration.TLS == nil {
-		err = service.Server.Serve(ln)
-	} else {
-		err = service.Server.ServeTLS(ln, service.Configuration.TLS.CertFile, service.Configuration.TLS.KeyFile)
+		return service.Server.ListenAndServe(service.Configuration.Bind)
 	}
-	if err == io.EOF && !service.running {
-		return nil
-	}
-	return err
+
+	return service.Server.ListenAndServeTLS(
+		service.Configuration.Bind,
+		service.Configuration.TLS.CertFile,
+		service.Configuration.TLS.KeyFile,
+	)
 }
 
 // Stop closes the listener and waits the `Start` to stop.
 func (service *FasthttpService) Stop() error {
 	if service.running {
-		err := service.Listener.Close()
-		if err != nil {
-			return err
-		}
 		service.running = false
+		return service.Server.Shutdown()
 	}
 	return nil
 }

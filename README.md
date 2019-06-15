@@ -3,7 +3,7 @@
 [![GoDoc](https://godoc.org/github.com/lab259/hermes?status.svg)](http://godoc.org/github.com/lab259/hermes)
 [![Go Report Card](https://goreportcard.com/badge/github.com/lab259/hermes)](https://goreportcard.com/report/github.com/lab259/hermes)
 
-# HTTP
+# Hermes
 
 This is one more web development framework for GO using the fasthttp as base.
 Or, maybe, it is just a set of utility of helpful functions that apply some

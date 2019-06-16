@@ -1,4 +1,4 @@
-package http
+package hermes
 
 type Routable interface {
 	Delete(path string, handler Handler)

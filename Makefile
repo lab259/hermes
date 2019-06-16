@@ -34,7 +34,7 @@ test-watch:
 
 bench:
 	@mkdir -p ./bench-results
-	@${GOPATHCMD} go test -benchmem -run=github.com/lab259/http -bench=$(TARGET)$$ -test.parallel=1 -cpuprofile ./bench-results/cpu.prof -memprofile ./bench-results/mem.prof
+	@${GOPATHCMD} go test -benchmem -run=github.com/lab259/hermes -bench=$(TARGET)$$ -test.parallel=1 -cpuprofile ./bench-results/cpu.prof -memprofile ./bench-results/mem.prof
 	
 plot-cpu:
 	@${GOPATHCMD} go tool pprof -http :8080 ./bench-results/cpu.prof

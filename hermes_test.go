@@ -1,4 +1,4 @@
-package http
+package hermes
 
 import (
 	"log"
@@ -17,13 +17,13 @@ func TestHttp(t *testing.T) {
 	log.SetOutput(ginkgo.GinkgoWriter)
 	gomega.RegisterFailHandler(ginkgo.Fail)
 
-	description := "Http Test Suite"
+	description := "Hermes Test Suite"
 	if os.Getenv("CI") == "" {
 		macchiato.RunSpecs(t, description)
 	} else {
 		reporterOutputDir := "./test-results"
 		os.MkdirAll(reporterOutputDir, os.ModePerm)
-		junitReporter := reporters.NewJUnitReporter("./test-results/http.xml")
+		junitReporter := reporters.NewJUnitReporter("./test-results/hermes.xml")
 		macchiatoReporter := macchiato.NewReporter()
 		ginkgo.RunSpecsWithCustomReporters(t, description, []ginkgo.Reporter{macchiatoReporter, junitReporter})
 	}

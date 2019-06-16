@@ -1,4 +1,4 @@
-package http
+package hermes
 
 import (
 	"context"
@@ -27,7 +27,7 @@ type contextKey string
 
 var contextKeyTestID contextKey = "test:context:id"
 
-var _ = describe("Http", func() {
+var _ = describe("Hermes", func() {
 	describe("Request", func() {
 		it("should have a context", func() {
 			req := newRequest()

@@ -1,4 +1,4 @@
-package http
+package hermes
 
 var (
 	applicationJSON        = []byte("application/json")

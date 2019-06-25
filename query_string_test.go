@@ -1,12 +1,13 @@
 package hermes
 
 import (
+	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
-var _ = describe("Hermes", func() {
-	describe("QueryString", func() {
-		it("should get bool values", func() {
+var _ = Describe("Hermes", func() {
+	Describe("QueryString", func() {
+		It("should get bool values", func() {
 			req := newRequest()
 			req.Raw().QueryArgs().Set("is_test", "true")
 
@@ -16,7 +17,7 @@ var _ = describe("Hermes", func() {
 			Expect(qs.Bool("without_default")).To(BeZero())
 		})
 
-		it("should get string values", func() {
+		It("should get string values", func() {
 			req := newRequest()
 			req.Raw().QueryArgs().Set("username", "gi.joe")
 
@@ -26,7 +27,7 @@ var _ = describe("Hermes", func() {
 			Expect(qs.String("without_default")).To(BeZero())
 		})
 
-		it("should get int values", func() {
+		It("should get int values", func() {
 			req := newRequest()
 			req.Raw().QueryArgs().Set("age", "26")
 
@@ -36,7 +37,7 @@ var _ = describe("Hermes", func() {
 			Expect(qs.Int("without_default")).To(BeZero())
 		})
 
-		it("should get int64 values", func() {
+		It("should get int64 values", func() {
 			req := newRequest()
 			req.Raw().QueryArgs().Set("duration", "86400000")
 
@@ -46,7 +47,7 @@ var _ = describe("Hermes", func() {
 			Expect(qs.Int64("without_default")).To(BeZero())
 		})
 
-		it("should get float values", func() {
+		It("should get float values", func() {
 			req := newRequest()
 			req.Raw().QueryArgs().Set("price", "3.14")
 

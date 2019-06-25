@@ -80,7 +80,7 @@ type Response interface {
 	Data(data interface{}) Result
 
 	// Error sends the default 500 response
-	Error(error) Result
+	Error(error, ...interface{}) Result
 
 	File(filepath string) Result
 

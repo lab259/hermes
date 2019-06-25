@@ -4,13 +4,13 @@ import (
 	"sync"
 	"time"
 
-	g "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
-var _ = describe("Hermes", func() {
-	describe("Application", func() {
-		it("should start and stop a app", func(done g.Done) {
+var _ = Describe("Hermes", func() {
+	Describe("Application", func() {
+		It("should start and stop a app", func(done Done) {
 			app := NewApplication(ApplicationConfig{
 				Name: "Testing",
 				HTTP: FasthttpServiceConfiguration{
@@ -20,7 +20,7 @@ var _ = describe("Hermes", func() {
 			var wg sync.WaitGroup
 			wg.Add(1)
 			go func() {
-				defer g.GinkgoRecover()
+				defer GinkgoRecover()
 
 				wg.Done()
 				Expect(app.Start()).To(BeNil())
@@ -34,7 +34,7 @@ var _ = describe("Hermes", func() {
 			done <- true
 		}, 1)
 
-		it("should restart a app", func(done g.Done) {
+		It("should restart a app", func(done Done) {
 			app := NewApplication(ApplicationConfig{
 				Name: "Testing",
 				HTTP: FasthttpServiceConfiguration{
@@ -70,7 +70,7 @@ var _ = describe("Hermes", func() {
 			done <- true
 		}, 2)
 
-		it("should return name", func() {
+		It("should return name", func() {
 			app := NewApplication(ApplicationConfig{
 				Name: "Testing",
 				HTTP: FasthttpServiceConfiguration{
@@ -87,7 +87,7 @@ var _ = describe("Hermes", func() {
 			Expect(app2.Name()).To(Equal("Application"))
 		})
 
-		it("should fail with misconfiguration", func() {
+		It("should fail with misconfiguration", func() {
 			app := NewApplication(ApplicationConfig{
 				Name: "Testing",
 				HTTP: FasthttpServiceConfiguration{

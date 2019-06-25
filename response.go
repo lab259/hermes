@@ -3,6 +3,7 @@ package hermes
 import (
 	"sync"
 
+	"github.com/lab259/errors"
 	"github.com/valyala/fasthttp"
 )
 
@@ -52,8 +53,8 @@ func (res *response) Data(data interface{}) Result {
 	return res.result.Data(data)
 }
 
-func (res *response) Error(err error) Result {
-	return res.result.Error(err)
+func (res *response) Error(err error, options ...interface{}) Result {
+	return res.result.Error(errors.Wrap(err, options...))
 }
 
 func (res *response) Redirect(uri string, code int) Result {

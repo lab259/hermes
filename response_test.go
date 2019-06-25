@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/lab259/errors"
+	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	"github.com/valyala/fasthttp"
@@ -29,9 +30,9 @@ func newResponse() *response {
 	}
 }
 
-var _ = describe("Hermes", func() {
-	describe("Response", func() {
-		it("should serialize and send a map as JSON with the rightful 'Content-type' header", func() {
+var _ = Describe("Hermes", func() {
+	Describe("Response", func() {
+		It("should serialize and send a map as JSON with the rightful 'Content-type' header", func() {
 			res := newResponse()
 			res.Data(map[string]interface{}{
 				"foo": "bar",
@@ -43,7 +44,7 @@ var _ = describe("Hermes", func() {
 			Expect(strings.TrimSpace(tmp.String())).To(Equal(`{"foo":"bar"}`))
 		})
 
-		it("should serialize and send a struct as JSON with the rightful 'Content-type' header", func() {
+		It("should serialize and send a struct as JSON with the rightful 'Content-type' header", func() {
 			res := newResponse()
 			res.Data(simpleModel{
 				Foo: "bar",
@@ -55,7 +56,7 @@ var _ = describe("Hermes", func() {
 			Expect(strings.TrimSpace(tmp.String())).To(Equal(`{"foo":"bar"}`))
 		})
 
-		it("should serialize and send a pointer as JSON with the rightful 'Content-type' header", func() {
+		It("should serialize and send a pointer as JSON with the rightful 'Content-type' header", func() {
 			res := newResponse()
 			res.Data(&simpleModel{
 				Foo: "bar",
@@ -67,7 +68,7 @@ var _ = describe("Hermes", func() {
 			Expect(strings.TrimSpace(tmp.String())).To(Equal(`{"foo":"bar"}`))
 		})
 
-		it("should serialize and send a array/slice as JSON with the rightful 'Content-type' header", func() {
+		It("should serialize and send a array/slice as JSON with the rightful 'Content-type' header", func() {
 			res := newResponse()
 			res.Data([]*simpleModel{
 				&simpleModel{
@@ -84,7 +85,7 @@ var _ = describe("Hermes", func() {
 			Expect(strings.TrimSpace(tmp.String())).To(Equal(`[{"foo":"bar"},{"foo":"baz"}]`))
 		})
 
-		it("should fail serializing a JSON struct", func() {
+		It("should fail serializing a JSON struct", func() {
 			res := newResponse()
 			res.Data(&errornousJson{})
 			Expect(string(res.result.r.Response.Header.ContentType())).To(Equal("application/json; charset=utf-8"))
@@ -94,7 +95,7 @@ var _ = describe("Hermes", func() {
 			Expect(strings.TrimSpace(tmp.String())).To(Equal(`{"code":"internal-server-error","message":"We encountered an internal error or misconfiguration and was unable to complete your request."}`))
 		})
 
-		it("should write bytes to the context body", func() {
+		It("should write bytes to the context body", func() {
 			res := newResponse()
 			res.Data([]byte("this is a test"))
 			tmp := bytes.NewBufferString("")
@@ -102,7 +103,7 @@ var _ = describe("Hermes", func() {
 			Expect(tmp.String()).To(Equal(`this is a test`))
 		})
 
-		it("should write string to the context body", func() {
+		It("should write string to the context body", func() {
 			res := newResponse()
 			res.Data("this is a test")
 			tmp := bytes.NewBufferString("")
@@ -110,7 +111,7 @@ var _ = describe("Hermes", func() {
 			Expect(tmp.String()).To(Equal(`this is a test`))
 		})
 
-		it("should write a buff to the context body", func() {
+		It("should write a buff to the context body", func() {
 			res := newResponse()
 			res.Data(strings.NewReader("this is a test"))
 			tmp := bytes.NewBufferString("")
@@ -118,7 +119,7 @@ var _ = describe("Hermes", func() {
 			Expect(tmp.String()).To(Equal(`this is a test`))
 		})
 
-		it("should serialize internal server error", func() {
+		It("should serialize internal server error", func() {
 			res := newResponse()
 			res.Error(errForced)
 
@@ -129,7 +130,7 @@ var _ = describe("Hermes", func() {
 			Expect(strings.TrimSpace(tmp.String())).To(Equal(`{"code":"internal-server-error","message":"We encountered an internal error or misconfiguration and was unable to complete your request."}`))
 		})
 
-		it("should serialize wrapped error", func() {
+		It("should serialize wrapped error", func() {
 			res := newResponse()
 			res.Error(errors.Wrap(errForced, errors.Http(400), errors.Module("tests"), errors.Code("forced-error"), errors.Message("An error was forced.")))
 
@@ -140,7 +141,7 @@ var _ = describe("Hermes", func() {
 			Expect(strings.TrimSpace(tmp.String())).To(Equal(`{"code":"forced-error","message":"An error was forced.","module":"tests"}`))
 		})
 
-		it("should override status with wrapped error", func() {
+		It("should override status with wrapped error", func() {
 			res := newResponse()
 			res.Status(403).Error(errors.Wrap(errForced, errors.Http(400), errors.Module("tests"), errors.Code("forced-error"), errors.Message("An error was forced.")))
 
@@ -151,7 +152,24 @@ var _ = describe("Hermes", func() {
 			Expect(strings.TrimSpace(tmp.String())).To(Equal(`{"code":"forced-error","message":"An error was forced.","module":"tests"}`))
 		})
 
-		it("should redirect", func() {
+		It("should wrap error with options", func() {
+			res := newResponse()
+			res.Status(403).Error(
+				errForced,
+				errors.Http(400),
+				errors.Module("tests"),
+				errors.Code("forced-error"),
+				errors.Message("An error was forced."),
+			)
+
+			Expect(string(res.result.r.Response.Header.ContentType())).To(Equal("application/json; charset=utf-8"))
+			tmp := bytes.NewBufferString("")
+			res.result.r.Response.BodyWriteTo(tmp)
+			Expect(res.result.r.Response.StatusCode()).To(Equal(403))
+			Expect(strings.TrimSpace(tmp.String())).To(Equal(`{"code":"forced-error","message":"An error was forced.","module":"tests"}`))
+		})
+
+		It("should redirect", func() {
 			res := newResponse()
 			res.Redirect("http://localhost:5000/redirect-test", 302)
 
@@ -159,7 +177,7 @@ var _ = describe("Hermes", func() {
 			Expect(string(res.result.r.Response.Header.Peek("Location"))).To(Equal("http://localhost:5000/redirect-test"))
 		})
 
-		it("should set cookies", func() {
+		It("should set cookies", func() {
 			res := newResponse()
 
 			cookie := fasthttp.AcquireCookie()
@@ -180,7 +198,7 @@ var _ = describe("Hermes", func() {
 			Expect(cookieSetted).To(BeTrue())
 		})
 
-		it("should set header", func() {
+		It("should set header", func() {
 			res := newResponse()
 			res.Header("Content-Type", "awesome/test").Data([]byte("this is a test"))
 			tmp := bytes.NewBufferString("")
@@ -189,7 +207,7 @@ var _ = describe("Hermes", func() {
 			Expect(string(res.result.r.Response.Header.Peek("Content-Type"))).To(Equal("awesome/test"))
 		})
 
-		it("should send file", func() {
+		It("should send file", func() {
 			res := newResponse()
 			res.File("examples/files/sample.pdf")
 
@@ -197,7 +215,7 @@ var _ = describe("Hermes", func() {
 			Expect(string(res.result.r.Response.Header.Peek("Content-Type"))).To(Equal("application/pdf"))
 		})
 
-		it("should send file (download)", func() {
+		It("should send file (download)", func() {
 			res := newResponse()
 			res.FileDownload("examples/files/sample.pdf", "expected.pdf")
 

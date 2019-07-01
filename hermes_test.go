@@ -3,6 +3,7 @@ package hermes
 import (
 	"log"
 	"os"
+	"path"
 	"testing"
 
 	"github.com/jamillosantos/macchiato"
@@ -21,9 +22,9 @@ func TestHttp(t *testing.T) {
 	if os.Getenv("CI") == "" {
 		macchiato.RunSpecs(t, description)
 	} else {
-		reporterOutputDir := "./test-results"
+		reporterOutputDir := "./test-results/hermes"
 		os.MkdirAll(reporterOutputDir, os.ModePerm)
-		junitReporter := reporters.NewJUnitReporter("./test-results/hermes.xml")
+		junitReporter := reporters.NewJUnitReporter(path.Join(reporterOutputDir, "results.xml"))
 		macchiatoReporter := macchiato.NewReporter()
 		ginkgo.RunSpecsWithCustomReporters(t, description, []ginkgo.Reporter{macchiatoReporter, junitReporter})
 	}

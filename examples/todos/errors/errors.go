@@ -1,6 +1,6 @@
 package errors
 
-import "github.com/lab259/errors"
+import "github.com/lab259/errors/v2"
 
 var (
 	TodoModule = errors.Module("todos")

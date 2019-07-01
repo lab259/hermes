@@ -6,7 +6,7 @@ import (
 	"io"
 	"reflect"
 
-	"github.com/lab259/errors"
+	"github.com/lab259/errors/v2"
 	"github.com/valyala/bytebufferpool"
 
 	"github.com/valyala/fasthttp"

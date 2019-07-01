@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"strings"
 
-	"github.com/lab259/errors"
+	"github.com/lab259/errors/v2"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 

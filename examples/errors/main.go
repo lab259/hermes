@@ -5,7 +5,7 @@ import (
 
 	validator_v9 "gopkg.in/go-playground/validator.v9"
 
-	"github.com/lab259/errors"
+	"github.com/lab259/errors/v2"
 	"github.com/lab259/hermes"
 )
 

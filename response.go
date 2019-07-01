@@ -3,7 +3,7 @@ package hermes
 import (
 	"sync"
 
-	"github.com/lab259/errors"
+	"github.com/lab259/errors/v2"
 	"github.com/valyala/fasthttp"
 )
 

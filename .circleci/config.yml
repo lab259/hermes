@@ -2,24 +2,23 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/golang:1.9
+      - image: circleci/golang:1.12
 
-    working_directory: /go/src/github.com/lab259/hermes
     steps:
       - checkout
       - restore_cache:
           keys:
-            - deps-{{ .Branch }}-{{ checksum "Gopkg.lock" }}
+            - deps-{{ .Branch }}-{{ checksum "go.sum" }}
             - deps-{{ .Branch }}-
             - deps-
-      - run: go get -u github.com/onsi/ginkgo/ginkgo
-      - run: make dep-ensure
-      - save_cache:
-          key: deps-{{ .Branch }}-{{ checksum "Gopkg.lock" }}
-          paths:
-            - vendor
+      - run: go get github.com/onsi/ginkgo/ginkgo
+      - run: go mod download
       - run: make build
       - run: make coverage-ci
       - run: bash <(curl -s https://codecov.io/bash)
+      - save_cache:
+          key: deps-{{ .Branch }}-{{ checksum "go.sum" }}
+          paths:
+            - /go/pkg/mod
       - store_test_results:
           path: test-results

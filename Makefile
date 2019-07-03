@@ -3,8 +3,17 @@ COVERAGEFILE=$(COVERDIR)/cover.out
 
 EXAMPLES=$(shell ls ./examples/)
 
+$(EXAMPLES): %:
+	$(eval EXAMPLE=$*)
+	@:
+
 run:
-	@go run examples/$(EXAMPLE)/main.go
+	@if [ ! -z "$(EXAMPLE)" ]; then \
+		go run ./examples/$(EXAMPLE); \
+	else \
+		echo "Usage: make [$(EXAMPLES)] run"; \
+		echo "The environment variable \`EXAMPLE\` is not defined."; \
+	fi
 
 build:
 	@test -d ./examples && $(foreach example,$(EXAMPLES),go build "-ldflags=$(LDFLAGS)" -o ./bin/$(example) -v ./examples/$(example) &&) :

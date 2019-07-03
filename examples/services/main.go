@@ -12,10 +12,10 @@ import (
 
 var config = hermes.ApplicationConfig{
 	Name: "Hello World",
-	ServiceStarter: rscsrv.NewServiceStarter([]rscsrv.Service{
+	ServiceStarter: rscsrv.DefaultServiceStarter(
 		&serviceA{},
 		&serviceB{},
-	}, &rscsrv.ColorServiceReporter{}),
+	),
 	HTTP: hermes.FasthttpServiceConfiguration{
 		Bind: ":8080",
 	},

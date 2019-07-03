@@ -11,7 +11,7 @@ import (
 
 type ApplicationConfig struct {
 	Name           string
-	ServiceStarter *rscsrv.ServiceStarter
+	ServiceStarter rscsrv.ServiceStarter
 	HTTP           FasthttpServiceConfiguration
 }
 

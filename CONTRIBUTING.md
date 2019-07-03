@@ -5,38 +5,27 @@
 What things you need to setup the project:
 
 - [go](https://golang.org/doc/install)
-- [golang/dep](https://github.com/golang/dep)
 - [ginkgo](http://onsi.github.io/ginkgo/)
 
 ### Environment
 
-For start developing the SDK you must create a fake `GOPATH` structure:
-
-```
-+-- /
-|---- src
-|------ github.com
-|-------- lab259
-|---------- http <- Here is where you will clone this repository.
-```
-
-Use the following command:
+For start developing the SDK you must clone the project:
 
 ```bash
-mkdir -p src/github.com/lab259/hermes && git clone git@github.com:lab259/hermes.git src/github.com/lab259/hermes
+git clone git@github.com:lab259/hermes.git
 ```
 
 Now, the dependencies must be installed.
 
-```
-cd src/github.com/lab259/hermes && make dep-ensure
+```bash
+go mod download
 ```
 
 :wink: Finally, you are done to start developing.
 
 ### Running tests
 
-In the `src/github.com/lab259/hermes` directory, execute:
+In the root directory (where you can find a file named `Makefile`), execute:
 
 ```bash
 make test
@@ -56,10 +45,10 @@ make coverage coverage-html
 
 ### Running examples
 
-In the `src/github.com/lab259/hermes` directory, execute:
+In the root directory, execute:
 
 ```bash
-EXAMPLE="todos" make run
+make $EXAMPLE run
 ```
 
-`EXAMPLE` is any example listed in `/examples` folder.
+`$EXAMPLE` is any example listed in `/examples` folder (eg.: `make todos run`)

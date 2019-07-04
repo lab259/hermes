@@ -8,12 +8,7 @@ $(EXAMPLES): %:
 	@:
 
 run:
-	@if [ ! -z "$(EXAMPLE)" ]; then \
-		go run ./examples/$(EXAMPLE); \
-	else \
-		echo "Usage: make [$(EXAMPLES)] run"; \
-		echo "The environment variable \`EXAMPLE\` is not defined."; \
-	fi
+	@test ! -z "$(EXAMPLE)" && go run ./examples/$(EXAMPLE) || echo "Usage: make [$(EXAMPLES)] run"
 
 build:
 	@test -d ./examples && $(foreach example,$(EXAMPLES),go build "-ldflags=$(LDFLAGS)" -o ./bin/$(example) -v ./examples/$(example) &&) :
@@ -42,9 +37,9 @@ plot-mem:
 
 coverage-ci:
 	@mkdir -p $(COVERDIR)
-	@ginkgo -r -covermode=count --cover --trace ./
+	@ginkgo -r -covermode=count --cover --trace ./...
 	@echo "mode: count" > "${COVERAGEFILE}"
-	@find . -type f -name *.coverprofile -exec grep -h -v "^mode:" {} >> "${COVERAGEFILE}" \; -exec rm -f {} \;
+	@find . -type f -name '*.coverprofile' -exec cat {} \; -exec rm -f {} \; | grep -h -v "^mode:" >> ${COVERAGEFILE}
 
 coverage: coverage-ci
 	@sed -i -e "s|_$(CURDIR)/|./|g" "${COVERAGEFILE}"

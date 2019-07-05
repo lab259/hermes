@@ -31,6 +31,8 @@ github.com/klauspost/cpuid v0.0.0-20180405133222-e7e905edc00e/go.mod h1:Pj4uuM52
 github.com/klauspost/cpuid v1.2.0/go.mod h1:Pj4uuM528wm8OyEC2QMXAi2YiTZ96dNQPGgoMS4s3ek=
 github.com/klauspost/cpuid v1.2.1 h1:vJi+O/nMdFt0vqm8NZBI6wzALWdA2X+egi0ogNyrC/w=
 github.com/klauspost/cpuid v1.2.1/go.mod h1:Pj4uuM528wm8OyEC2QMXAi2YiTZ96dNQPGgoMS4s3ek=
+github.com/lab259/errors v2.1.0+incompatible h1:spmhLIqKUzsog6XhwOpeDY0oX8Q5NguDkMAtCB6trws=
+github.com/lab259/errors v2.1.0+incompatible/go.mod h1:MDDGb8dSRNqu9IVhE4C+nF2qFqPPO+n6/Nn1AqyI6rI=
 github.com/lab259/errors/v2 v2.2.0 h1:I2YKNMygf9LiBsyt0RkRRRFaVFUqSGHBzsG7Pe21zKk=
 github.com/lab259/errors/v2 v2.2.0/go.mod h1:bcuh1ha3APn7gzh8k1QMzuFXpqfBplbVKyClNpZ+H6U=
 github.com/lab259/go-rscsrv v0.2.1 h1:/crfSH3rZXUTfqNBw+B1qMbkiuRN5Swucb10nmIV1Os=

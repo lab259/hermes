@@ -3,11 +3,10 @@ module github.com/lab259/hermes
 go 1.12
 
 require (
-	github.com/AdhityaRamadhanus/fasthttpcors v0.0.0-20170121111917-d4c07198763a
 	github.com/jamillosantos/macchiato v0.0.0-20171220130318-3be045cc5033
 	github.com/klauspost/compress v1.5.0 // indirect
 	github.com/klauspost/cpuid v1.2.1 // indirect
-	github.com/lab259/errors v2.1.0+incompatible
+	github.com/lab259/cors v0.1.0
 	github.com/lab259/errors/v2 v2.2.0
 	github.com/lab259/go-rscsrv v0.2.1
 	github.com/lab259/rlog v2.0.1+incompatible

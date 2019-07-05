@@ -1,5 +1,3 @@
-github.com/AdhityaRamadhanus/fasthttpcors v0.0.0-20170121111917-d4c07198763a h1:XVdatQFSP2YhJGjqLLIfW8QBk4loz/SCe/PxkXDiW+s=
-github.com/AdhityaRamadhanus/fasthttpcors v0.0.0-20170121111917-d4c07198763a/go.mod h1:C0A1KeiVHs+trY6gUTPhhGammbrZ30ZfXRW/nuT7HLw=
 github.com/ajg/form v1.5.1/go.mod h1:uL1WgH+h2mgNtvBq0339dVnzXdBETtL2LeUXaIv25UY=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
@@ -31,8 +29,8 @@ github.com/klauspost/cpuid v0.0.0-20180405133222-e7e905edc00e/go.mod h1:Pj4uuM52
 github.com/klauspost/cpuid v1.2.0/go.mod h1:Pj4uuM528wm8OyEC2QMXAi2YiTZ96dNQPGgoMS4s3ek=
 github.com/klauspost/cpuid v1.2.1 h1:vJi+O/nMdFt0vqm8NZBI6wzALWdA2X+egi0ogNyrC/w=
 github.com/klauspost/cpuid v1.2.1/go.mod h1:Pj4uuM528wm8OyEC2QMXAi2YiTZ96dNQPGgoMS4s3ek=
-github.com/lab259/errors v2.1.0+incompatible h1:spmhLIqKUzsog6XhwOpeDY0oX8Q5NguDkMAtCB6trws=
-github.com/lab259/errors v2.1.0+incompatible/go.mod h1:MDDGb8dSRNqu9IVhE4C+nF2qFqPPO+n6/Nn1AqyI6rI=
+github.com/lab259/cors v0.1.0 h1:0806vcp/WBZBqwPRBA6sowKxE6/Mf6IekdWR+qC5tSQ=
+github.com/lab259/cors v0.1.0/go.mod h1:irvlJlQvQX/3L0ouMuvV4XNMSKP7a1+45aexLgqnojQ=
 github.com/lab259/errors/v2 v2.2.0 h1:I2YKNMygf9LiBsyt0RkRRRFaVFUqSGHBzsG7Pe21zKk=
 github.com/lab259/errors/v2 v2.2.0/go.mod h1:bcuh1ha3APn7gzh8k1QMzuFXpqfBplbVKyClNpZ+H6U=
 github.com/lab259/go-rscsrv v0.2.1 h1:/crfSH3rZXUTfqNBw+B1qMbkiuRN5Swucb10nmIV1Os=

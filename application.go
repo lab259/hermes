@@ -44,14 +44,6 @@ func (app *Application) Name() string {
 	return app.Configuration.Name
 }
 
-func (app *Application) LoadConfiguration() (interface{}, error) {
-	return nil, nil
-}
-
-func (app *Application) ApplyConfiguration(interface{}) error {
-	return nil
-}
-
 func (app *Application) Restart() error {
 	if err := app.Stop(); err != nil {
 		return err

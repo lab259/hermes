@@ -4,6 +4,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/lab259/go-rscsrv"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -31,6 +33,43 @@ var _ = Describe("Hermes", func() {
 			wg.Add(1)
 			Expect(app.Stop()).To(BeNil())
 			wg.Wait()
+			done <- true
+		}, 1)
+
+		It("should start and stop a app with services", func(done Done) {
+			var serviceA service
+			var serviceB service
+
+			serviceStarter := rscsrv.QuietServiceStarter(&serviceA, &serviceB)
+			Expect(serviceStarter.Start()).To(Succeed())
+
+			Expect(serviceA.running).To(BeTrue())
+			Expect(serviceB.running).To(BeTrue())
+
+			app := NewApplication(ApplicationConfig{
+				Name:           "Testing",
+				ServiceStarter: serviceStarter,
+				HTTP: FasthttpServiceConfiguration{
+					Bind: ":0",
+				},
+			}, NewRouter(RouterConfig{}))
+			var wg sync.WaitGroup
+			wg.Add(1)
+			go func() {
+				defer GinkgoRecover()
+
+				wg.Done()
+				Expect(app.Start()).To(BeNil())
+				wg.Done()
+			}()
+			wg.Wait()
+			time.Sleep(time.Millisecond * 500)
+			wg.Add(1)
+			Expect(app.Stop()).To(BeNil())
+			wg.Wait()
+
+			Expect(serviceA.running).To(BeFalse())
+			Expect(serviceB.running).To(BeFalse())
 			done <- true
 		}, 1)
 
@@ -98,3 +137,36 @@ var _ = Describe("Hermes", func() {
 		})
 	})
 })
+
+type service struct {
+	running bool
+}
+
+func (service *service) Name() string {
+	return "Service A"
+}
+
+func (service *service) LoadConfiguration() (interface{}, error) {
+	return nil, nil
+}
+
+func (service *service) ApplyConfiguration(interface{}) error {
+	return nil
+}
+
+func (service *service) Restart() error {
+	if err := service.Stop(); err != nil {
+		return err
+	}
+	return service.Start()
+}
+
+func (service *service) Start() error {
+	service.running = true
+	return nil
+}
+
+func (service *service) Stop() error {
+	service.running = false
+	return nil
+}

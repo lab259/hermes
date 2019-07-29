@@ -68,11 +68,7 @@ func (service *FasthttpService) Start() error {
 		return service.Server.ListenAndServe(service.Configuration.Bind)
 	}
 
-	return service.Server.ListenAndServeTLS(
-		service.Configuration.Bind,
-		service.Configuration.TLS.CertFile,
-		service.Configuration.TLS.KeyFile,
-	)
+	return service.Server.ListenAndServeTLS(service.Configuration.Bind, service.Configuration.TLS.CertFile, service.Configuration.TLS.KeyFile)
 }
 
 // Stop closes the listener and waits the `Start` to stop.

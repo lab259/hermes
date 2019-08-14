@@ -3,7 +3,7 @@ package middlewares_test
 import (
 	"bytes"
 
-	"github.com/lab259/rlog"
+	"github.com/lab259/rlog/v2"
 
 	"github.com/lab259/hermes"
 	"github.com/lab259/hermes/middlewares"

@@ -9,7 +9,7 @@ require (
 	github.com/lab259/cors v0.1.0
 	github.com/lab259/errors/v2 v2.2.0
 	github.com/lab259/go-rscsrv v0.2.1
-	github.com/lab259/rlog v2.0.1+incompatible
+	github.com/lab259/rlog/v2 v2.1.0
 	github.com/leodido/go-urn v1.1.0 // indirect
 	github.com/onsi/ginkgo v1.8.0
 	github.com/onsi/gomega v1.5.0

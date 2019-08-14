@@ -2,7 +2,7 @@ package middlewares
 
 import (
 	"github.com/lab259/hermes"
-	"github.com/lab259/rlog"
+	"github.com/lab259/rlog/v2"
 )
 
 func Logger(req hermes.Request) rlog.Logger {

@@ -169,6 +169,25 @@ var _ = Describe("Hermes", func() {
 			Expect(strings.TrimSpace(tmp.String())).To(Equal(`{"code":"forced-error","message":"An error was forced.","module":"tests"}`))
 		})
 
+		It("should wrap error with duplicated options", func() {
+			res := newResponse()
+
+			err := errors.Wrap(errForced, StatusConflict, errors.Module("some-internal-module"))
+			res.Status(403).Error(
+				err,
+				errors.Http(400),
+				errors.Module("tests"),
+				errors.Code("forced-error"),
+				errors.Message("An error was forced."),
+			)
+
+			Expect(string(res.result.r.Response.Header.ContentType())).To(Equal("application/json; charset=utf-8"))
+			tmp := bytes.NewBufferString("")
+			res.result.r.Response.BodyWriteTo(tmp)
+			Expect(res.result.r.Response.StatusCode()).To(Equal(403))
+			Expect(strings.TrimSpace(tmp.String())).To(Equal(`{"code":"forced-error","message":"An error was forced.","module":"tests"}`))
+		})
+
 		It("should redirect", func() {
 			res := newResponse()
 			res.Redirect("http://localhost:5000/redirect-test", 302)

@@ -22,12 +22,14 @@ var errorResponsePool = &sync.Pool{
 }
 
 type errorResponse struct {
-	Status int
-	Data   map[string]interface{}
+	defaultStatus int
+	Status        int
+	Data          map[string]interface{}
 }
 
 func acquireErrorResponse(status int) *errorResponse {
 	r := errorResponsePool.Get().(*errorResponse)
+	r.defaultStatus = status
 	r.Status = status
 	return r
 }
@@ -38,6 +40,7 @@ func releaseErrorResponse(r *errorResponse) {
 }
 
 func (response *errorResponse) reset() {
+	response.defaultStatus = 0
 	response.Status = 0
 	for key := range response.Data {
 		delete(response.Data, key)
@@ -47,10 +50,12 @@ func (response *errorResponse) reset() {
 func (response *errorResponse) SetParam(name string, value interface{}) {
 	switch name {
 	case "statusCode":
-		if v, ok := value.(int); ok {
+		if v, ok := value.(int); ok && response.Status == response.defaultStatus {
 			response.Status = v
 		}
 	default:
-		response.Data[name] = value
+		if _, found := response.Data[name]; !found {
+			response.Data[name] = value
+		}
 	}
 }

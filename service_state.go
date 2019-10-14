@@ -3,13 +3,13 @@ package hermes
 import "sync"
 
 type serviceState struct {
-	mutex sync.RWMutex
+	mutex    sync.RWMutex
 	_running bool
 }
 
 func (service *serviceState) isRunning() bool {
 	service.mutex.RLock()
-	defer service.RUnlock()
+	defer service.mutex.RUnlock()
 	return service._running
 }
 

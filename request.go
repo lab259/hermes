@@ -25,14 +25,14 @@ type request struct {
 	params      [][]byte
 }
 
-func acquireRequest(ctx context.Context, r *fasthttp.RequestCtx) *request {
+func AcquireRequest(ctx context.Context, r *fasthttp.RequestCtx) *request {
 	req := requestPool.Get().(*request)
 	req.r = r
 	req.ctx = ctx
 	return req
 }
 
-func releaseRequest(req *request) {
+func ReleaseRequest(req *request) {
 	req.reset()
 	requestPool.Put(req)
 }

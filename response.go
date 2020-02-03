@@ -23,13 +23,13 @@ func (res *response) reset() {
 	// result is resetted on .End()
 }
 
-func acquireResponse(r *fasthttp.RequestCtx) *response {
+func AcquireResponse(r *fasthttp.RequestCtx) *response {
 	res := responsePool.Get().(*response)
 	res.result.r = r
 	return res
 }
 
-func releaseResponse(res *response) {
+func ReleaseResponse(res *response) {
 	res.reset()
 	responsePool.Put(res)
 }

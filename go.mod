@@ -4,8 +4,6 @@ go 1.12
 
 require (
 	github.com/jamillosantos/macchiato v0.0.0-20171220130318-3be045cc5033
-	github.com/klauspost/compress v1.5.0 // indirect
-	github.com/klauspost/cpuid v1.2.1 // indirect
 	github.com/lab259/cors v0.1.0
 	github.com/lab259/errors/v2 v2.2.0
 	github.com/lab259/go-rscsrv v0.2.1
@@ -15,7 +13,7 @@ require (
 	github.com/onsi/gomega v1.5.0
 	github.com/pkg/errors v0.8.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0
-	github.com/valyala/fasthttp v1.3.0
+	github.com/valyala/fasthttp v1.9.0
 	golang.org/x/crypto v0.0.0-20190424203555-c05e17bb3b2d // indirect
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/go-playground/validator.v9 v9.28.0

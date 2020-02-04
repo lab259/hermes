@@ -9,66 +9,66 @@ import (
 
 var responsePool = &sync.Pool{
 	New: func() interface{} {
-		return &response{
+		return &BaseResponse{
 			result: result{},
 		}
 	},
 }
 
-type response struct {
+type BaseResponse struct {
 	result result
 }
 
-func (res *response) reset() {
+func (res *BaseResponse) reset() {
 	// result is resetted on .End()
 }
 
-func acquireResponse(r *fasthttp.RequestCtx) *response {
-	res := responsePool.Get().(*response)
+func AcquireResponse(r *fasthttp.RequestCtx) *BaseResponse {
+	res := responsePool.Get().(*BaseResponse)
 	res.result.r = r
 	return res
 }
 
-func releaseResponse(res *response) {
+func ReleaseResponse(res *BaseResponse) {
 	res.reset()
 	responsePool.Put(res)
 }
 
-func (res *response) Cookie(cookie *fasthttp.Cookie) Response {
+func (res *BaseResponse) Cookie(cookie *fasthttp.Cookie) Response {
 	res.result.r.Response.Header.SetCookie(cookie)
 	return res
 }
 
-func (res *response) Status(status int) Response {
+func (res *BaseResponse) Status(status int) Response {
 	res.result.status = status
 	return res
 }
 
-func (res *response) Header(name, value string) Response {
+func (res *BaseResponse) Header(name, value string) Response {
 	res.result.r.Response.Header.Set(name, value)
 	return res
 }
 
-func (res *response) Data(data interface{}) Result {
+func (res *BaseResponse) Data(data interface{}) Result {
 	return res.result.Data(data)
 }
 
-func (res *response) Error(err error, options ...interface{}) Result {
+func (res *BaseResponse) Error(err error, options ...interface{}) Result {
 	return res.result.Error(errors.Wrap(err, options...))
 }
 
-func (res *response) Redirect(uri string, code int) Result {
+func (res *BaseResponse) Redirect(uri string, code int) Result {
 	return res.result.Redirect(uri, code)
 }
 
-func (res *response) File(filepath string) Result {
+func (res *BaseResponse) File(filepath string) Result {
 	return res.result.File(filepath)
 }
 
-func (res *response) FileDownload(filepath, filename string) Result {
+func (res *BaseResponse) FileDownload(filepath, filename string) Result {
 	return res.result.FileDownload(filepath, filename)
 }
 
-func (res *response) End() Result {
+func (res *BaseResponse) End() Result {
 	return &res.result
 }

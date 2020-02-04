@@ -9,8 +9,8 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
-func newRequest() *request {
-	return &request{
+func newRequest() *BaseRequest {
+	return &BaseRequest{
 		ctx: context.Background(),
 		r:   &fasthttp.RequestCtx{},
 	}

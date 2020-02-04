@@ -24,8 +24,8 @@ func (*errornousJson) MarshalJSON() ([]byte, error) {
 	return nil, errForced
 }
 
-func newResponse() *response {
-	return &response{
+func newResponse() *BaseResponse {
+	return &BaseResponse{
 		result: result{r: &fasthttp.RequestCtx{}},
 	}
 }

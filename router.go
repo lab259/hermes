@@ -124,17 +124,17 @@ func (router *router) findHandler(root *node, path *tokensDescriptor, values *to
 	return root.Matches(0, path, values)
 }
 
-func (router *router) releaseResources(req *request, res *response, path *tokensDescriptor, values *tokensDescriptor) {
-	releaseRequest(req)
-	releaseResponse(res)
+func (router *router) releaseResources(req *BaseRequest, res *BaseResponse, path *tokensDescriptor, values *tokensDescriptor) {
+	ReleaseRequest(req)
+	ReleaseResponse(res)
 	releaseTokensDescriptor(path)
 	releaseTokensDescriptor(values)
 }
 
 func (router *router) Handler() fasthttp.RequestHandler {
 	return func(fCtx *fasthttp.RequestCtx) {
-		req := acquireRequest(context.Background(), fCtx)
-		res := acquireResponse(fCtx)
+		req := AcquireRequest(context.Background(), fCtx)
+		res := AcquireResponse(fCtx)
 		values := acquireTokensDescriptor()
 		path := acquireTokensDescriptor()
 		defer router.releaseResources(req, res, path, values)

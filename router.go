@@ -124,7 +124,7 @@ func (router *router) findHandler(root *node, path *tokensDescriptor, values *to
 	return root.Matches(0, path, values)
 }
 
-func (router *router) releaseResources(req *request, res *response, path *tokensDescriptor, values *tokensDescriptor) {
+func (router *router) releaseResources(req *BaseRequest, res *BaseResponse, path *tokensDescriptor, values *tokensDescriptor) {
 	ReleaseRequest(req)
 	ReleaseResponse(res)
 	releaseTokensDescriptor(path)

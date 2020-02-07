@@ -37,8 +37,8 @@ var _ = Describe("Hermes", func() {
 		}, 1)
 
 		It("should start and stop a app with services", func(done Done) {
-			var serviceA service
-			var serviceB service
+			var serviceA testService
+			var serviceB testService
 
 			serviceStarter := rscsrv.QuietServiceStarter(&serviceA, &serviceB)
 			Expect(serviceStarter.Start()).To(Succeed())
@@ -138,35 +138,35 @@ var _ = Describe("Hermes", func() {
 	})
 })
 
-type service struct {
+type testService struct {
 	running bool
 }
 
-func (service *service) Name() string {
+func (service *testService) Name() string {
 	return "Service A"
 }
 
-func (service *service) LoadConfiguration() (interface{}, error) {
+func (service *testService) LoadConfiguration() (interface{}, error) {
 	return nil, nil
 }
 
-func (service *service) ApplyConfiguration(interface{}) error {
+func (service *testService) ApplyConfiguration(interface{}) error {
 	return nil
 }
 
-func (service *service) Restart() error {
+func (service *testService) Restart() error {
 	if err := service.Stop(); err != nil {
 		return err
 	}
 	return service.Start()
 }
 
-func (service *service) Start() error {
+func (service *testService) Start() error {
 	service.running = true
 	return nil
 }
 
-func (service *service) Stop() error {
+func (service *testService) Stop() error {
 	service.running = false
 	return nil
 }
